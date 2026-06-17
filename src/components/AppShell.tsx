@@ -215,7 +215,29 @@ export default function AppShell() {
         {(subStatus === "active" || subStatus === "trialing") && view === "story" && <StoryView transactions={transactions} />}
         {(subStatus === "active" || subStatus === "trialing") && view === "search" && <SearchView transactions={transactions} onDeleteTransaction={handleDeleteTransaction} />}
         {(subStatus === "active" || subStatus === "trialing") && view === "settings" && (
-          <SettingsView user={user} onDeleteAll={handleDeleteAll} onToast={showToast} subStatus={subStatus} />
+          <SettingsView
+            user={user}
+            spaces={spaces}
+            transactions={transactions}
+            activeSpace={activeSpace}
+            onDeleteAll={handleDeleteAll}
+            onToast={showToast}
+            subStatus={subStatus}
+            onRenameSpace={async (id, name) => {
+              await supabase.from("spaces").update({ name }).eq("id", id);
+              setSpaces((prev) => prev.map((s) => s.id === id ? { ...s, name } : s));
+            }}
+            onDeleteSpace={async (id) => {
+              await supabase.from("transactions").delete().eq("space_id", id);
+              await supabase.from("spaces").delete().eq("id", id);
+              const remaining = spaces.filter((s) => s.id !== id);
+              setSpaces(remaining);
+              if (activeSpace?.id === id && remaining.length > 0) {
+                setActiveSpace(remaining[0]);
+                await loadTransactions(remaining[0].id);
+              }
+            }}
+          />
         )}
       </div>
 
