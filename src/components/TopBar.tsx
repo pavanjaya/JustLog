@@ -26,11 +26,17 @@ export default function TopBar({ view, onAvatarClick, avatarUrl, userInitial = "
       <div className="w-12 h-12" />
 
       {/* Center title */}
-      <div
-        className="text-[22px] font-medium tracking-tight flex-1 text-center"
-        style={{ color: "var(--md-on-surface)", letterSpacing: "0" }}
-      >
-        {VIEW_TITLES[view]}
+      <div className="flex-1 flex items-center justify-center">
+        {view === "home" ? (
+          <img src="/logo.svg" alt="JustLog" className="h-7 w-auto" />
+        ) : (
+          <span
+            className="text-[22px] font-medium tracking-tight"
+            style={{ color: "var(--md-on-surface)" }}
+          >
+            {VIEW_TITLES[view]}
+          </span>
+        )}
       </div>
 
       {/* Trailing — avatar */}

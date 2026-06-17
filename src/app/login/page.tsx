@@ -23,25 +23,12 @@ export default function LoginPage() {
       <div className="w-full flex flex-col items-center gap-8">
         {/* Logo — MD3 Large icon container */}
         <div className="flex flex-col items-center gap-4">
+          <img src="/logo.svg" alt="JustLog" className="h-12 w-auto" />
           <div
-            className="w-20 h-20 rounded-[var(--md-shape-xl)] flex items-center justify-center text-4xl"
-            style={{ background: "var(--md-primary-container)" }}
+            className="text-sm text-center"
+            style={{ color: "var(--md-on-surface-variant)" }}
           >
-            📓
-          </div>
-          <div>
-            <div
-              className="text-[32px] font-medium tracking-tight text-center"
-              style={{ color: "var(--md-on-surface)" }}
-            >
-              JustLog
-            </div>
-            <div
-              className="text-sm text-center mt-1"
-              style={{ color: "var(--md-on-surface-variant)" }}
-            >
-              The fastest way to remember your money.
-            </div>
+            The fastest way to remember your money.
           </div>
         </div>
 
