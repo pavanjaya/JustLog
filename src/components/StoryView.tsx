@@ -82,8 +82,8 @@ export default function StoryView({ transactions }: StoryViewProps) {
         <div className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--md-outline)" }}>All Time</div>
 
         {/* Balance hero */}
-        <div className="rounded-2xl px-4 py-4 mb-3" style={{ background: allBalance >= 0 ? "#F0FBF4" : "#FFF5F5" }}>
-          <div className="text-xs font-medium mb-1" style={{ color: allBalance >= 0 ? "#2E7D32" : "#C62828" }}>Total Balance</div>
+        <div className="rounded-2xl px-4 py-4 mb-3" style={{ background: "rgba(200,49,255,0.06)" }}>
+          <div className="text-xs font-medium mb-1" style={{ color: "var(--md-primary)" }}>Total Balance</div>
           <div className="text-3xl font-bold tracking-tight" style={{ color: allBalance >= 0 ? "#1B5E20" : "#B71C1C" }}>
             {allBalance < 0 ? "−" : ""}{fmtFull(Math.abs(allBalance))}
           </div>
