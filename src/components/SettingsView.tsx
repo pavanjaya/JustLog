@@ -33,39 +33,36 @@ export default function SettingsView({ user, onDeleteAll, onToast, subStatus = "
   return (
     <div className="flex-1 overflow-y-auto no-scrollbar pt-4 pb-6" style={{ background: "#fff" }}>
       {/* Profile card */}
-      <div
-        className="mx-4 mb-5 p-5 rounded-2xl flex items-center gap-4"
-        style={{ background: "var(--md-primary-container)" }}
-      >
+      <div className="mx-4 mb-5 flex items-center gap-4 px-1 pt-2 pb-4" style={{ borderBottom: "1px solid var(--md-outline-variant)" }}>
         {avatar ? (
-          <img src={avatar} alt={name} className="w-14 h-14 rounded-full flex-shrink-0 object-cover" />
+          <img src={avatar} alt={name} className="w-12 h-12 rounded-full flex-shrink-0 object-cover" />
         ) : (
           <div
-            className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-medium flex-shrink-0"
-            style={{ background: "var(--md-primary)", color: "var(--md-on-primary)" }}
+            className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-medium flex-shrink-0"
+            style={{ background: "var(--md-surface-container-low)", color: "var(--md-on-surface)" }}
           >
             {initials}
           </div>
         )}
         <div className="min-w-0">
-          <div className="text-base font-medium truncate" style={{ color: "var(--md-on-primary-container)" }}>{name}</div>
-          <div className="text-sm truncate mt-0.5" style={{ color: "var(--md-on-primary-container)", opacity: 0.75 }}>{email}</div>
+          <div className="text-base font-semibold truncate" style={{ color: "var(--md-on-surface)" }}>{name}</div>
+          <div className="text-xs truncate mt-0.5" style={{ color: "var(--md-on-surface-variant)" }}>{email}</div>
         </div>
       </div>
 
       {/* Subscription card */}
       <div
         className="mx-4 mb-3 p-4 rounded-2xl flex items-center justify-between gap-3"
-        style={{ background: "rgba(200,49,255,0.05)", border: "1px solid rgba(200,49,255,0.15)" }}
+        style={{ background: "var(--md-surface-container-low)" }}
       >
         <div>
           <div className="flex items-center gap-2 mb-0.5">
             <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>JustLog Pro</span>
             <span
-              className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+              className="text-[10px] font-medium px-2 py-0.5 rounded-full"
               style={{
-                background: subStatus === "trialing" ? "rgba(200,49,255,0.12)" : subStatus === "active" ? "#E8F5E9" : "#FFF3E0",
-                color: subStatus === "trialing" ? "var(--md-primary)" : subStatus === "active" ? "#2E7D32" : "#E65100",
+                background: subStatus === "trialing" ? "#EDE7F6" : subStatus === "active" ? "#E8F5E9" : "#FFF3E0",
+                color: subStatus === "trialing" ? "#6A1B9A" : subStatus === "active" ? "#2E7D32" : "#E65100",
               }}
             >
               {subStatus === "trialing" ? "Free Trial" : subStatus === "active" ? "Active" : "Inactive"}
@@ -78,7 +75,7 @@ export default function SettingsView({ user, onDeleteAll, onToast, subStatus = "
         <button
           onClick={subStatus === "none" ? () => onToast("Stripe setup pending") : handleManageBilling}
           className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold"
-          style={{ background: "var(--md-primary)", color: "#fff" }}
+          style={{ background: "var(--md-surface-container-highest)", color: "var(--md-on-surface)" }}
         >
           {subStatus === "none" ? "Subscribe" : "Manage"}
         </button>
