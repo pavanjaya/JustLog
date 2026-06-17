@@ -19,7 +19,7 @@ export default function TopBar({ onNavigate, onAvatarClick, onSpaceClick, active
     >
       {/* Logo */}
       <button onClick={() => onNavigate("home")} className="flex items-center flex-shrink-0">
-        <img src="/logo.svg" alt="JustLog" className="h-6 w-auto" />
+        <img src="/logo.svg" alt="JustLog" className="h-8 w-auto" />
       </button>
 
       {/* Space switcher pill — center */}
