@@ -32,7 +32,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
     .filter((tx) => new Date(tx.created_at).toDateString() === today && tx.type === "expense")
     .reduce((sum, tx) => sum + tx.amount, 0);
 
-  const all = transactions.slice().reverse();
+  const all = transactions.slice();
 
   function scrollToBottom() {
     setTimeout(() => {
@@ -110,16 +110,16 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
         </div>
       </div>
 
-      {/* Chat feed */}
-      <div ref={feedRef} className="flex-1 overflow-y-auto no-scrollbar px-3 pt-3 pb-2 flex flex-col gap-1.5">
-        {all.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center gap-3 py-16">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.2} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-outline-variant)" }}>
+      {/* Chat feed — newest at bottom, scroll up for history */}
+      <div ref={feedRef} className="flex-1 overflow-y-auto no-scrollbar px-3 pt-3 pb-2 flex flex-col-reverse gap-1.5">
+        {/* AI response bubble — shows at bottom (visually) due to flex-col-reverse */}
+        <AiBubble state={aiState} newTxs={newTxs} />
+
+        {all.length === 0 && aiState === "idle" ? (
+          <div className="flex flex-col items-center justify-center gap-3 py-16">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.2} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-outline-variant)" }}>
               <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
             </svg>
-            <div className="text-base font-medium" style={{ color: "var(--md-on-surface-variant)" }}>
-              Hi {userName}
-            </div>
             <div className="text-sm text-center leading-relaxed" style={{ color: "var(--md-outline)" }}>
               Type anything below to log.
               <br />
@@ -129,9 +129,6 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
         ) : (
           all.map((tx, i) => <TxItem key={tx.id} tx={tx} index={i} showDate onDelete={onDeleteTransaction} />)
         )}
-
-        {/* AI response bubble */}
-        <AiBubble state={aiState} newTxs={newTxs} />
       </div>
 
       {/* Chat input — always at bottom */}
