@@ -87,7 +87,7 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
                 onClick={() => { onSwitch(space); onClose(); }}
                 className="flex items-center gap-3 px-3 py-3 rounded-2xl w-full text-left transition-all"
                 style={{
-                  background: isActive ? "var(--md-primary-container)" : "transparent",
+                  background: isActive ? "rgba(200,49,255,0.05)" : "transparent",
                 }}
               >
                 <div

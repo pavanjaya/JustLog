@@ -27,7 +27,7 @@ export default function TopBar({ onNavigate, onAvatarClick, onSpaceClick, active
         <button
           onClick={onSpaceClick}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full md-ripple transition-all"
-          style={{ background: "var(--md-primary-container)" }}
+          style={{ background: "rgba(200,49,255,0.07)" }}
         >
           <span className="text-xs font-semibold max-w-[120px] truncate" style={{ color: "var(--md-on-primary-container)" }}>
             {activeSpace?.name ?? "Personal"}
