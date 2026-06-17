@@ -74,16 +74,30 @@ function mockParse(text: string): ParsedTx[] {
     salary: "Salary", income: "Salary", business: "Business", investment: "Investment", travel: "Travel",
   };
 
+  // First split on explicit delimiters (newline, comma, ·)
   const lines = text.split(/[\n,·]+/).map(s => s.trim()).filter(Boolean);
+
+  // Then within each line, split on inline pattern: number followed by words, then another number
+  // e.g. "20 oshin 30 pavan" → ["20 oshin", "30 pavan"]
+  const segments: string[] = [];
+  for (const line of lines) {
+    const inlineMatches = [...line.matchAll(/(\d+(?:\.\d+)?)\s+([a-zA-Z][^0-9]*?)(?=\s*\d|$)/g)];
+    if (inlineMatches.length > 1) {
+      inlineMatches.forEach(m => segments.push((m[1] + " " + m[2]).trim()));
+    } else {
+      segments.push(line);
+    }
+  }
+
   const results: ParsedTx[] = [];
 
-  for (const line of lines) {
-    const amountMatch = line.match(/\d+(\.\d+)?/);
+  for (const seg of segments) {
+    const amountMatch = seg.match(/\d+(\.\d+)?/);
     if (!amountMatch) continue;
     const amount = parseFloat(amountMatch[0]);
     if (amount <= 0) continue;
 
-    const lower = line.toLowerCase();
+    const lower = seg.toLowerCase();
     const isIncome = INCOME_KEYWORDS.some(k => lower.includes(k));
     let category = "Other";
     for (const [keyword, cat] of Object.entries(CATEGORY_MAP)) {
@@ -91,7 +105,7 @@ function mockParse(text: string): ParsedTx[] {
     }
     if (isIncome && category === "Other") category = "Salary";
 
-    const description = line.replace(/\d+(\.\d+)?/g, "").replace(/[₹$]/g, "").trim()
+    const description = seg.replace(/\d+(\.\d+)?/g, "").replace(/[₹$]/g, "").trim()
       .split(" ").filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") || "Transaction";
 
     results.push({ amount, type: isIncome ? "income" : "expense", category, description });
