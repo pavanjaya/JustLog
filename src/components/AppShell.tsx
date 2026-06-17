@@ -72,16 +72,10 @@ export default function AppShell() {
     return space;
   }, [supabase, loadSpaces]);
 
-  const loadSubscription = useCallback(async (userId: string) => {
-    const { data } = await supabase
-      .from("subscriptions")
-      .select("status")
-      .eq("user_id", userId)
-      .single();
-    const s = data?.status;
-    if (s === "active" || s === "trialing") setSubStatus(s as SubStatus);
-    else setSubStatus("none");
-  }, [supabase]);
+  const loadSubscription = useCallback(async (_userId: string) => {
+    // Stripe not yet configured — grant access to everyone
+    setSubStatus("active");
+  }, []);
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
