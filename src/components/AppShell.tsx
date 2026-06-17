@@ -66,6 +66,7 @@ export default function AppShell() {
     if (!user) return;
     const rows = txs.map((tx) => ({ ...tx, user_id: user.id }));
     const { data, error } = await supabase.from("transactions").insert(rows).select();
+    if (error) { console.error("Insert error:", error); }
     if (!error && data) {
       setTransactions((prev) => [...prev, ...(data as Transaction[])]);
     }

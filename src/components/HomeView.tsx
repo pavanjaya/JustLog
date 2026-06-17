@@ -60,14 +60,13 @@ export default function HomeView({ transactions, onAddTransactions, userName = "
       const data = await res.json();
       const parsed: Array<{ amount: number; type: "income" | "expense"; category: string; description: string }> = data.transactions;
 
-      const now = Date.now();
-      const created: Transaction[] = parsed.map((tx, i) => ({
-        id: String(now + i),
+      const created: Transaction[] = parsed.map((tx) => ({
+        id: crypto.randomUUID(),
         amount: Number(tx.amount),
         type: tx.type,
         category: tx.category as Transaction["category"],
         description: tx.description,
-        created_at: new Date(now + i).toISOString(),
+        created_at: new Date().toISOString(),
       }));
 
       await onAddTransactions(created);
