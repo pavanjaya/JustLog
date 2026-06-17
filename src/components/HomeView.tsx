@@ -85,25 +85,25 @@ export default function HomeView({ transactions, onAddTransactions, userName = "
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Today's summary strip */}
-      {(todayIncome > 0 || todayExpense > 0) && (
-        <div
-          className="flex-shrink-0 flex gap-4 px-4 py-2 text-xs"
-          style={{ background: "var(--md-surface-container-low)", borderBottom: "1px solid var(--md-outline-variant)" }}
-        >
-          {todayIncome > 0 && (
-            <span style={{ color: "var(--md-tertiary)" }}>
-              ↑ {fmtCompact(todayIncome)}
-            </span>
-          )}
-          {todayExpense > 0 && (
-            <span style={{ color: "var(--md-error)" }}>
-              ↓ {fmtCompact(todayExpense)}
-            </span>
-          )}
-          <span style={{ color: "var(--md-on-surface-variant)" }}>today</span>
+      {/* Today summary cards */}
+      <div className="flex-shrink-0 grid grid-cols-2 gap-3 px-4 pt-3 pb-2">
+        <div className="rounded-[var(--md-shape-xl)] p-4" style={{ background: "var(--md-tertiary-container)" }}>
+          <div className="text-[11px] font-medium uppercase tracking-wider mb-2" style={{ color: "var(--md-on-tertiary-container)", opacity: 0.7 }}>
+            Received
+          </div>
+          <div className="text-xl font-medium" style={{ color: "var(--md-on-tertiary-container)" }}>
+            {fmtCompact(todayIncome)}
+          </div>
         </div>
-      )}
+        <div className="rounded-[var(--md-shape-xl)] p-4" style={{ background: "var(--md-error-container)" }}>
+          <div className="text-[11px] font-medium uppercase tracking-wider mb-2" style={{ color: "var(--md-on-error-container)", opacity: 0.7 }}>
+            Spent
+          </div>
+          <div className="text-xl font-medium" style={{ color: "var(--md-on-error-container)" }}>
+            {fmtCompact(todayExpense)}
+          </div>
+        </div>
+      </div>
 
       {/* Chat feed */}
       <div ref={feedRef} className="flex-1 overflow-y-auto no-scrollbar px-3 pt-3 pb-2 flex flex-col gap-1.5">
