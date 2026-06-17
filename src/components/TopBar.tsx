@@ -17,22 +17,24 @@ export default function TopBar({ onNavigate, onAvatarClick, onSpaceClick, active
       className="flex-shrink-0 flex items-center px-4 h-14 gap-2"
       style={{ background: "#fff" }}
     >
-      {/* Logo */}
-      <button onClick={() => onNavigate("home")} className="flex items-center flex-shrink-0">
-        <img src="/logo.svg" alt="JustLog" className="h-8 w-auto" />
-      </button>
+      {/* Logo + Space switcher — left side */}
+      <div className="flex items-center gap-2 flex-1 min-w-0">
+        <button onClick={() => onNavigate("home")} className="flex items-center flex-shrink-0">
+          <img src="/logo.svg" alt="JustLog" className="h-8 w-auto" />
+        </button>
 
-      {/* Space switcher pill — center */}
-      <div className="flex-1 flex justify-center">
+        {/* Divider */}
+        <div className="w-px h-4 flex-shrink-0" style={{ background: "var(--md-outline-variant)" }} />
+
+        {/* Space switcher */}
         <button
           onClick={onSpaceClick}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full md-ripple transition-all"
-          style={{ background: "transparent", border: "1.5px solid var(--md-outline-variant)" }}
+          className="flex items-center gap-1 md-ripple rounded-lg px-1 py-0.5 min-w-0"
         >
-          <span className="text-xs font-semibold max-w-[120px] truncate" style={{ color: "var(--md-on-surface)" }}>
+          <span className="text-sm font-medium truncate" style={{ color: "var(--md-on-surface-variant)" }}>
             {activeSpace?.name ?? "Personal"}
           </span>
-          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-on-surface-variant)", flexShrink: 0 }}>
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-outline)", flexShrink: 0 }}>
             <polyline points="6 9 12 15 18 9"/>
           </svg>
         </button>
