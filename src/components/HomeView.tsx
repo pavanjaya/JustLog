@@ -103,7 +103,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
         {/* Balance hero */}
         <div className="mb-4">
           <div className="text-xs font-medium mb-1" style={{ color: "var(--md-on-surface-variant)" }}>Total Balance</div>
-          <div className="text-4xl font-bold tracking-tight" style={{ color: balance >= 0 ? "#1B5E20" : "#B71C1C" }}>
+          <div className="text-2xl font-bold tracking-tight" style={{ color: balance >= 0 ? "#1B5E20" : "#B71C1C" }}>
             {balance < 0 ? "−" : ""}{fmtFull(Math.abs(balance))}
           </div>
         </div>
