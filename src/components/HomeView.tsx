@@ -155,9 +155,6 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
         )}
       </div>
 
-      {/* Divider */}
-      <div className="flex-shrink-0 mx-4" style={{ height: "1px", background: "var(--md-outline-variant)" }} />
-
       {/* Chat feed */}
       <div ref={feedRef} className="flex-1 overflow-y-auto no-scrollbar px-3 pt-2 pb-2 flex flex-col-reverse gap-1">
         <AiBubble state={aiState} newTxs={newTxs} />

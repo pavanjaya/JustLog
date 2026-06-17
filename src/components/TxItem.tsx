@@ -105,8 +105,6 @@ export default function TxItem({ tx, index = 0, showDate = false, onDelete }: Tx
         )}
       </div>
 
-      {/* Thin divider */}
-      <div className="ml-16 mr-3" style={{ height: "1px", background: "var(--md-outline-variant)", opacity: 0.6 }} />
     </div>
   );
 }
