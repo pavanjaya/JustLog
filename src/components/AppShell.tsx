@@ -5,7 +5,6 @@ import type { Transaction, View } from "@/types";
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import TopBar from "@/components/TopBar";
-import BottomNav from "@/components/BottomNav";
 import Drawer from "@/components/Drawer";
 import HomeView from "@/components/HomeView";
 import StoryView from "@/components/StoryView";
@@ -91,9 +90,9 @@ export default function AppShell() {
         user={user}
       />
 
-      {/* MD3 Top App Bar */}
       <TopBar
         view={view}
+        onNavigate={setView}
         onAvatarClick={() => setDrawerOpen(true)}
         avatarUrl={avatarUrl}
         userInitial={userInitial}
@@ -115,9 +114,6 @@ export default function AppShell() {
           <SettingsView user={user} onDeleteAll={handleDeleteAll} onToast={showToast} />
         )}
       </div>
-
-      {/* MD3 Bottom Navigation Bar */}
-      <BottomNav view={view} onNavigate={setView} />
 
       {/* MD3 Snackbar */}
       <Toast message={toast.message} visible={toast.visible} />

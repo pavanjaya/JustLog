@@ -5,7 +5,7 @@ import type { Transaction } from "@/types";
 import TxItem from "@/components/TxItem";
 import AiBubble from "@/components/AiBubble";
 import BottomInput from "@/components/BottomInput";
-import { fmtCompact, getGreeting } from "@/lib/format";
+import { fmtCompact } from "@/lib/format";
 
 interface HomeViewProps {
   transactions: Transaction[];
@@ -16,7 +16,7 @@ interface HomeViewProps {
 
 type AiState = "idle" | "loading" | "success" | "error";
 
-export default function HomeView({ transactions, onAddTransactions, onSeeAll, userName = "there" }: HomeViewProps) {
+export default function HomeView({ transactions, onAddTransactions, userName = "there" }: HomeViewProps) {
   const [input, setInput] = useState("");
   const [aiState, setAiState] = useState<AiState>("idle");
   const [newTxs, setNewTxs] = useState<Transaction[]>([]);
@@ -31,7 +31,7 @@ export default function HomeView({ transactions, onAddTransactions, onSeeAll, us
     .filter((tx) => new Date(tx.created_at).toDateString() === today && tx.type === "expense")
     .reduce((sum, tx) => sum + tx.amount, 0);
 
-  const recent = transactions.slice().reverse().slice(0, 12);
+  const all = transactions.slice().reverse();
 
   function scrollToBottom() {
     setTimeout(() => {
@@ -85,90 +85,49 @@ export default function HomeView({ transactions, onAddTransactions, onSeeAll, us
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Feed */}
-      <div ref={feedRef} className="flex-1 overflow-y-auto no-scrollbar pt-2 pb-2">
-
-        {/* Greeting */}
-        <div className="px-4 pb-4 pt-2">
-          <div className="text-xs font-medium" style={{ color: "var(--md-on-surface-variant)" }}>
-            {getGreeting()}
-          </div>
-          <div className="text-[28px] font-medium tracking-tight mt-0.5" style={{ color: "var(--md-on-surface)" }}>
-            {userName} 👋
-          </div>
+      {/* Today's summary strip */}
+      {(todayIncome > 0 || todayExpense > 0) && (
+        <div
+          className="flex-shrink-0 flex gap-4 px-4 py-2 text-xs"
+          style={{ background: "var(--md-surface-container-low)", borderBottom: "1px solid var(--md-outline-variant)" }}
+        >
+          {todayIncome > 0 && (
+            <span style={{ color: "var(--md-tertiary)" }}>
+              ↑ {fmtCompact(todayIncome)}
+            </span>
+          )}
+          {todayExpense > 0 && (
+            <span style={{ color: "var(--md-error)" }}>
+              ↓ {fmtCompact(todayExpense)}
+            </span>
+          )}
+          <span style={{ color: "var(--md-on-surface-variant)" }}>today</span>
         </div>
+      )}
 
-        {/* MD3 Cards — Today's summary */}
-        <div className="grid grid-cols-2 gap-3 px-4 pb-4">
-          {/* Income card — MD3 Filled card with tertiary container */}
-          <div
-            className="rounded-[var(--md-shape-xl)] p-4"
-            style={{ background: "var(--md-tertiary-container)" }}
-          >
-            <div className="text-[11px] font-medium uppercase tracking-wider mb-2" style={{ color: "var(--md-on-tertiary-container)", opacity: 0.7 }}>
-              Received
-            </div>
-            <div className="text-xl font-medium" style={{ color: "var(--md-on-tertiary-container)" }}>
-              {fmtCompact(todayIncome)}
-            </div>
-          </div>
-
-          {/* Expense card — MD3 Filled card with error container */}
-          <div
-            className="rounded-[var(--md-shape-xl)] p-4"
-            style={{ background: "var(--md-error-container)" }}
-          >
-            <div className="text-[11px] font-medium uppercase tracking-wider mb-2" style={{ color: "var(--md-on-error-container)", opacity: 0.7 }}>
-              Spent
-            </div>
-            <div className="text-xl font-medium" style={{ color: "var(--md-on-error-container)" }}>
-              {fmtCompact(todayExpense)}
-            </div>
-          </div>
-        </div>
-
-        {/* AI bubble */}
-        <AiBubble state={aiState} newTxs={newTxs} />
-
-        {/* Recent section */}
-        <div className="flex items-center justify-between px-4 pt-2 pb-2">
-          <span
-            className="text-xs font-medium uppercase tracking-wider"
-            style={{ color: "var(--md-on-surface-variant)" }}
-          >
-            Recent
-          </span>
-          <button
-            onClick={onSeeAll}
-            className="text-sm font-medium md-ripple px-3 py-1 rounded-full"
-            style={{ color: "var(--md-primary)" }}
-          >
-            See all
-          </button>
-        </div>
-
-        {recent.length > 0 ? (
-          <div className="px-4 flex flex-col gap-1">
-            {recent.map((tx, i) => (
-              <TxItem key={tx.id} tx={tx} index={i} />
-            ))}
-          </div>
-        ) : (
-          <div className="px-6 py-12 text-center flex flex-col items-center gap-3">
+      {/* Chat feed */}
+      <div ref={feedRef} className="flex-1 overflow-y-auto no-scrollbar px-3 pt-3 pb-2 flex flex-col gap-1.5">
+        {all.length === 0 ? (
+          <div className="flex-1 flex flex-col items-center justify-center gap-3 py-16">
             <div className="text-5xl opacity-20">📝</div>
             <div className="text-base font-medium" style={{ color: "var(--md-on-surface-variant)" }}>
-              Nothing logged yet
+              Hi {userName} 👋
             </div>
-            <div className="text-sm leading-relaxed" style={{ color: "var(--md-outline)" }}>
-              Type anything below.
+            <div className="text-sm text-center leading-relaxed" style={{ color: "var(--md-outline)" }}>
+              Type anything below to log.
               <br />
-              Takes under 3 seconds.
+              <span className="opacity-70">500 coffee · 25000 salary · 1200 petrol</span>
             </div>
           </div>
+        ) : (
+          all.map((tx, i) => <TxItem key={tx.id} tx={tx} index={i} showDate />)
         )}
+
+        {/* AI response bubble */}
+        <AiBubble state={aiState} newTxs={newTxs} />
       </div>
 
-      {/* Bottom input */}
+      {/* Chat input — always at bottom */}
       <BottomInput value={input} onChange={setInput} onSend={handleSend} disabled={isLoading} />
     </div>
   );

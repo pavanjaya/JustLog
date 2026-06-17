@@ -33,7 +33,9 @@ export default function BottomInput({ value, onChange, onSend, disabled }: Botto
 
   function handleSend() {
     onSend();
-    if (textareaRef.current) textareaRef.current.style.height = "auto";
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
   }
 
   function fillSuggestion(text: string) {
@@ -44,36 +46,35 @@ export default function BottomInput({ value, onChange, onSend, disabled }: Botto
 
   return (
     <div
-      className="flex-shrink-0 px-4 pt-3 pb-2"
-      style={{ background: "var(--md-surface-container-low)", borderTop: "1px solid var(--md-outline-variant)" }}
+      className="flex-shrink-0 px-3 pt-2 pb-3"
+      style={{ background: "var(--md-surface)", borderTop: "1px solid var(--md-outline-variant)" }}
     >
-      {/* MD3 Assist chips / Suggestion chips */}
-      <div className="flex gap-2 overflow-x-auto pb-2.5 no-scrollbar">
-        {SUGGESTIONS.map((s) => (
-          <button
-            key={s}
-            onClick={() => fillSuggestion(s)}
-            className="flex-shrink-0 px-4 py-1.5 text-xs font-medium rounded-full border md-ripple transition-colors whitespace-nowrap"
-            style={{
-              borderColor: "var(--md-outline)",
-              color: "var(--md-on-surface-variant)",
-              background: "transparent",
-            }}
-          >
-            {s}
-          </button>
-        ))}
-      </div>
+      {/* Suggestion chips — scrollable row */}
+      {!value && (
+        <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+          {SUGGESTIONS.map((s) => (
+            <button
+              key={s}
+              onClick={() => fillSuggestion(s)}
+              className="flex-shrink-0 px-3 py-1 text-xs font-medium rounded-full border md-ripple whitespace-nowrap"
+              style={{
+                borderColor: "var(--md-outline-variant)",
+                color: "var(--md-on-surface-variant)",
+                background: "var(--md-surface-container-low)",
+              }}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      )}
 
-      {/* Input row */}
-      <div className="flex items-end gap-3">
-        {/* MD3 Filled Text Field */}
+      {/* Chat-style input row */}
+      <div className="flex items-end gap-2">
+        {/* Pill input */}
         <div
-          className="flex-1 flex items-end gap-2 px-4 py-3 rounded-t-[var(--md-shape-xs)] rounded-b-none"
-          style={{
-            background: "var(--md-surface-container-highest)",
-            borderBottom: `2px solid var(--md-primary)`,
-          }}
+          className="flex-1 flex items-end gap-2 px-4 py-2.5 rounded-[22px]"
+          style={{ background: "var(--md-surface-container-highest)" }}
         >
           <textarea
             ref={textareaRef}
@@ -81,7 +82,7 @@ export default function BottomInput({ value, onChange, onSend, disabled }: Botto
             value={value}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
-            placeholder="500 coffee · 1200 petrol · 25000 salary"
+            placeholder="Type anything… 500 coffee, 25k salary"
             autoComplete="off"
             autoCorrect="off"
             disabled={disabled}
@@ -90,21 +91,17 @@ export default function BottomInput({ value, onChange, onSend, disabled }: Botto
           />
         </div>
 
-        {/* MD3 FAB - Small */}
+        {/* Send button — circular, primary color */}
         <button
           onClick={handleSend}
-          disabled={disabled}
-          className="w-14 h-14 rounded-[var(--md-shape-lg)] flex items-center justify-center flex-shrink-0 md-ripple transition-all active:scale-95 disabled:opacity-40"
-          style={{ background: "var(--md-primary-container)", color: "var(--md-on-primary-container)" }}
+          disabled={disabled || !value.trim()}
+          className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 md-ripple transition-all active:scale-95 disabled:opacity-30"
+          style={{ background: "var(--md-primary)", color: "var(--md-on-primary)" }}
         >
           <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
             <path d="M2 12L22 2L12 22L10 14L2 12Z" />
           </svg>
         </button>
-      </div>
-
-      <div className="text-center text-[11px] mt-1.5" style={{ color: "var(--md-on-surface-variant)" }}>
-        Enter to log · Shift+Enter for new line
       </div>
     </div>
   );
