@@ -165,7 +165,6 @@ export default function AppShell() {
       />
 
       <TopBar
-        view={view}
         onNavigate={setView}
         onAvatarClick={() => setDrawerOpen(true)}
         onSpaceClick={() => setSpaceSwitcherOpen(true)}

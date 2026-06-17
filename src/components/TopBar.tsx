@@ -1,10 +1,8 @@
 "use client";
 
-import type { View } from "@/types";
-import type { Space } from "@/types";
+import type { View, Space } from "@/types";
 
 interface TopBarProps {
-  view: View;
   onNavigate: (v: View) => void;
   onAvatarClick: () => void;
   onSpaceClick: () => void;
@@ -13,7 +11,7 @@ interface TopBarProps {
   userInitial?: string;
 }
 
-export default function TopBar({ view, onNavigate, onAvatarClick, onSpaceClick, activeSpace, avatarUrl, userInitial = "?" }: TopBarProps) {
+export default function TopBar({ onNavigate, onAvatarClick, onSpaceClick, activeSpace, avatarUrl, userInitial = "?" }: TopBarProps) {
   return (
     <div
       className="flex-shrink-0 flex items-center px-4 h-14 gap-2"
@@ -39,22 +37,6 @@ export default function TopBar({ view, onNavigate, onAvatarClick, onSpaceClick, 
           </svg>
         </button>
       </div>
-
-      {/* Search icon */}
-      <button
-        onClick={() => onNavigate("search")}
-        aria-label="Search"
-        className="w-10 h-10 flex items-center justify-center rounded-full md-ripple"
-        style={{
-          background: view === "search" ? "var(--md-primary-container)" : "transparent",
-          color: view === "search" ? "var(--md-primary)" : "var(--md-on-surface-variant)",
-        }}
-      >
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="11" cy="11" r="8" />
-          <line x1="21" y1="21" x2="16.65" y2="16.65" />
-        </svg>
-      </button>
 
       {/* Avatar */}
       <button
