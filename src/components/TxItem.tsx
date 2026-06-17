@@ -18,9 +18,17 @@ export default function TxItem({ tx, index = 0, showDate = false, onDelete }: Tx
   const [showDelete, setShowDelete] = useState(false);
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const metaText = showDate
-    ? `${tx.category} · ${date.toLocaleDateString("en-IN", { day: "numeric", month: "short" })}`
-    : `${tx.category} · ${date.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}`;
+  function smartTime(d: Date) {
+    const now = new Date();
+    const diffMs = now.getTime() - d.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const time = d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+    if (diffDays === 0) return time;
+    if (diffDays < 7) return `${d.toLocaleDateString("en-IN", { weekday: "short" })} ${time}`;
+    return `${d.toLocaleDateString("en-IN", { day: "numeric", month: "short" })} ${time}`;
+  }
+
+  const metaText = `${tx.category} · ${smartTime(date)}`;
 
   function startPress() {
     pressTimer.current = setTimeout(() => setShowDelete(true), 500);
