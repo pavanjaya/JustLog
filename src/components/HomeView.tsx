@@ -5,7 +5,7 @@ import type { Transaction } from "@/types";
 import TxItem from "@/components/TxItem";
 import AiBubble from "@/components/AiBubble";
 import BottomInput from "@/components/BottomInput";
-import { fmtCompact } from "@/lib/format";
+import { fmtCompact, getGreeting } from "@/lib/format";
 
 interface HomeViewProps {
   transactions: Transaction[];
@@ -85,22 +85,27 @@ export default function HomeView({ transactions, onAddTransactions, userName = "
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Today summary cards */}
-      <div className="flex-shrink-0 grid grid-cols-2 gap-3 px-4 pt-4 pb-2">
-        <div className="rounded-[var(--md-shape-xl)] p-4" style={{ background: "var(--md-tertiary-container)" }}>
-          <div className="text-[11px] font-medium uppercase tracking-wider mb-2" style={{ color: "var(--md-on-tertiary-container)", opacity: 0.7 }}>
-            Received
-          </div>
-          <div className="text-xl font-medium" style={{ color: "var(--md-on-tertiary-container)" }}>
-            {fmtCompact(todayIncome)}
-          </div>
+      {/* Greeting + summary */}
+      <div className="flex-shrink-0 px-4 pt-4 pb-2">
+        <div className="text-sm mb-0.5" style={{ color: "var(--md-on-surface-variant)" }}>{getGreeting()}</div>
+        <div className="text-2xl font-semibold mb-4" style={{ color: "var(--md-on-surface)" }}>
+          {userName} 👋
         </div>
-        <div className="rounded-[var(--md-shape-xl)] p-4" style={{ background: "var(--md-error-container)" }}>
-          <div className="text-[11px] font-medium uppercase tracking-wider mb-2" style={{ color: "var(--md-on-error-container)", opacity: 0.7 }}>
-            Spent
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="rounded-[var(--md-shape-xl)] p-4" style={{ background: "var(--md-surface-container-low)", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+            <div className="flex items-center gap-1.5 mb-2">
+              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: "#2E7D32" }} />
+              <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--md-on-surface-variant)" }}>Received Today</span>
+            </div>
+            <div className="text-xl font-semibold" style={{ color: "#2E7D32" }}>{fmtCompact(todayIncome)}</div>
           </div>
-          <div className="text-xl font-medium" style={{ color: "var(--md-on-error-container)" }}>
-            {fmtCompact(todayExpense)}
+          <div className="rounded-[var(--md-shape-xl)] p-4" style={{ background: "var(--md-surface-container-low)", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+            <div className="flex items-center gap-1.5 mb-2">
+              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: "#C62828" }} />
+              <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--md-on-surface-variant)" }}>Spent Today</span>
+            </div>
+            <div className="text-xl font-semibold" style={{ color: "#C62828" }}>{fmtCompact(todayExpense)}</div>
           </div>
         </div>
       </div>
