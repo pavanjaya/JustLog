@@ -18,13 +18,23 @@ export type Category =
   | "Investment"
   | "Other";
 
+export interface Space {
+  id: string;
+  user_id: string;
+  name: string;
+  icon: string;
+  color: string;
+  created_at: string;
+}
+
 export interface Transaction {
   id: string;
+  space_id?: string;
   amount: number;
   type: TxType;
   category: Category;
   description: string;
-  created_at: string; // ISO date string
+  created_at: string;
 }
 
 export type View = "home" | "story" | "search" | "settings";
