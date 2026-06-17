@@ -10,13 +10,14 @@ import { fmtCompact, getGreeting } from "@/lib/format";
 interface HomeViewProps {
   transactions: Transaction[];
   onAddTransactions: (txs: Transaction[]) => Promise<void>;
+  onDeleteTransaction: (id: string) => void;
   onSeeAll: () => void;
   userName?: string;
 }
 
 type AiState = "idle" | "loading" | "success" | "error";
 
-export default function HomeView({ transactions, onAddTransactions, userName = "there" }: HomeViewProps) {
+export default function HomeView({ transactions, onAddTransactions, onDeleteTransaction, userName = "there" }: HomeViewProps) {
   const [input, setInput] = useState("");
   const [aiState, setAiState] = useState<AiState>("idle");
   const [newTxs, setNewTxs] = useState<Transaction[]>([]);
@@ -126,7 +127,7 @@ export default function HomeView({ transactions, onAddTransactions, userName = "
             </div>
           </div>
         ) : (
-          all.map((tx, i) => <TxItem key={tx.id} tx={tx} index={i} showDate />)
+          all.map((tx, i) => <TxItem key={tx.id} tx={tx} index={i} showDate onDelete={onDeleteTransaction} />)
         )}
 
         {/* AI response bubble */}

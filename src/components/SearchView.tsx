@@ -6,6 +6,7 @@ import TxItem from "@/components/TxItem";
 
 interface SearchViewProps {
   transactions: Transaction[];
+  onDeleteTransaction: (id: string) => void;
 }
 
 const ic = { width: 15, height: 15, viewBox: "0 0 24 24", fill: "none" as const, stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
@@ -19,7 +20,7 @@ const SEARCH_CHIPS: { icon: React.ReactNode; label: string; query: string }[] = 
   { icon: <svg {...ic}><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>, label: "Top expense", query: "Biggest expense" },
 ];
 
-export default function SearchView({ transactions }: SearchViewProps) {
+export default function SearchView({ transactions, onDeleteTransaction }: SearchViewProps) {
   const [query, setQuery] = useState("");
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -127,7 +128,7 @@ export default function SearchView({ transactions }: SearchViewProps) {
         {allTx.length > 0 ? (
           <div className="px-4 flex flex-col gap-1">
             {allTx.map((tx, i) => (
-              <TxItem key={tx.id} tx={tx} index={i} showDate />
+              <TxItem key={tx.id} tx={tx} index={i} showDate onDelete={onDeleteTransaction} />
             ))}
           </div>
         ) : (

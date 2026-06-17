@@ -62,6 +62,12 @@ export default function AppShell() {
     }
   }
 
+  async function handleDeleteTransaction(id: string) {
+    if (!user) return;
+    await supabase.from("transactions").delete().eq("id", id).eq("user_id", user.id);
+    setTransactions((prev) => prev.filter((tx) => tx.id !== id));
+  }
+
   async function handleAddTransactions(txs: Transaction[]) {
     if (!user) return;
     const rows = txs.map((tx) => ({ ...tx, user_id: user.id }));
@@ -105,12 +111,13 @@ export default function AppShell() {
           <HomeView
             transactions={transactions}
             onAddTransactions={handleAddTransactions}
+            onDeleteTransaction={handleDeleteTransaction}
             onSeeAll={() => setView("search")}
             userName={userName}
           />
         )}
         {view === "story" && <StoryView transactions={transactions} />}
-        {view === "search" && <SearchView transactions={transactions} />}
+        {view === "search" && <SearchView transactions={transactions} onDeleteTransaction={handleDeleteTransaction} />}
         {view === "settings" && (
           <SettingsView user={user} onDeleteAll={handleDeleteAll} onToast={showToast} />
         )}
