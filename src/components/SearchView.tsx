@@ -20,12 +20,52 @@ const SEARCH_CHIPS = [
   { icon: <svg {...ic}><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>, label: "All entries", query: "Show all transactions" },
 ];
 
+function groupByMonthAndDate(transactions: Transaction[]) {
+  // newest first
+  const sorted = [...transactions].reverse();
+
+  // month key → date key → transactions
+  const months: { monthKey: string; monthLabel: string; days: { dateKey: string; dateLabel: string; txs: Transaction[] }[] }[] = [];
+  const monthMap = new Map<string, Map<string, Transaction[]>>();
+
+  for (const tx of sorted) {
+    const d = new Date(tx.created_at);
+    const monthKey = `${d.getFullYear()}-${d.getMonth()}`;
+    const dateKey = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+
+    if (!monthMap.has(monthKey)) monthMap.set(monthKey, new Map());
+    const dayMap = monthMap.get(monthKey)!;
+    if (!dayMap.has(dateKey)) dayMap.set(dateKey, []);
+    dayMap.get(dateKey)!.push(tx);
+  }
+
+  for (const [monthKey, dayMap] of monthMap) {
+    const [year, month] = monthKey.split("-").map(Number);
+    const monthLabel = new Date(year, month, 1).toLocaleString("en-IN", { month: "long", year: "numeric" });
+    const days: { dateKey: string; dateLabel: string; txs: Transaction[] }[] = [];
+
+    for (const [dateKey, txs] of dayMap) {
+      const [y, m, day] = dateKey.split("-").map(Number);
+      const d = new Date(y, m, day);
+      const now = new Date();
+      const isToday = d.toDateString() === now.toDateString();
+      const isYesterday = d.toDateString() === new Date(now.setDate(now.getDate() - 1)).toDateString();
+      const dateLabel = isToday ? "Today" : isYesterday ? "Yesterday" : d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+      days.push({ dateKey, dateLabel, txs });
+    }
+
+    months.push({ monthKey, monthLabel, days });
+  }
+
+  return months;
+}
+
 export default function SearchView({ transactions, onDeleteTransaction }: SearchViewProps) {
   const [query, setQuery] = useState("");
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const allTx = transactions.slice().reverse();
+  const grouped = groupByMonthAndDate(transactions);
 
   async function runSearch(q: string) {
     if (!q.trim()) return;
@@ -57,8 +97,7 @@ export default function SearchView({ transactions, onDeleteTransaction }: Search
           style={{ background: "var(--md-surface-container-low)", border: "1px solid var(--md-outline-variant)" }}
         >
           <svg viewBox="0 0 24 24" className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-outline)" }}>
-            <circle cx="11" cy="11" r="8" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
           <input
             value={query}
@@ -71,16 +110,16 @@ export default function SearchView({ transactions, onDeleteTransaction }: Search
             style={{ color: "var(--md-on-surface)" }}
           />
           {query && (
-            <button onClick={() => runSearch(query)} className="flex-shrink-0">
-              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor" style={{ color: "var(--md-primary)" }}>
-                <path d="M2 12L22 2L12 22L10 14L2 12Z" />
+            <button onClick={() => { setQuery(""); setResult(null); }} className="flex-shrink-0">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" style={{ color: "var(--md-outline)" }}>
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
               </svg>
             </button>
           )}
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto no-scrollbar pb-4">
+      <div className="flex-1 overflow-y-auto no-scrollbar pb-6">
         {/* AI result */}
         {result !== null && (
           <div className="mx-4 mb-3 p-4 rounded-2xl animate-fade-up" style={{ background: "rgba(200,49,255,0.05)" }}>
@@ -93,10 +132,13 @@ export default function SearchView({ transactions, onDeleteTransaction }: Search
             ) : (
               <p className="text-sm leading-[1.7]" style={{ color: "var(--md-on-surface)" }}>{result}</p>
             )}
+            <button onClick={() => runSearch(query)} className="mt-2 text-xs font-medium" style={{ color: "var(--md-primary)" }}>
+              Ask again
+            </button>
           </div>
         )}
 
-        {/* Suggestion chips grid */}
+        {/* Suggestion chips */}
         {!result && (
           <div className="grid grid-cols-2 gap-2 px-4 mb-4">
             {SEARCH_CHIPS.map((chip) => (
@@ -104,34 +146,46 @@ export default function SearchView({ transactions, onDeleteTransaction }: Search
                 key={chip.label}
                 onClick={() => runSearch(chip.query)}
                 className="flex items-center gap-2.5 px-4 py-3 rounded-2xl text-left"
-                style={{
-                  background: "var(--md-surface-container-low)",
-                  color: "var(--md-on-surface)",
-                }}
+                style={{ background: "var(--md-surface-container-low)" }}
               >
                 <span className="flex-shrink-0" style={{ color: "var(--md-on-surface-variant)" }}>{chip.icon}</span>
-                <span className="text-xs font-medium">{chip.label}</span>
+                <span className="text-xs font-medium" style={{ color: "var(--md-on-surface)" }}>{chip.label}</span>
               </button>
             ))}
           </div>
         )}
 
-        {/* All entries */}
-        <div className="px-4 pb-2 flex items-center justify-between">
-          <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>All Entries</span>
-          <span className="text-xs" style={{ color: "var(--md-outline)" }}>{allTx.length} transactions</span>
-        </div>
-
-        {allTx.length > 0 ? (
-          <div className="px-3 flex flex-col">
-            {allTx.map((tx, i) => (
-              <TxItem key={tx.id} tx={tx} index={i} showDate onDelete={onDeleteTransaction} />
-            ))}
-          </div>
+        {/* Grouped entries */}
+        {transactions.length === 0 ? (
+          <div className="px-6 py-10 text-center text-sm" style={{ color: "var(--md-outline)" }}>No transactions yet</div>
         ) : (
-          <div className="px-6 py-10 text-center text-sm" style={{ color: "var(--md-outline)" }}>
-            No transactions yet
-          </div>
+          grouped.map(({ monthKey, monthLabel, days }) => (
+            <div key={monthKey}>
+              {/* Month header */}
+              <div className="px-4 pt-2 pb-1 flex items-center justify-between">
+                <span className="text-xs font-semibold" style={{ color: "var(--md-on-surface-variant)" }}>{monthLabel}</span>
+                <span className="text-[10px]" style={{ color: "var(--md-outline)" }}>
+                  {days.reduce((s, d) => s + d.txs.length, 0)} entries
+                </span>
+              </div>
+
+              {/* Days */}
+              {days.map(({ dateKey, dateLabel, txs }) => (
+                <div key={dateKey}>
+                  {/* Date label */}
+                  <div className="px-4 py-1">
+                    <span className="text-[11px] font-medium" style={{ color: "var(--md-outline)" }}>{dateLabel}</span>
+                  </div>
+                  {/* Transactions */}
+                  <div className="px-3">
+                    {txs.map((tx, i) => (
+                      <TxItem key={tx.id} tx={tx} index={i} onDelete={onDeleteTransaction} />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))
         )}
       </div>
     </div>
