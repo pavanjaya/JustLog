@@ -12,6 +12,9 @@ import SearchView from "@/components/SearchView";
 import SettingsView from "@/components/SettingsView";
 import SpaceSwitcher from "@/components/SpaceSwitcher";
 import Toast from "@/components/Toast";
+import PaywallView from "@/components/PaywallView";
+
+type SubStatus = "loading" | "active" | "trialing" | "none";
 
 export default function AppShell() {
   const [view, setView] = useState<View>("home");
@@ -21,6 +24,7 @@ export default function AppShell() {
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [activeSpace, setActiveSpace] = useState<Space | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [subStatus, setSubStatus] = useState<SubStatus>("loading");
   const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: "", visible: false });
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const supabase = createClient();
@@ -68,6 +72,17 @@ export default function AppShell() {
     return space;
   }, [supabase, loadSpaces]);
 
+  const loadSubscription = useCallback(async (userId: string) => {
+    const { data } = await supabase
+      .from("subscriptions")
+      .select("status")
+      .eq("user_id", userId)
+      .single();
+    const s = data?.status;
+    if (s === "active" || s === "trialing") setSubStatus(s as SubStatus);
+    else setSubStatus("none");
+  }, [supabase]);
+
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       setUser(user);
@@ -75,6 +90,9 @@ export default function AppShell() {
         const space = await ensureDefaultSpace(user.id);
         setActiveSpace(space);
         await loadTransactions(space.id);
+        await loadSubscription(user.id);
+      } else {
+        setSubStatus("none");
       }
     });
 
@@ -84,6 +102,9 @@ export default function AppShell() {
         const space = await ensureDefaultSpace(session.user.id);
         setActiveSpace(space);
         await loadTransactions(space.id);
+        await loadSubscription(session.user.id);
+      } else {
+        setSubStatus("none");
       }
     });
 
@@ -91,7 +112,7 @@ export default function AppShell() {
       subscription.unsubscribe();
       if (toastTimer.current) clearTimeout(toastTimer.current);
     };
-  }, [ensureDefaultSpace, loadTransactions, supabase]);
+  }, [ensureDefaultSpace, loadTransactions, loadSubscription, supabase]);
 
   async function handleSwitchSpace(space: Space) {
     setActiveSpace(space);
@@ -137,6 +158,12 @@ export default function AppShell() {
     if (data) setTransactions((prev) => [...prev, ...(data as Transaction[])]);
   }
 
+  async function handleSubscribe() {
+    const res = await fetch("/api/stripe/checkout", { method: "POST" });
+    const { url } = await res.json();
+    if (url) window.location.href = url;
+  }
+
   const userName = user?.user_metadata?.full_name?.split(" ")[0] ?? user?.email?.split("@")[0];
   const avatarUrl = user?.user_metadata?.avatar_url as string | undefined;
   const userInitial = (user?.user_metadata?.full_name ?? user?.email ?? "?").charAt(0).toUpperCase();
@@ -174,7 +201,15 @@ export default function AppShell() {
       />
 
       <div className="flex-1 overflow-hidden flex">
-        {view === "home" && (
+        {/* Paywall */}
+        {subStatus === "loading" && (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "var(--md-primary)", borderTopColor: "transparent" }} />
+          </div>
+        )}
+        {subStatus === "none" && <PaywallView onSubscribe={handleSubscribe} />}
+
+        {(subStatus === "active" || subStatus === "trialing") && view === "home" && (
           <HomeView
             transactions={transactions}
             onAddTransactions={handleAddTransactions}
@@ -183,9 +218,9 @@ export default function AppShell() {
             userName={userName}
           />
         )}
-        {view === "story" && <StoryView transactions={transactions} />}
-        {view === "search" && <SearchView transactions={transactions} onDeleteTransaction={handleDeleteTransaction} />}
-        {view === "settings" && (
+        {(subStatus === "active" || subStatus === "trialing") && view === "story" && <StoryView transactions={transactions} />}
+        {(subStatus === "active" || subStatus === "trialing") && view === "search" && <SearchView transactions={transactions} onDeleteTransaction={handleDeleteTransaction} />}
+        {(subStatus === "active" || subStatus === "trialing") && view === "settings" && (
           <SettingsView user={user} onDeleteAll={handleDeleteAll} onToast={showToast} />
         )}
       </div>

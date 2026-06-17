@@ -17,6 +17,12 @@ export default function SettingsView({ user, onDeleteAll, onToast }: SettingsVie
   const avatar = user?.user_metadata?.avatar_url as string | undefined;
   const initials = name.charAt(0).toUpperCase();
 
+  async function handleManageBilling() {
+    const res = await fetch("/api/stripe/portal", { method: "POST" });
+    const { url } = await res.json();
+    if (url) window.location.href = url;
+  }
+
   async function handleSignOut() {
     const supabase = createClient();
     await supabase.auth.signOut();
@@ -49,7 +55,8 @@ export default function SettingsView({ user, onDeleteAll, onToast }: SettingsVie
       {/* Group 1 */}
       <SettingsGroup>
         <SettingsItem icon={<IconExport />} label="Export Data" onClick={() => onToast("Export coming soon")} />
-        <SettingsItem icon={<IconFolders />} label="Manage Spaces" onClick={() => onToast("Spaces coming in V2")} last />
+        <SettingsItem icon={<IconFolders />} label="Manage Spaces" onClick={() => onToast("Spaces coming in V2")} />
+        <SettingsItem icon={<IconCard />} label="Manage Subscription" onClick={handleManageBilling} last />
       </SettingsGroup>
 
       {/* Group 2 */}
@@ -108,6 +115,7 @@ function IconBell()     { return <svg {...iconProps}><path d="M18 8A6 6 0 006 8c
 function IconInfo()     { return <svg {...iconProps}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>; }
 function IconTrash()    { return <svg {...iconProps}><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>; }
 function IconLogOut()   { return <svg {...iconProps}><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>; }
+function IconCard()    { return <svg {...iconProps}><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>; }
 
 interface SettingsItemProps {
   icon: React.ReactNode;
