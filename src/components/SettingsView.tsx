@@ -24,70 +24,85 @@ export default function SettingsView({ user, onDeleteAll, onToast }: SettingsVie
   }
 
   return (
-    <div className="flex-1 overflow-y-auto no-scrollbar pt-4 pb-6">
-      {/* Profile card */}
-      <div className="mx-4 mb-4 bg-white rounded-radius-md p-[18px] flex items-center gap-3.5 shadow-shadow-sm">
+    <div className="flex-1 overflow-y-auto no-scrollbar pt-2 pb-6">
+      {/* MD3 Profile card */}
+      <div
+        className="mx-4 mb-4 p-5 rounded-[var(--md-shape-xl)] flex items-center gap-4"
+        style={{ background: "var(--md-primary-container)" }}
+      >
         {avatar ? (
-          <img src={avatar} alt={name} className="w-[54px] h-[54px] rounded-full flex-shrink-0 object-cover" />
+          <img src={avatar} alt={name} className="w-14 h-14 rounded-full flex-shrink-0 object-cover" />
         ) : (
-          <div className="w-[54px] h-[54px] bg-blue rounded-full flex items-center justify-center text-xl font-bold text-white flex-shrink-0">
+          <div
+            className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-medium flex-shrink-0"
+            style={{ background: "var(--md-primary)", color: "var(--md-on-primary)" }}
+          >
             {initials}
           </div>
         )}
-        <div>
-          <div className="text-base font-semibold mb-[3px]">{name}</div>
-          <div className="text-xs text-text-secondary">{email}</div>
+        <div className="min-w-0">
+          <div className="text-base font-medium truncate" style={{ color: "var(--md-on-primary-container)" }}>{name}</div>
+          <div className="text-sm truncate mt-0.5" style={{ color: "var(--md-on-primary-container)", opacity: 0.75 }}>{email}</div>
         </div>
       </div>
 
       {/* Group 1 */}
-      <div className="mx-4 mb-2.5 bg-white rounded-radius-md overflow-hidden shadow-shadow-sm">
-        <SettingsItem icon="📤" bg="#E3F2FD" label="Export Data" onClick={() => onToast("Export coming soon")} />
-        <SettingsItem icon="🗂️" bg="#F3E5F5" label="Manage Spaces" onClick={() => onToast("Spaces coming in V2")} last />
-      </div>
+      <SettingsGroup>
+        <SettingsItem icon="📤" label="Export Data" onClick={() => onToast("Export coming soon")} />
+        <SettingsItem icon="🗂️" label="Manage Spaces" onClick={() => onToast("Spaces coming in V2")} last />
+      </SettingsGroup>
 
       {/* Group 2 */}
-      <div className="mx-4 mb-2.5 bg-white rounded-radius-md overflow-hidden shadow-shadow-sm">
-        <SettingsItem
-          icon="🌙"
-          bg="#E8F5E9"
-          label="Dark Mode"
-          onClick={() => onToast("Dark mode coming soon")}
-          rightSlot={<Toggle />}
-        />
-        <SettingsItem
-          icon="🔔"
-          bg="#FFF8E1"
-          label="Notifications"
-          onClick={() => onToast("Notifications coming in V2")}
-          rightSlot={<Toggle />}
-          last
-        />
-      </div>
+      <SettingsGroup>
+        <SettingsItem icon="🌙" label="Dark Mode" onClick={() => onToast("Dark mode coming soon")} rightSlot={<Toggle />} />
+        <SettingsItem icon="🔔" label="Notifications" onClick={() => onToast("Notifications coming in V2")} rightSlot={<Toggle />} last />
+      </SettingsGroup>
 
       {/* Group 3 */}
-      <div className="mx-4 mb-2.5 bg-white rounded-radius-md overflow-hidden shadow-shadow-sm">
-        <SettingsItem icon="ℹ️" bg="#F5F5F5" label="About JustLog" onClick={() => onToast("JustLog V1.0 — Just type.")} />
-        <SettingsItem icon="🗑️" bg="#FFEBEE" label="Delete All Data" danger onClick={onDeleteAll} last />
-      </div>
+      <SettingsGroup>
+        <SettingsItem icon="ℹ️" label="About JustLog" onClick={() => onToast("JustLog V1.0 — Just type.")} />
+        <SettingsItem icon="🗑️" label="Delete All Data" danger onClick={onDeleteAll} last />
+      </SettingsGroup>
 
       {/* Sign out */}
-      <div className="mx-4 mb-2.5 bg-white rounded-radius-md overflow-hidden shadow-shadow-sm">
-        <SettingsItem icon="🚪" bg="#FFF3E0" label="Sign Out" danger onClick={handleSignOut} last />
-      </div>
+      <SettingsGroup>
+        <SettingsItem icon="🚪" label="Sign Out" danger onClick={handleSignOut} last />
+      </SettingsGroup>
 
-      <div className="text-center py-5 text-[11px] text-text-tertiary">JustLog V1.0 · Just type.</div>
+      <div className="text-center py-5 text-xs" style={{ color: "var(--md-outline)" }}>
+        JustLog V1.0 · Just type.
+      </div>
+    </div>
+  );
+}
+
+function SettingsGroup({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className="mx-4 mb-3 rounded-[var(--md-shape-xl)] overflow-hidden"
+      style={{ background: "var(--md-surface-container-low)" }}
+    >
+      {children}
     </div>
   );
 }
 
 function Toggle() {
-  return <div className="w-[42px] h-6 bg-surface-2 rounded-xl relative cursor-pointer transition-colors" />;
+  return (
+    <div
+      className="w-11 h-6 rounded-full flex-shrink-0 relative"
+      style={{ background: "var(--md-surface-container-highest)", border: "2px solid var(--md-outline)" }}
+    >
+      <div
+        className="w-4 h-4 rounded-full absolute top-0.5 left-0.5"
+        style={{ background: "var(--md-outline)" }}
+      />
+    </div>
+  );
 }
 
 interface SettingsItemProps {
   icon: string;
-  bg: string;
   label: string;
   onClick: () => void;
   danger?: boolean;
@@ -95,19 +110,22 @@ interface SettingsItemProps {
   rightSlot?: React.ReactNode;
 }
 
-function SettingsItem({ icon, bg, label, onClick, danger, last, rightSlot }: SettingsItemProps) {
+function SettingsItem({ icon, label, onClick, danger, last, rightSlot }: SettingsItemProps) {
   return (
-    <div
+    <button
       onClick={onClick}
-      className={`flex items-center gap-[13px] px-4 py-3.5 cursor-pointer transition-colors hover:bg-surface ${
-        !last ? "border-b border-border" : ""
-      }`}
+      className={`w-full flex items-center gap-4 px-4 py-4 text-left md-ripple transition-colors ${!last ? "border-b" : ""}`}
+      style={{ borderColor: "var(--md-outline-variant)" }}
     >
-      <div className="w-[34px] h-[34px] rounded-[9px] flex items-center justify-center text-[17px] flex-shrink-0" style={{ background: bg }}>
-        {icon}
-      </div>
-      <div className={`flex-1 text-sm ${danger ? "text-red" : "text-text-primary"}`}>{label}</div>
-      {rightSlot ?? <div className={`text-base ${danger ? "text-red" : "text-text-tertiary"}`}>›</div>}
-    </div>
+      <span className="text-xl w-7 text-center flex-shrink-0">{icon}</span>
+      <span className="flex-1 text-sm font-medium" style={{ color: danger ? "var(--md-error)" : "var(--md-on-surface)" }}>
+        {label}
+      </span>
+      {rightSlot ?? (
+        <svg viewBox="0 0 24 24" className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} style={{ color: "var(--md-on-surface-variant)" }}>
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
+      )}
+    </button>
   );
 }

@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { DM_Sans } from "next/font/google";
+import { Roboto } from "next/font/google";
 import "./globals.css";
 
-const dmSans = DM_Sans({
+const roboto = Roboto({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-dm-sans",
+  weight: ["300", "400", "500", "700"],
+  variable: "--font-roboto",
   display: "swap",
 });
 
@@ -20,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`h-full antialiased ${dmSans.variable}`}>
+    <html lang="en" className={`h-full ${roboto.variable}`}>
       <body className="h-full font-sans">{children}</body>
     </html>
   );

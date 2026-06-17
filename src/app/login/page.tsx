@@ -11,34 +11,59 @@ export default function LoginPage() {
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
     });
   }
 
   return (
-    <div className="flex flex-col h-screen max-w-[430px] mx-auto items-center justify-center bg-surface px-8">
+    <div
+      className="flex flex-col h-screen max-w-[430px] mx-auto items-center justify-center px-6"
+      style={{ background: "var(--md-surface)" }}
+    >
       <div className="w-full flex flex-col items-center gap-8">
-        {/* Logo */}
-        <div className="flex flex-col items-center gap-2">
-          <div className="w-16 h-16 bg-blue rounded-2xl flex items-center justify-center text-3xl shadow-shadow-sm">
+        {/* Logo — MD3 Large icon container */}
+        <div className="flex flex-col items-center gap-4">
+          <div
+            className="w-20 h-20 rounded-[var(--md-shape-xl)] flex items-center justify-center text-4xl"
+            style={{ background: "var(--md-primary-container)" }}
+          >
             📓
           </div>
-          <div className="text-2xl font-bold tracking-tight mt-1">JustLog</div>
-          <div className="text-sm text-text-secondary text-center leading-relaxed">
-            The fastest way to remember your money.
+          <div>
+            <div
+              className="text-[32px] font-medium tracking-tight text-center"
+              style={{ color: "var(--md-on-surface)" }}
+            >
+              JustLog
+            </div>
+            <div
+              className="text-sm text-center mt-1"
+              style={{ color: "var(--md-on-surface-variant)" }}
+            >
+              The fastest way to remember your money.
+            </div>
           </div>
         </div>
 
-        {/* Login card */}
-        <div className="w-full bg-white rounded-radius-md p-6 shadow-shadow-sm flex flex-col gap-4">
-          <div className="text-center text-[13px] text-text-secondary">Sign in to continue</div>
+        {/* MD3 Filled card */}
+        <div
+          className="w-full rounded-[var(--md-shape-xl)] p-6 flex flex-col gap-4"
+          style={{ background: "var(--md-surface-container-low)" }}
+        >
+          <div className="text-sm text-center" style={{ color: "var(--md-on-surface-variant)" }}>
+            Sign in to continue
+          </div>
 
+          {/* MD3 Outlined button with Google logo */}
           <button
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="flex items-center justify-center gap-3 w-full border border-border rounded-radius-md py-3 px-4 text-sm font-medium text-text-primary bg-white transition-colors hover:bg-surface disabled:opacity-60"
+            className="flex items-center justify-center gap-3 w-full py-3 px-6 rounded-[var(--md-shape-full)] border text-sm font-medium md-ripple transition-colors disabled:opacity-60"
+            style={{
+              borderColor: "var(--md-outline)",
+              color: "var(--md-on-surface)",
+              background: "transparent",
+            }}
           >
             <svg viewBox="0 0 24 24" className="w-5 h-5 flex-shrink-0">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -50,9 +75,9 @@ export default function LoginPage() {
           </button>
         </div>
 
-        <div className="text-xs text-text-tertiary text-center">
+        <p className="text-xs text-center" style={{ color: "var(--md-outline)" }}>
           Your data is private and only visible to you.
-        </div>
+        </p>
       </div>
     </div>
   );

@@ -23,7 +23,6 @@ export default function HomeView({ transactions, onAddTransactions, onSeeAll, us
   const [isLoading, setIsLoading] = useState(false);
   const feedRef = useRef<HTMLDivElement>(null);
 
-  // Today's totals
   const today = new Date().toDateString();
   const todayIncome = transactions
     .filter((tx) => new Date(tx.created_at).toDateString() === today && tx.type === "income")
@@ -59,8 +58,7 @@ export default function HomeView({ transactions, onAddTransactions, onSeeAll, us
       if (!res.ok) throw new Error("API error");
 
       const data = await res.json();
-      const parsed: Array<{ amount: number; type: "income" | "expense"; category: string; description: string }> =
-        data.transactions;
+      const parsed: Array<{ amount: number; type: "income" | "expense"; category: string; description: string }> = data.transactions;
 
       const now = Date.now();
       const created: Transaction[] = parsed.map((tx, i) => ({
@@ -76,7 +74,6 @@ export default function HomeView({ transactions, onAddTransactions, onSeeAll, us
       setNewTxs(created);
       setAiState("success");
       scrollToBottom();
-
       setTimeout(() => setAiState("idle"), created.length > 1 ? 6000 : 4000);
     } catch {
       setAiState("error");
@@ -89,28 +86,44 @@ export default function HomeView({ transactions, onAddTransactions, onSeeAll, us
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Feed */}
-      <div ref={feedRef} className="flex-1 overflow-y-auto no-scrollbar pt-4 pb-2">
+      <div ref={feedRef} className="flex-1 overflow-y-auto no-scrollbar pt-2 pb-2">
+
         {/* Greeting */}
-        <div className="px-4 pb-5 pt-2">
-          <div className="text-xs text-text-secondary mb-[3px]">{getGreeting()}</div>
-          <div className="text-[24px] font-bold tracking-tight">{userName} 👋</div>
+        <div className="px-4 pb-4 pt-2">
+          <div className="text-xs font-medium" style={{ color: "var(--md-on-surface-variant)" }}>
+            {getGreeting()}
+          </div>
+          <div className="text-[28px] font-medium tracking-tight mt-0.5" style={{ color: "var(--md-on-surface)" }}>
+            {userName} 👋
+          </div>
         </div>
 
-        {/* Today cards */}
-        <div className="grid grid-cols-2 gap-2.5 px-4 pb-4">
-          <div className="bg-white rounded-radius-md p-[14px_16px] shadow-shadow-sm">
-            <div className="text-[11px] font-medium uppercase tracking-wide text-text-secondary mb-[5px] flex items-center gap-[5px]">
-              <span className="w-1.5 h-1.5 rounded-full bg-green flex-shrink-0" />
-              Received today
+        {/* MD3 Cards — Today's summary */}
+        <div className="grid grid-cols-2 gap-3 px-4 pb-4">
+          {/* Income card — MD3 Filled card with tertiary container */}
+          <div
+            className="rounded-[var(--md-shape-xl)] p-4"
+            style={{ background: "var(--md-tertiary-container)" }}
+          >
+            <div className="text-[11px] font-medium uppercase tracking-wider mb-2" style={{ color: "var(--md-on-tertiary-container)", opacity: 0.7 }}>
+              Received
             </div>
-            <div className="text-xl font-bold tracking-tight text-green">{fmtCompact(todayIncome)}</div>
+            <div className="text-xl font-medium" style={{ color: "var(--md-on-tertiary-container)" }}>
+              {fmtCompact(todayIncome)}
+            </div>
           </div>
-          <div className="bg-white rounded-radius-md p-[14px_16px] shadow-shadow-sm">
-            <div className="text-[11px] font-medium uppercase tracking-wide text-text-secondary mb-[5px] flex items-center gap-[5px]">
-              <span className="w-1.5 h-1.5 rounded-full bg-red flex-shrink-0" />
-              Spent today
+
+          {/* Expense card — MD3 Filled card with error container */}
+          <div
+            className="rounded-[var(--md-shape-xl)] p-4"
+            style={{ background: "var(--md-error-container)" }}
+          >
+            <div className="text-[11px] font-medium uppercase tracking-wider mb-2" style={{ color: "var(--md-on-error-container)", opacity: 0.7 }}>
+              Spent
             </div>
-            <div className="text-xl font-bold tracking-tight text-red">{fmtCompact(todayExpense)}</div>
+            <div className="text-xl font-medium" style={{ color: "var(--md-on-error-container)" }}>
+              {fmtCompact(todayExpense)}
+            </div>
           </div>
         </div>
 
@@ -118,24 +131,35 @@ export default function HomeView({ transactions, onAddTransactions, onSeeAll, us
         <AiBubble state={aiState} newTxs={newTxs} />
 
         {/* Recent section */}
-        <div className="flex items-center justify-between px-4 pt-1 pb-2.5">
-          <span className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary">Recent</span>
-          <button onClick={onSeeAll} className="text-[13px] font-medium text-blue">
+        <div className="flex items-center justify-between px-4 pt-2 pb-2">
+          <span
+            className="text-xs font-medium uppercase tracking-wider"
+            style={{ color: "var(--md-on-surface-variant)" }}
+          >
+            Recent
+          </span>
+          <button
+            onClick={onSeeAll}
+            className="text-sm font-medium md-ripple px-3 py-1 rounded-full"
+            style={{ color: "var(--md-primary)" }}
+          >
             See all
           </button>
         </div>
 
         {recent.length > 0 ? (
-          <div className="px-4 flex flex-col gap-2">
+          <div className="px-4 flex flex-col gap-1">
             {recent.map((tx, i) => (
               <TxItem key={tx.id} tx={tx} index={i} />
             ))}
           </div>
         ) : (
-          <div className="px-6 py-12 text-center flex flex-col items-center gap-2.5">
-            <div className="text-[44px] opacity-25">📝</div>
-            <div className="text-[15px] font-semibold text-text-secondary">Nothing logged yet</div>
-            <div className="text-[13px] text-text-tertiary leading-relaxed">
+          <div className="px-6 py-12 text-center flex flex-col items-center gap-3">
+            <div className="text-5xl opacity-20">📝</div>
+            <div className="text-base font-medium" style={{ color: "var(--md-on-surface-variant)" }}>
+              Nothing logged yet
+            </div>
+            <div className="text-sm leading-relaxed" style={{ color: "var(--md-outline)" }}>
               Type anything below.
               <br />
               Takes under 3 seconds.

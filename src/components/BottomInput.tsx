@@ -33,63 +33,77 @@ export default function BottomInput({ value, onChange, onSend, disabled }: Botto
 
   function handleSend() {
     onSend();
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-    }
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
   }
 
   function fillSuggestion(text: string) {
     onChange(text);
     const el = textareaRef.current;
-    if (el) {
-      el.focus();
-      requestAnimationFrame(() => autoGrow(el));
-    }
+    if (el) { el.focus(); requestAnimationFrame(() => autoGrow(el)); }
   }
 
   return (
-    <div className="flex-shrink-0 bg-white border-t border-border px-3 pt-2.5 pb-3.5">
-      {/* Suggestion chips */}
-      <div className="flex gap-1.5 overflow-x-auto pb-2.5 no-scrollbar">
+    <div
+      className="flex-shrink-0 px-4 pt-3 pb-2"
+      style={{ background: "var(--md-surface-container-low)", borderTop: "1px solid var(--md-outline-variant)" }}
+    >
+      {/* MD3 Assist chips / Suggestion chips */}
+      <div className="flex gap-2 overflow-x-auto pb-2.5 no-scrollbar">
         {SUGGESTIONS.map((s) => (
-          <div
+          <button
             key={s}
             onClick={() => fillSuggestion(s)}
-            className="bg-surface border border-border rounded-full px-3.5 py-1.5 text-xs text-text-secondary whitespace-nowrap cursor-pointer transition-colors hover:bg-blue-light hover:border-blue hover:text-blue flex-shrink-0"
+            className="flex-shrink-0 px-4 py-1.5 text-xs font-medium rounded-full border md-ripple transition-colors whitespace-nowrap"
+            style={{
+              borderColor: "var(--md-outline)",
+              color: "var(--md-on-surface-variant)",
+              background: "transparent",
+            }}
           >
             {s}
-          </div>
+          </button>
         ))}
       </div>
 
       {/* Input row */}
-      <div className="flex items-end gap-2">
-        <div className="flex-1 bg-surface border-[1.5px] border-transparent rounded-radius-xl px-4 py-2.5 flex items-end gap-2 transition-colors focus-within:border-blue focus-within:bg-white focus-within:shadow-[0_0_0_3px_rgba(25,118,210,0.07)]">
+      <div className="flex items-end gap-3">
+        {/* MD3 Filled Text Field */}
+        <div
+          className="flex-1 flex items-end gap-2 px-4 py-3 rounded-t-[var(--md-shape-xs)] rounded-b-none"
+          style={{
+            background: "var(--md-surface-container-highest)",
+            borderBottom: `2px solid var(--md-primary)`,
+          }}
+        >
           <textarea
             ref={textareaRef}
             rows={1}
             value={value}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
-            placeholder={"500 coffee\n1200 petrol\n25000 salary"}
+            placeholder="500 coffee · 1200 petrol · 25000 salary"
             autoComplete="off"
             autoCorrect="off"
             disabled={disabled}
-            className="flex-1 border-none outline-none bg-transparent text-[15px] text-text-primary resize-none leading-[1.5] max-h-[120px] overflow-y-auto no-scrollbar placeholder:text-text-tertiary"
+            className="flex-1 border-none outline-none bg-transparent text-[15px] resize-none leading-[1.5] max-h-[120px] overflow-y-auto no-scrollbar"
+            style={{ color: "var(--md-on-surface)" }}
           />
         </div>
+
+        {/* MD3 FAB - Small */}
         <button
           onClick={handleSend}
           disabled={disabled}
-          className="w-9 h-9 bg-blue rounded-full flex-shrink-0 flex items-center justify-center transition-all hover:bg-[#1565C0] active:scale-[0.91] disabled:opacity-50"
+          className="w-14 h-14 rounded-[var(--md-shape-lg)] flex items-center justify-center flex-shrink-0 md-ripple transition-all active:scale-95 disabled:opacity-40"
+          style={{ background: "var(--md-primary-container)", color: "var(--md-on-primary-container)" }}
         >
-          <svg viewBox="0 0 24 24" className="w-4 h-4 fill-white">
+          <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
             <path d="M2 12L22 2L12 22L10 14L2 12Z" />
           </svg>
         </button>
       </div>
 
-      <div className="text-center text-[11px] text-text-tertiary mt-1.5">
+      <div className="text-center text-[11px] mt-1.5" style={{ color: "var(--md-on-surface-variant)" }}>
         Enter to log · Shift+Enter for new line
       </div>
     </div>
