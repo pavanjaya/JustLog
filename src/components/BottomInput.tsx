@@ -95,8 +95,8 @@ export default function BottomInput({ value, onChange, onSend, disabled }: Botto
         <button
           onClick={handleSend}
           disabled={disabled || !value.trim()}
-          className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 md-ripple transition-all active:scale-95 disabled:opacity-30"
-          style={{ background: "var(--md-primary)", color: "var(--md-on-primary)" }}
+          className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 md-ripple transition-all active:scale-95"
+          style={{ background: disabled || !value.trim() ? "var(--md-surface-container-highest)" : "var(--md-primary)", color: disabled || !value.trim() ? "var(--md-on-surface-variant)" : "var(--md-on-primary)" }}
         >
           <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
             <path d="M2 12L22 2L12 22L10 14L2 12Z" />
