@@ -5,7 +5,7 @@ import type { Transaction } from "@/types";
 import TxItem from "@/components/TxItem";
 import AiBubble from "@/components/AiBubble";
 import BottomInput from "@/components/BottomInput";
-import { fmtCompact, getGreeting } from "@/lib/format";
+import { fmtCompact, fmtFull, getGreeting } from "@/lib/format";
 
 interface HomeViewProps {
   transactions: Transaction[];
@@ -31,6 +31,9 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
   const todayExpense = transactions
     .filter((tx) => new Date(tx.created_at).toDateString() === today && tx.type === "expense")
     .reduce((sum, tx) => sum + tx.amount, 0);
+  const totalIncome = transactions.filter((tx) => tx.type === "income").reduce((sum, tx) => sum + tx.amount, 0);
+  const totalExpense = transactions.filter((tx) => tx.type === "expense").reduce((sum, tx) => sum + tx.amount, 0);
+  const balance = totalIncome - totalExpense;
 
   // Reversed so DOM order is newest-first; flex-col-reverse then shows oldest at top, newest at bottom
   const all = [...transactions].reverse();
@@ -94,6 +97,14 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
           <div className="text-xs font-medium mb-0.5" style={{ color: "var(--md-on-surface-variant)" }}>{getGreeting()}</div>
           <div className="text-2xl font-bold tracking-tight" style={{ color: "var(--md-on-surface)" }}>
             {userName} 👋
+          </div>
+        </div>
+
+        {/* Balance hero */}
+        <div className="mb-4">
+          <div className="text-xs font-medium mb-1" style={{ color: "var(--md-on-surface-variant)" }}>Total Balance</div>
+          <div className="text-4xl font-bold tracking-tight" style={{ color: balance >= 0 ? "#1B5E20" : "#B71C1C" }}>
+            {balance < 0 ? "−" : ""}{fmtFull(Math.abs(balance))}
           </div>
         </div>
 
