@@ -82,7 +82,7 @@ export default function Drawer({ open, view, onClose, onNavigate, onDeleteAll, u
 
         {/* Nav */}
         <div className="flex-1 px-3 flex flex-col gap-0.5">
-          <DrawerItem icon={<IconStory />} label="Monthly Story" active={view === "story"} onClick={() => nav("story")} />
+          <DrawerItem icon={<IconStory />} label="Story" active={view === "story"} onClick={() => nav("story")} />
           <DrawerItem icon={<IconSettings />} label="Settings" active={view === "settings"} onClick={() => nav("settings")} />
           <DrawerItem icon={<IconExport />} label="Export Data" onClick={onClose} />
           <div className="flex-1" />
