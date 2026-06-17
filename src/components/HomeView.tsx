@@ -98,45 +98,31 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
         {/* Summary cards */}
         <div className="grid grid-cols-2 gap-3">
           {/* Received */}
-          <div
-            className="rounded-2xl p-4"
-            style={{
-              background: "#F0FBF4",
-              border: "1px solid #C8EECF",
-            }}
-          >
+          <div className="rounded-2xl p-4" style={{ background: "#F0FBF4", border: "1px solid #C8EECF" }}>
             <div className="flex items-center gap-1.5 mb-2.5">
               <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#2E7D32" }}>
-                <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="#fff" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="17 7 12 12 7 7" />
-                  <line x1="12" y1="12" x2="12" y2="21" />
+                {/* down arrow = incoming */}
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                  <path d="M5 2 L5 8 M2 5 L5 8 L8 5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
               <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#2E7D32" }}>Received</span>
             </div>
             <div className="text-xl font-bold" style={{ color: "#1B5E20" }}>{fmtCompact(todayIncome)}</div>
-            <div className="text-[10px] mt-0.5" style={{ color: "#4CAF50" }}>Today</div>
           </div>
 
           {/* Spent */}
-          <div
-            className="rounded-2xl p-4"
-            style={{
-              background: "#FFF5F5",
-              border: "1px solid #FFCDD2",
-            }}
-          >
+          <div className="rounded-2xl p-4" style={{ background: "#FFF5F5", border: "1px solid #FFCDD2" }}>
             <div className="flex items-center gap-1.5 mb-2.5">
               <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#C62828" }}>
-                <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="#fff" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="7 17 12 12 17 17" />
-                  <line x1="12" y1="12" x2="12" y2="3" />
+                {/* up arrow = outgoing */}
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                  <path d="M5 8 L5 2 M2 5 L5 2 L8 5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
               <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#C62828" }}>Spent</span>
             </div>
             <div className="text-xl font-bold" style={{ color: "#B71C1C" }}>{fmtCompact(todayExpense)}</div>
-            <div className="text-[10px] mt-0.5" style={{ color: "#EF5350" }}>Today</div>
           </div>
         </div>
       </div>
