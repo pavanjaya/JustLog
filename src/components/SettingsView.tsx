@@ -60,8 +60,7 @@ export default function SettingsView({ user, onDeleteAll, onToast }: SettingsVie
 
       {/* Group 3 */}
       <SettingsGroup>
-        <SettingsItem icon={<IconInfo />} label="About JustLog" onClick={() => onToast("JustLog V1.0 — Just type.")} />
-        <SettingsItem icon={<IconTrash />} label="Delete All Data" danger onClick={onDeleteAll} last />
+        <SettingsItem icon={<IconInfo />} label="About JustLog" onClick={() => onToast("JustLog V1.0 — Just type.")} last />
       </SettingsGroup>
 
       {/* Sign out */}

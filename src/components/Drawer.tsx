@@ -86,7 +86,6 @@ export default function Drawer({ open, view, onClose, onNavigate, onDeleteAll, u
           <DrawerItem icon={<IconSettings />} label="Settings" active={view === "settings"} onClick={() => nav("settings")} />
           <DrawerItem icon={<IconExport />} label="Export Data" onClick={onClose} />
           <div className="flex-1" />
-          <DrawerItem icon={<IconTrash />} label="Delete All Data" danger onClick={() => { onDeleteAll(); onClose(); }} />
           <DrawerItem icon={<IconLogOut />} label="Sign Out" danger onClick={handleSignOut} />
         </div>
 
