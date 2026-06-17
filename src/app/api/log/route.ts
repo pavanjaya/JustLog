@@ -60,6 +60,45 @@ function isValidTx(tx: unknown): tx is ParsedTx {
   );
 }
 
+function mockParse(text: string): ParsedTx[] {
+  const INCOME_KEYWORDS = ["salary", "income", "received", "from", "credit", "refund", "bonus", "freelance"];
+  const CATEGORY_MAP: Record<string, string> = {
+    coffee: "Food & Drinks", tea: "Food & Drinks", food: "Food & Drinks", lunch: "Food & Drinks",
+    dinner: "Food & Drinks", breakfast: "Food & Drinks", restaurant: "Food & Drinks", swiggy: "Food & Drinks", zomato: "Food & Drinks",
+    grocery: "Groceries", groceries: "Groceries", vegetables: "Groceries", fruits: "Groceries", milk: "Groceries",
+    petrol: "Transport", uber: "Transport", ola: "Transport", auto: "Transport", bus: "Transport", metro: "Transport", fuel: "Transport",
+    school: "Education", fees: "Education", tuition: "Education", college: "Education", course: "Education",
+    rent: "Housing", electricity: "Bills", wifi: "Bills", internet: "Bills", phone: "Bills", recharge: "Bills",
+    medicine: "Healthcare", doctor: "Healthcare", hospital: "Healthcare", pharmacy: "Healthcare",
+    movie: "Entertainment", netflix: "Entertainment", game: "Entertainment", amazon: "Shopping", shopping: "Shopping", clothes: "Shopping",
+    salary: "Salary", income: "Salary", business: "Business", investment: "Investment", travel: "Travel",
+  };
+
+  const lines = text.split(/[\n,·]+/).map(s => s.trim()).filter(Boolean);
+  const results: ParsedTx[] = [];
+
+  for (const line of lines) {
+    const amountMatch = line.match(/\d+(\.\d+)?/);
+    if (!amountMatch) continue;
+    const amount = parseFloat(amountMatch[0]);
+    if (amount <= 0) continue;
+
+    const lower = line.toLowerCase();
+    const isIncome = INCOME_KEYWORDS.some(k => lower.includes(k));
+    let category = "Other";
+    for (const [keyword, cat] of Object.entries(CATEGORY_MAP)) {
+      if (lower.includes(keyword)) { category = cat; break; }
+    }
+    if (isIncome && category === "Other") category = "Salary";
+
+    const description = line.replace(/\d+(\.\d+)?/g, "").replace(/[₹$]/g, "").trim()
+      .split(" ").filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") || "Transaction";
+
+    results.push({ amount, type: isIncome ? "income" : "expense", category, description });
+  }
+  return results;
+}
+
 export async function POST(req: NextRequest) {
   let body: { text?: string };
   try {
@@ -71,6 +110,15 @@ export async function POST(req: NextRequest) {
   const text = body.text?.trim();
   if (!text) {
     return NextResponse.json({ error: "Missing text" }, { status: 400 });
+  }
+
+  const apiKey = process.env.ANTHROPIC_API_KEY ?? "";
+  const isMock = !apiKey || apiKey.includes("xxx");
+
+  if (isMock) {
+    const transactions = mockParse(text);
+    if (transactions.length === 0) return NextResponse.json({ error: "Could not parse" }, { status: 422 });
+    return NextResponse.json({ transactions });
   }
 
   try {
