@@ -175,7 +175,7 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
                   <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                 </svg>
               </div>
-              <span className="text-sm font-medium" style={{ color: "var(--md-on-surface-variant)" }}>New Space</span>
+              <span className="text-sm font-medium" style={{ color: "var(--md-on-surface-variant)" }}>Create New Space</span>
             </button>
           </div>
         )}
