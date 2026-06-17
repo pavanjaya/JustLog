@@ -169,6 +169,24 @@ export default function StoryView({ transactions }: StoryViewProps) {
           <div className="py-8 text-center text-sm" style={{ color: "var(--md-outline)" }}>No transactions this month</div>
         ) : (
           <>
+            {/* Monthly narrative — first thing you see */}
+            <div className="mb-3 p-4 rounded-2xl" style={{ background: "rgba(200,49,255,0.05)" }}>
+              <div className="flex items-center gap-2 mb-2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-primary)" }}><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--md-primary)" }}>This Month</span>
+              </div>
+              <p className="text-sm leading-[1.75]" style={{ color: "var(--md-on-surface)" }}>
+                {(() => {
+                  let t = `You received ${fmtFull(curr.income)}.`;
+                  if (curr.expense > 0) t += ` You spent ${fmtFull(curr.expense)}.`;
+                  if (sortedCats.length > 0) t += ` Biggest spend: ${sortedCats[0][0]} (${fmtFull(sortedCats[0][1])}).`;
+                  if (curr.income > curr.expense) t += ` Saved ${fmtFull(curr.income - curr.expense)}.`;
+                  else if (curr.expense > curr.income) t += ` Overspent by ${fmtFull(curr.expense - curr.income)}.`;
+                  return t;
+                })()}
+              </p>
+            </div>
+
             {/* Monthly stat cards */}
             <div className="grid grid-cols-3 gap-2 mb-3">
               <StatCard label="Income" value={fmtCompact(curr.income)} delta={incomeDelta} bg="#F0FBF4" color="#1B5E20" accentColor="#2E7D32" positiveIsGood />
@@ -232,24 +250,6 @@ export default function StoryView({ transactions }: StoryViewProps) {
                 </div>
               </div>
             )}
-
-            {/* Monthly narrative */}
-            <div className="mb-3 p-4 rounded-2xl" style={{ background: "rgba(200,49,255,0.05)" }}>
-              <div className="flex items-center gap-2 mb-2">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-primary)" }}><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--md-primary)" }}>This Month</span>
-              </div>
-              <p className="text-sm leading-[1.75]" style={{ color: "var(--md-on-surface)" }}>
-                {(() => {
-                  let t = `You received ${fmtFull(curr.income)}.`;
-                  if (curr.expense > 0) t += ` You spent ${fmtFull(curr.expense)}.`;
-                  if (sortedCats.length > 0) t += ` Biggest spend: ${sortedCats[0][0]} (${fmtFull(sortedCats[0][1])}).`;
-                  if (curr.income > curr.expense) t += ` Saved ${fmtFull(curr.income - curr.expense)}.`;
-                  else if (curr.expense > curr.income) t += ` Overspent by ${fmtFull(curr.expense - curr.income)}.`;
-                  return t;
-                })()}
-              </p>
-            </div>
 
             {/* Monthly top categories */}
             {topCats.length > 0 && (
