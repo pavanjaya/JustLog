@@ -45,11 +45,12 @@ export default function TxItem({ tx, index = 0, showDate = false, onDelete }: Tx
   }
 
   return (
-    <div className="relative animate-fade-up" style={{ animationDelay: `${index * 0.04}s` }}>
+    <div className="animate-fade-up" style={{ animationDelay: `${index * 0.04}s` }}>
       <div
-        className="flex items-center gap-4 px-4 py-3 rounded-[var(--md-shape-xl)] md-ripple select-none transition-all duration-200"
+        className="flex items-center gap-3 px-3 py-3 select-none transition-all duration-200"
         style={{
-          background: showDelete ? "var(--md-error-container)" : "var(--md-surface-container-low)",
+          background: showDelete ? "var(--md-error-container)" : "transparent",
+          borderRadius: showDelete ? "14px" : "0",
           transform: showDelete ? "scale(0.98)" : "scale(1)",
         }}
         onMouseDown={startPress}
@@ -59,43 +60,53 @@ export default function TxItem({ tx, index = 0, showDate = false, onDelete }: Tx
         onTouchEnd={cancelPress}
         onClick={() => showDelete && setShowDelete(false)}
       >
-        {/* Icon */}
+        {/* Category icon circle */}
         <div
-          className="w-10 h-10 rounded-[var(--md-shape-md)] flex items-center justify-center flex-shrink-0"
+          className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
           style={{ background: showDelete ? "rgba(255,255,255,0.5)" : meta.bg }}
         >
-          <CategoryIcon icon={meta.icon} size={18} color={showDelete ? "var(--md-error)" : "#5a5a6e"} />
+          <CategoryIcon icon={meta.icon} size={17} color={showDelete ? "var(--md-error)" : "#5a4e6e"} />
         </div>
 
-        {/* Text */}
+        {/* Description + meta */}
         <div className="flex-1 min-w-0">
-          <div className="text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis"
-            style={{ color: showDelete ? "var(--md-on-error-container)" : "var(--md-on-surface)" }}>
+          <div
+            className="text-sm font-medium leading-tight whitespace-nowrap overflow-hidden text-ellipsis"
+            style={{ color: showDelete ? "var(--md-on-error-container)" : "var(--md-on-surface)" }}
+          >
             {tx.description}
           </div>
-          <div className="text-xs mt-0.5" style={{ color: showDelete ? "var(--md-on-error-container)" : "var(--md-on-surface-variant)", opacity: showDelete ? 0.7 : 1 }}>
-            {showDelete ? "Hold to delete · tap to cancel" : metaText}
+          <div
+            className="text-xs mt-0.5"
+            style={{ color: showDelete ? "var(--md-on-error-container)" : "var(--md-outline)", opacity: showDelete ? 0.75 : 1 }}
+          >
+            {showDelete ? "Tap trash to delete · tap row to cancel" : metaText}
           </div>
         </div>
 
-        {/* Amount or delete button */}
+        {/* Amount or delete */}
         {showDelete ? (
           <button
             onClick={handleDelete}
-            className="flex items-center justify-center w-9 h-9 rounded-full flex-shrink-0 active:scale-90 transition-transform"
+            className="flex items-center justify-center w-8 h-8 rounded-full flex-shrink-0 active:scale-90 transition-transform"
             style={{ background: "var(--md-error)", color: "#fff" }}
           >
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
             </svg>
           </button>
         ) : (
-          <div className="text-sm font-medium flex-shrink-0"
-            style={{ color: tx.type === "income" ? "#2E7D32" : "var(--md-on-surface)" }}>
+          <div
+            className="text-sm font-semibold flex-shrink-0 tabular-nums"
+            style={{ color: tx.type === "income" ? "#1B7A3E" : "var(--md-on-surface)" }}
+          >
             {tx.type === "income" ? "+" : "−"}{fmtFull(tx.amount)}
           </div>
         )}
       </div>
+
+      {/* Thin divider */}
+      <div className="ml-16 mr-3" style={{ height: "1px", background: "var(--md-outline-variant)", opacity: 0.6 }} />
     </div>
   );
 }

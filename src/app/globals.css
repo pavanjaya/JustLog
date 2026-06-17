@@ -27,19 +27,19 @@
   --md-on-error-container: #410002;
 
   /* Surface */
-  --md-surface: #F8F9FF;
-  --md-on-surface: #191C20;
-  --md-surface-variant: #DFE2EB;
-  --md-on-surface-variant: #43474E;
+  --md-surface: #FFFFFF;
+  --md-on-surface: #111214;
+  --md-surface-variant: #F0F0F3;
+  --md-on-surface-variant: #5C5F66;
   --md-surface-container-lowest: #FFFFFF;
-  --md-surface-container-low: #F2F3FA;
-  --md-surface-container: #ECEDF4;
-  --md-surface-container-high: #E6E8EE;
-  --md-surface-container-highest: #E1E2E8;
+  --md-surface-container-low: #F7F7F9;
+  --md-surface-container: #F0F1F4;
+  --md-surface-container-high: #EBEBEE;
+  --md-surface-container-highest: #E3E4E8;
 
   /* Outline */
-  --md-outline: #73777F;
-  --md-outline-variant: #C3C7CF;
+  --md-outline: #8A8D94;
+  --md-outline-variant: #E0E1E6;
 
   /* Shape scale */
   --md-shape-none: 0px;

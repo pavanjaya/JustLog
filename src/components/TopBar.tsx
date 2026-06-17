@@ -13,8 +13,8 @@ interface TopBarProps {
 export default function TopBar({ view, onNavigate, onAvatarClick, avatarUrl, userInitial = "?" }: TopBarProps) {
   return (
     <div
-      className="flex-shrink-0 flex items-center px-3 h-14 gap-2"
-      style={{ background: "var(--md-surface)" }}
+      className="flex-shrink-0 flex items-center px-4 h-14 gap-2"
+      style={{ background: "#fff", borderBottom: "1px solid var(--md-outline-variant)" }}
     >
       {/* Logo */}
       <button onClick={() => onNavigate("home")} className="flex items-center md-ripple rounded-lg px-1 py-1 flex-shrink-0">

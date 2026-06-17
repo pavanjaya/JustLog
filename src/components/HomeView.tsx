@@ -17,7 +17,7 @@ interface HomeViewProps {
 
 type AiState = "idle" | "loading" | "success" | "error";
 
-export default function HomeView({ transactions, onAddTransactions, onDeleteTransaction, userName = "there" }: HomeViewProps) {
+export default function HomeView({ transactions, onAddTransactions, onDeleteTransaction, onSeeAll, userName = "there" }: HomeViewProps) {
   const [input, setInput] = useState("");
   const [aiState, setAiState] = useState<AiState>("idle");
   const [newTxs, setNewTxs] = useState<Transaction[]>([]);
@@ -84,46 +84,99 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Greeting + summary */}
-      <div className="flex-shrink-0 px-4 pt-4 pb-2">
-        <div className="text-sm mb-0.5" style={{ color: "var(--md-on-surface-variant)" }}>{getGreeting()}</div>
-        <div className="text-2xl font-semibold mb-4" style={{ color: "var(--md-on-surface)" }}>
-          {userName} 👋
+    <div className="flex-1 flex flex-col overflow-hidden" style={{ background: "#fff" }}>
+      {/* Greeting + summary cards */}
+      <div className="flex-shrink-0 px-4 pt-5 pb-3">
+        {/* Greeting */}
+        <div className="mb-4">
+          <div className="text-xs font-medium mb-0.5" style={{ color: "var(--md-on-surface-variant)" }}>{getGreeting()}</div>
+          <div className="text-2xl font-bold tracking-tight" style={{ color: "var(--md-on-surface)" }}>
+            {userName} 👋
+          </div>
         </div>
 
+        {/* Summary cards */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-[var(--md-shape-xl)] p-4" style={{ background: "var(--md-surface-container-low)", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-            <div className="flex items-center gap-1.5 mb-2">
-              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: "#2E7D32" }} />
-              <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--md-on-surface-variant)" }}>Received Today</span>
+          {/* Received */}
+          <div
+            className="rounded-2xl p-4"
+            style={{
+              background: "#F0FBF4",
+              border: "1px solid #C8EECF",
+            }}
+          >
+            <div className="flex items-center gap-1.5 mb-2.5">
+              <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#2E7D32" }}>
+                <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="#fff" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="17 7 12 12 7 7" />
+                  <line x1="12" y1="12" x2="12" y2="21" />
+                </svg>
+              </div>
+              <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#2E7D32" }}>Received</span>
             </div>
-            <div className="text-xl font-semibold" style={{ color: "#2E7D32" }}>{fmtCompact(todayIncome)}</div>
+            <div className="text-xl font-bold" style={{ color: "#1B5E20" }}>{fmtCompact(todayIncome)}</div>
+            <div className="text-[10px] mt-0.5" style={{ color: "#4CAF50" }}>Today</div>
           </div>
-          <div className="rounded-[var(--md-shape-xl)] p-4" style={{ background: "var(--md-surface-container-low)", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-            <div className="flex items-center gap-1.5 mb-2">
-              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: "#C62828" }} />
-              <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--md-on-surface-variant)" }}>Spent Today</span>
+
+          {/* Spent */}
+          <div
+            className="rounded-2xl p-4"
+            style={{
+              background: "#FFF5F5",
+              border: "1px solid #FFCDD2",
+            }}
+          >
+            <div className="flex items-center gap-1.5 mb-2.5">
+              <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#C62828" }}>
+                <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="#fff" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="7 17 12 12 17 17" />
+                  <line x1="12" y1="12" x2="12" y2="3" />
+                </svg>
+              </div>
+              <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#C62828" }}>Spent</span>
             </div>
-            <div className="text-xl font-semibold" style={{ color: "#C62828" }}>{fmtCompact(todayExpense)}</div>
+            <div className="text-xl font-bold" style={{ color: "#B71C1C" }}>{fmtCompact(todayExpense)}</div>
+            <div className="text-[10px] mt-0.5" style={{ color: "#EF5350" }}>Today</div>
           </div>
         </div>
       </div>
 
-      {/* Chat feed — newest at bottom, scroll up for history */}
-      <div ref={feedRef} className="flex-1 overflow-y-auto no-scrollbar px-3 pt-3 pb-2 flex flex-col-reverse gap-1.5">
-        {/* AI response bubble — shows at bottom (visually) due to flex-col-reverse */}
+      {/* Section header */}
+      <div className="flex-shrink-0 flex items-center justify-between px-4 pt-2 pb-2">
+        <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>Recent</span>
+        {all.length > 0 && (
+          <button
+            onClick={onSeeAll}
+            className="text-xs font-semibold"
+            style={{ color: "var(--md-primary)" }}
+          >
+            See all
+          </button>
+        )}
+      </div>
+
+      {/* Divider */}
+      <div className="flex-shrink-0 mx-4" style={{ height: "1px", background: "var(--md-outline-variant)" }} />
+
+      {/* Chat feed */}
+      <div ref={feedRef} className="flex-1 overflow-y-auto no-scrollbar px-3 pt-2 pb-2 flex flex-col-reverse gap-1">
         <AiBubble state={aiState} newTxs={newTxs} />
 
         {all.length === 0 && aiState === "idle" ? (
           <div className="flex flex-col items-center justify-center gap-3 py-16">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.2} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-outline-variant)" }}>
-              <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
-            </svg>
-            <div className="text-sm text-center leading-relaxed" style={{ color: "var(--md-outline)" }}>
-              Type anything below to log.
-              <br />
-              <span className="opacity-70">500 coffee · 25000 salary · 1200 petrol</span>
+            <div
+              className="w-14 h-14 rounded-2xl flex items-center justify-center"
+              style={{ background: "var(--md-surface-container-low)" }}
+            >
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-outline)" }}>
+                <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+              </svg>
+            </div>
+            <div>
+              <div className="text-sm font-medium text-center mb-1" style={{ color: "var(--md-on-surface)" }}>Log your first entry</div>
+              <div className="text-xs text-center leading-relaxed" style={{ color: "var(--md-outline)" }}>
+                500 coffee · 25000 salary · 1200 petrol
+              </div>
             </div>
           </div>
         ) : (
@@ -131,7 +184,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
         )}
       </div>
 
-      {/* Chat input — always at bottom */}
+      {/* Chat input */}
       <BottomInput value={input} onChange={setInput} onSend={handleSend} disabled={isLoading} />
     </div>
   );

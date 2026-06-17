@@ -46,8 +46,8 @@ export default function BottomInput({ value, onChange, onSend, disabled }: Botto
 
   return (
     <div
-      className="flex-shrink-0 px-3 pt-2 pb-3"
-      style={{ background: "var(--md-surface)" }}
+      className="flex-shrink-0 px-3 pt-2 pb-4"
+      style={{ background: "#fff", borderTop: "1px solid var(--md-outline-variant)" }}
     >
       {/* Suggestion chips — scrollable row */}
       {!value && (
@@ -74,7 +74,7 @@ export default function BottomInput({ value, onChange, onSend, disabled }: Botto
         {/* Pill input */}
         <div
           className="flex-1 flex items-end gap-2 px-4 py-2.5 rounded-[22px]"
-          style={{ background: "var(--md-surface-container-highest)" }}
+          style={{ background: "var(--md-surface-container-low)", border: "1.5px solid var(--md-outline-variant)" }}
         >
           <textarea
             ref={textareaRef}
