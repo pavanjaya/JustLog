@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -13,10 +14,44 @@ interface SettingsViewProps {
 
 export default function SettingsView({ user, onDeleteAll, onToast, subStatus = "active" }: SettingsViewProps) {
   const router = useRouter();
+  const supabase = createClient();
   const name = user?.user_metadata?.full_name ?? user?.email?.split("@")[0] ?? "You";
   const email = user?.email ?? "";
   const avatar = user?.user_metadata?.avatar_url as string | undefined;
   const initials = name.charAt(0).toUpperCase();
+  const [editingName, setEditingName] = useState(false);
+  const [nameVal, setNameVal] = useState(name);
+  const [avatarUrl, setAvatarUrl] = useState<string | undefined>(avatar);
+  const [saving, setSaving] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  async function saveDisplayName() {
+    if (!nameVal.trim() || nameVal === name) { setEditingName(false); return; }
+    setSaving(true);
+    await supabase.auth.updateUser({ data: { full_name: nameVal.trim() } });
+    setSaving(false);
+    setEditingName(false);
+    onToast("Name updated");
+  }
+
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    setSaving(true);
+    const ext = file.name.split(".").pop();
+    const path = `avatars/${user.id}.${ext}`;
+    const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+    if (!error) {
+      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      const url = data.publicUrl + "?t=" + Date.now();
+      await supabase.auth.updateUser({ data: { avatar_url: url } });
+      setAvatarUrl(url);
+      onToast("Photo updated");
+    } else {
+      onToast("Upload failed — check Supabase storage bucket");
+    }
+    setSaving(false);
+  }
 
   async function handleManageBilling() {
     const res = await fetch("/api/stripe/portal", { method: "POST" });
@@ -33,20 +68,52 @@ export default function SettingsView({ user, onDeleteAll, onToast, subStatus = "
   return (
     <div className="flex-1 overflow-y-auto no-scrollbar pt-4 pb-6" style={{ background: "#fff" }}>
       {/* Profile card */}
-      <div className="mx-4 mb-5 flex items-center gap-4 px-1 pt-2 pb-4" style={{ borderBottom: "1px solid var(--md-outline-variant)" }}>
-        {avatar ? (
-          <img src={avatar} alt={name} className="w-12 h-12 rounded-full flex-shrink-0 object-cover" />
-        ) : (
-          <div
-            className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-medium flex-shrink-0"
-            style={{ background: "var(--md-surface-container-low)", color: "var(--md-on-surface)" }}
-          >
-            {initials}
+      <div className="mx-4 mb-3 rounded-2xl overflow-hidden" style={{ background: "var(--md-surface-container-low)" }}>
+        <div className="p-4 flex items-center gap-4">
+          {/* Avatar with edit tap */}
+          <button onClick={() => fileRef.current?.click()} className="relative flex-shrink-0">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt={name} className="w-14 h-14 rounded-full object-cover" />
+            ) : (
+              <div className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-semibold" style={{ background: "var(--md-outline-variant)", color: "var(--md-on-surface)" }}>
+                {initials}
+              </div>
+            )}
+            <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center" style={{ background: "var(--md-on-surface)", border: "2px solid var(--md-surface-container-low)" }}>
+              <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="#fff" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+              </svg>
+            </div>
+          </button>
+          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+
+          {/* Name + email */}
+          <div className="flex-1 min-w-0">
+            {editingName ? (
+              <div className="flex items-center gap-2">
+                <input
+                  autoFocus
+                  value={nameVal}
+                  onChange={(e) => setNameVal(e.target.value)}
+                  onBlur={saveDisplayName}
+                  onKeyDown={(e) => e.key === "Enter" && saveDisplayName()}
+                  className="flex-1 text-sm font-semibold border-none outline-none bg-transparent"
+                  style={{ color: "var(--md-on-surface)", borderBottom: "1.5px solid var(--md-primary)" }}
+                />
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm font-semibold truncate" style={{ color: "var(--md-on-surface)" }}>{nameVal}</span>
+                <button onClick={() => setEditingName(true)}>
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-outline)" }}>
+                    <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                  </svg>
+                </button>
+              </div>
+            )}
+            <div className="text-xs mt-0.5 truncate" style={{ color: "var(--md-on-surface-variant)" }}>{email}</div>
           </div>
-        )}
-        <div className="min-w-0">
-          <div className="text-base font-semibold truncate" style={{ color: "var(--md-on-surface)" }}>{name}</div>
-          <div className="text-xs truncate mt-0.5" style={{ color: "var(--md-on-surface-variant)" }}>{email}</div>
+          {saving && <div className="text-xs" style={{ color: "var(--md-primary)" }}>Saving…</div>}
         </div>
       </div>
 
