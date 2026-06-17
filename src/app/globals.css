@@ -78,7 +78,7 @@
 
 /* ─── TAILWIND v4 THEME MAPPING ─── */
 @theme inline {
-  --font-sans: var(--font-roboto), Roboto, -apple-system, sans-serif;
+  --font-sans: var(--font-geist), Geist, -apple-system, sans-serif;
 
   --color-white: var(--color-white);
   --color-surface: var(--color-surface);

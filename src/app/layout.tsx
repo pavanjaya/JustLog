@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
-import { Roboto } from "next/font/google";
+import { Geist } from "next/font/google";
 import "./globals.css";
 
-const roboto = Roboto({
+const geist = Geist({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "700"],
-  variable: "--font-roboto",
+  variable: "--font-geist",
   display: "swap",
 });
 
@@ -20,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`h-full ${roboto.variable}`}>
+    <html lang="en" className={`h-full ${geist.variable}`}>
       <body className="h-full font-sans">{children}</body>
     </html>
   );
