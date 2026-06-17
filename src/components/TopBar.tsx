@@ -20,7 +20,7 @@ export default function TopBar({ view, onNavigate, onAvatarClick, onSpaceClick, 
       style={{ background: "#fff" }}
     >
       {/* Logo */}
-      <button onClick={() => onNavigate("home")} className="flex items-center md-ripple rounded-lg px-1 py-1 flex-shrink-0">
+      <button onClick={() => onNavigate("home")} className="flex items-center flex-shrink-0">
         <img src="/logo.svg" alt="JustLog" className="h-6 w-auto" />
       </button>
 
