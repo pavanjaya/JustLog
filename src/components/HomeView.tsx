@@ -145,7 +145,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
           <button
             onClick={onSeeAll}
             className="text-xs font-semibold"
-            style={{ color: "var(--md-primary)" }}
+            style={{ color: "var(--md-on-surface)" }}
           >
             See all
           </button>
