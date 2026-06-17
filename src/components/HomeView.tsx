@@ -90,52 +90,38 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden" style={{ background: "#fff" }}>
-      {/* Greeting + summary cards */}
-      <div className="flex-shrink-0 px-4 pt-5 pb-3">
-        {/* Greeting */}
-        <div className="mb-4">
-          <div className="text-xs font-medium mb-0.5" style={{ color: "var(--md-on-surface-variant)" }}>{getGreeting()}</div>
-          <div className="text-2xl font-bold tracking-tight" style={{ color: "var(--md-on-surface)" }}>
-            {userName} 👋
+      {/* Compact header: greeting + balance + today stats in one row */}
+      <div className="flex-shrink-0 px-4 pt-3 pb-2">
+        {/* Top row: greeting left, balance right */}
+        <div className="flex items-center justify-between mb-2">
+          <div>
+            <div className="text-[11px]" style={{ color: "var(--md-on-surface-variant)" }}>{getGreeting()}, {userName} 👋</div>
+            <div className="text-xs mt-0.5" style={{ color: "var(--md-outline)" }}>Total Balance</div>
           </div>
-        </div>
-
-        {/* Balance hero */}
-        <div className="mb-4">
-          <div className="text-xs font-medium mb-1" style={{ color: "var(--md-on-surface-variant)" }}>Total Balance</div>
-          <div className="text-4xl font-bold tracking-tight" style={{ color: balance >= 0 ? "#1B5E20" : "#B71C1C" }}>
+          <div className="text-2xl font-bold tracking-tight" style={{ color: balance >= 0 ? "#1B5E20" : "#B71C1C" }}>
             {balance < 0 ? "−" : ""}{fmtFull(Math.abs(balance))}
           </div>
         </div>
 
-        {/* Summary cards */}
-        <div className="grid grid-cols-2 gap-3">
-          {/* Received */}
-          <div className="rounded-2xl p-4" style={{ background: "#F0FBF4", border: "1px solid #C8EECF" }}>
-            <div className="flex items-center gap-1.5 mb-2.5">
-              <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#2E7D32" }}>
-                {/* down arrow = incoming */}
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                  <path d="M5 2 L5 8 M2 5 L5 8 L8 5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-              <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#2E7D32" }}>Received</span>
+        {/* Today stats: single compact row */}
+        <div className="flex gap-2">
+          <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: "#F0FBF4" }}>
+            <div className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#2E7D32" }}>
+              <svg width="8" height="8" viewBox="0 0 10 10" fill="none">
+                <path d="M5 2 L5 8 M2 5 L5 8 L8 5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </div>
-            <div className="text-xl font-bold" style={{ color: "#1B5E20" }}>{fmtCompact(todayIncome)}</div>
+            <span className="text-[10px] font-medium" style={{ color: "#2E7D32" }}>In</span>
+            <span className="text-sm font-bold ml-auto" style={{ color: "#1B5E20" }}>{fmtCompact(todayIncome)}</span>
           </div>
-
-          {/* Spent */}
-          <div className="rounded-2xl p-4" style={{ background: "#FFF5F5", border: "1px solid #FFCDD2" }}>
-            <div className="flex items-center gap-1.5 mb-2.5">
-              <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#C62828" }}>
-                {/* up arrow = outgoing */}
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                  <path d="M5 8 L5 2 M2 5 L5 2 L8 5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-              <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#C62828" }}>Spent</span>
+          <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: "#FFF5F5" }}>
+            <div className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#C62828" }}>
+              <svg width="8" height="8" viewBox="0 0 10 10" fill="none">
+                <path d="M5 8 L5 2 M2 5 L5 2 L8 5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </div>
-            <div className="text-xl font-bold" style={{ color: "#B71C1C" }}>{fmtCompact(todayExpense)}</div>
+            <span className="text-[10px] font-medium" style={{ color: "#C62828" }}>Out</span>
+            <span className="text-sm font-bold ml-auto" style={{ color: "#B71C1C" }}>{fmtCompact(todayExpense)}</span>
           </div>
         </div>
       </div>
