@@ -32,7 +32,8 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
     .filter((tx) => new Date(tx.created_at).toDateString() === today && tx.type === "expense")
     .reduce((sum, tx) => sum + tx.amount, 0);
 
-  const all = transactions.slice();
+  // Reversed so DOM order is newest-first; flex-col-reverse then shows oldest at top, newest at bottom
+  const all = [...transactions].reverse();
 
   function scrollToBottom() {
     // flex-col-reverse inverts scroll: top=0 is visually the bottom
