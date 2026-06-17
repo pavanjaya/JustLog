@@ -49,9 +49,9 @@ export default function SearchView({ transactions, onDeleteTransaction }: Search
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="flex-1 flex flex-col overflow-hidden" style={{ background: "#fff" }}>
       {/* MD3 Search Bar */}
-      <div className="px-4 py-3 flex-shrink-0" style={{ background: "var(--md-surface-container-low)" }}>
+      <div className="px-4 py-3 flex-shrink-0" style={{ background: "#fff" }}>
         <div
           className="flex items-center gap-3 px-4 py-3 rounded-[var(--md-shape-full)]"
           style={{ background: "var(--md-surface-container-highest)" }}

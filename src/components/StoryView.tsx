@@ -83,7 +83,7 @@ export default function StoryView({ transactions }: StoryViewProps) {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto no-scrollbar pb-5">
+    <div className="flex-1 overflow-y-auto no-scrollbar pb-5" style={{ background: "#fff" }}>
       {/* Month selector */}
       <div className="flex items-center justify-between px-4 pt-3 pb-4">
         <div>

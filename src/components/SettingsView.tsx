@@ -24,10 +24,10 @@ export default function SettingsView({ user, onDeleteAll, onToast }: SettingsVie
   }
 
   return (
-    <div className="flex-1 overflow-y-auto no-scrollbar pt-2 pb-6">
-      {/* MD3 Profile card */}
+    <div className="flex-1 overflow-y-auto no-scrollbar pt-4 pb-6" style={{ background: "#fff" }}>
+      {/* Profile card */}
       <div
-        className="mx-4 mb-4 p-5 rounded-[var(--md-shape-xl)] flex items-center gap-4"
+        className="mx-4 mb-5 p-5 rounded-2xl flex items-center gap-4"
         style={{ background: "var(--md-primary-container)" }}
       >
         {avatar ? (
@@ -79,7 +79,7 @@ export default function SettingsView({ user, onDeleteAll, onToast }: SettingsVie
 function SettingsGroup({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="mx-4 mb-3 rounded-[var(--md-shape-xl)] overflow-hidden"
+      className="mx-4 mb-3 rounded-2xl overflow-hidden"
       style={{ background: "var(--md-surface-container-low)" }}
     >
       {children}
@@ -123,8 +123,8 @@ function SettingsItem({ icon, label, onClick, danger, last, rightSlot }: Setting
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center gap-4 px-4 py-4 text-left md-ripple transition-colors ${!last ? "border-b" : ""}`}
-      style={{ borderColor: "var(--md-outline-variant)" }}
+      className={`w-full flex items-center gap-4 px-4 py-3.5 text-left md-ripple transition-colors`}
+      style={{}}
     >
       <span className="w-5 flex-shrink-0 flex items-center justify-center" style={{ color: danger ? "var(--md-error)" : "var(--md-on-surface-variant)" }}>{icon}</span>
       <span className="flex-1 text-sm font-medium" style={{ color: danger ? "var(--md-error)" : "var(--md-on-surface)" }}>
