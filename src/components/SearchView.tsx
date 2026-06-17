@@ -9,13 +9,15 @@ interface SearchViewProps {
   onDeleteTransaction: (id: string) => void;
 }
 
+const ic = { width: 16, height: 16, viewBox: "0 0 24 24", fill: "none" as const, stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+
 const SEARCH_CHIPS = [
-  { label: "Monthly spend", query: "How much did I spend this month?" },
-  { label: "Food expenses", query: "Show food expenses" },
-  { label: "Income", query: "Income this month" },
-  { label: "Top expense", query: "Biggest expense" },
-  { label: "Transport", query: "Transport this month" },
-  { label: "All entries", query: "Show all transactions" },
+  { icon: <svg {...ic}><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>, label: "Monthly spend", query: "How much did I spend this month?" },
+  { icon: <svg {...ic}><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/></svg>, label: "Food", query: "Show food expenses" },
+  { icon: <svg {...ic}><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>, label: "Income", query: "Income this month" },
+  { icon: <svg {...ic}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>, label: "Top expense", query: "Biggest expense" },
+  { icon: <svg {...ic}><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>, label: "Transport", query: "Transport this month" },
+  { icon: <svg {...ic}><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>, label: "All entries", query: "Show all transactions" },
 ];
 
 export default function SearchView({ transactions, onDeleteTransaction }: SearchViewProps) {
@@ -94,20 +96,21 @@ export default function SearchView({ transactions, onDeleteTransaction }: Search
           </div>
         )}
 
-        {/* Suggestion chips — horizontal scroll rows */}
+        {/* Suggestion chips grid */}
         {!result && (
-          <div className="px-4 mb-4 flex flex-wrap gap-2">
+          <div className="grid grid-cols-2 gap-2 px-4 mb-4">
             {SEARCH_CHIPS.map((chip) => (
               <button
                 key={chip.label}
                 onClick={() => runSearch(chip.query)}
-                className="px-3 py-1.5 rounded-full text-xs font-medium"
+                className="flex items-center gap-2.5 px-4 py-3 rounded-2xl text-left"
                 style={{
-                  background: "rgba(200,49,255,0.05)",
-                  color: "var(--md-primary)",
+                  background: "var(--md-surface-container-low)",
+                  color: "var(--md-on-surface)",
                 }}
               >
-                {chip.label}
+                <span className="flex-shrink-0" style={{ color: "var(--md-on-surface-variant)" }}>{chip.icon}</span>
+                <span className="text-xs font-medium">{chip.label}</span>
               </button>
             ))}
           </div>
