@@ -72,9 +72,7 @@ export default function StoryView({ transactions }: StoryViewProps) {
     return Math.round(((curr - prev) / prev) * 100);
   }
 
-  const incomeDelta = delta(curr.income, prev.income);
   const expenseDelta = delta(curr.expense, prev.expense);
-  const savedDelta = delta(curr.income - curr.expense, prev.income - prev.expense);
 
   return (
     <div className="flex-1 overflow-y-auto no-scrollbar pb-8" style={{ background: "#fff" }}>
@@ -185,13 +183,6 @@ export default function StoryView({ transactions }: StoryViewProps) {
                   return t;
                 })()}
               </p>
-            </div>
-
-            {/* Monthly stat cards */}
-            <div className="grid grid-cols-3 gap-2 mb-3">
-              <StatCard label="Income" value={fmtCompact(curr.income)} delta={incomeDelta} bg="#F0FBF4" color="#1B5E20" accentColor="#2E7D32" positiveIsGood />
-              <StatCard label="Spent" value={fmtCompact(curr.expense)} delta={expenseDelta} bg="#FFF5F5" color="#B71C1C" accentColor="#C62828" positiveIsGood={false} />
-              <StatCard label="Saved" value={fmtCompact(curr.income - curr.expense)} delta={savedDelta} bg="rgba(200,49,255,0.05)" color="#7B1FA2" accentColor="var(--md-primary)" positiveIsGood />
             </div>
 
             {/* Savings rate */}
