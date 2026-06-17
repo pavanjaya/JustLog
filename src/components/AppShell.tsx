@@ -77,7 +77,8 @@ export default function AppShell() {
 
   return (
     <div
-      className="flex flex-col h-screen max-w-[430px] mx-auto relative"
+      className="flex flex-col max-w-[430px] mx-auto relative"
+      style={{ height: "100dvh" }}
       style={{ background: "var(--md-surface)" }}
     >
       {/* Profile drawer (slide from right) */}
