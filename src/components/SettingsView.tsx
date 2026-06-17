@@ -19,18 +19,20 @@ export default function SettingsView({ user, onDeleteAll, onToast, subStatus = "
   const email = user?.email ?? "";
   const avatar = user?.user_metadata?.avatar_url as string | undefined;
   const initials = name.charAt(0).toUpperCase();
-  const [editingName, setEditingName] = useState(false);
   const [nameVal, setNameVal] = useState(name);
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>(avatar);
   const [saving, setSaving] = useState(false);
+  const [editSheet, setEditSheet] = useState(false);
+  const [editNameDraft, setEditNameDraft] = useState(name);
   const fileRef = useRef<HTMLInputElement>(null);
 
   async function saveDisplayName() {
-    if (!nameVal.trim() || nameVal === name) { setEditingName(false); return; }
+    if (!editNameDraft.trim()) return;
     setSaving(true);
-    await supabase.auth.updateUser({ data: { full_name: nameVal.trim() } });
+    await supabase.auth.updateUser({ data: { full_name: editNameDraft.trim() } });
+    setNameVal(editNameDraft.trim());
     setSaving(false);
-    setEditingName(false);
+    setEditSheet(false);
     onToast("Name updated");
   }
 
@@ -69,53 +71,86 @@ export default function SettingsView({ user, onDeleteAll, onToast, subStatus = "
     <div className="flex-1 overflow-y-auto no-scrollbar pt-4 pb-6" style={{ background: "#fff" }}>
       {/* Profile card */}
       <div className="mx-4 mb-3 rounded-2xl overflow-hidden" style={{ background: "var(--md-surface-container-low)" }}>
-        <div className="p-4 flex items-center gap-4">
-          {/* Avatar with edit tap */}
-          <button onClick={() => fileRef.current?.click()} className="relative flex-shrink-0">
+        <button
+          onClick={() => { setEditNameDraft(nameVal); setEditSheet(true); }}
+          className="w-full p-4 flex items-center gap-4 text-left"
+        >
+          <div className="relative flex-shrink-0">
             {avatarUrl ? (
-              <img src={avatarUrl} alt={name} className="w-14 h-14 rounded-full object-cover" />
+              <img src={avatarUrl} alt={nameVal} className="w-14 h-14 rounded-full object-cover" />
             ) : (
               <div className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-semibold" style={{ background: "var(--md-outline-variant)", color: "var(--md-on-surface)" }}>
                 {initials}
               </div>
             )}
-            <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center" style={{ background: "var(--md-on-surface)", border: "2px solid var(--md-surface-container-low)" }}>
-              <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="#fff" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
-              </svg>
-            </div>
-          </button>
-          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
-
-          {/* Name + email */}
+          </div>
           <div className="flex-1 min-w-0">
-            {editingName ? (
-              <div className="flex items-center gap-2">
-                <input
-                  autoFocus
-                  value={nameVal}
-                  onChange={(e) => setNameVal(e.target.value)}
-                  onBlur={saveDisplayName}
-                  onKeyDown={(e) => e.key === "Enter" && saveDisplayName()}
-                  className="flex-1 text-sm font-semibold border-none outline-none bg-transparent"
-                  style={{ color: "var(--md-on-surface)", borderBottom: "1.5px solid var(--md-primary)" }}
-                />
-              </div>
-            ) : (
-              <div className="flex items-center gap-1.5">
-                <span className="text-sm font-semibold truncate" style={{ color: "var(--md-on-surface)" }}>{nameVal}</span>
-                <button onClick={() => setEditingName(true)}>
-                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-outline)" }}>
-                    <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
-                  </svg>
-                </button>
-              </div>
-            )}
+            <div className="text-sm font-semibold truncate" style={{ color: "var(--md-on-surface)" }}>{nameVal}</div>
             <div className="text-xs mt-0.5 truncate" style={{ color: "var(--md-on-surface-variant)" }}>{email}</div>
           </div>
-          {saving && <div className="text-xs" style={{ color: "var(--md-primary)" }}>Saving…</div>}
-        </div>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-outline)", flexShrink: 0 }}>
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
       </div>
+
+      {/* Edit profile bottom sheet */}
+      {editSheet && (
+        <div className="fixed inset-0 z-50 flex flex-col justify-end" style={{ background: "rgba(0,0,0,0.4)" }} onClick={() => setEditSheet(false)}>
+          <div
+            className="rounded-t-3xl p-6 pb-10 flex flex-col gap-5"
+            style={{ background: "#fff" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-10 h-1 rounded-full mx-auto mb-1" style={{ background: "var(--md-outline-variant)" }} />
+            <div className="text-base font-semibold" style={{ color: "var(--md-on-surface)" }}>Edit Profile</div>
+
+            {/* Avatar picker */}
+            <div className="flex flex-col items-center gap-3">
+              <div className="relative">
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt={nameVal} className="w-20 h-20 rounded-full object-cover" />
+                ) : (
+                  <div className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-semibold" style={{ background: "var(--md-outline-variant)", color: "var(--md-on-surface)" }}>
+                    {nameVal.charAt(0).toUpperCase()}
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => fileRef.current?.click()}
+                className="text-sm font-medium px-4 py-1.5 rounded-full"
+                style={{ background: "var(--md-surface-container-low)", color: "var(--md-on-surface)" }}
+              >
+                Change Photo
+              </button>
+              <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+            </div>
+
+            {/* Name input */}
+            <div>
+              <div className="text-xs font-medium mb-2" style={{ color: "var(--md-on-surface-variant)" }}>Display Name</div>
+              <input
+                autoFocus
+                value={editNameDraft}
+                onChange={(e) => setEditNameDraft(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && saveDisplayName()}
+                className="w-full px-4 py-3 rounded-2xl text-sm outline-none border-none"
+                style={{ background: "var(--md-surface-container-low)", color: "var(--md-on-surface)" }}
+                placeholder="Your name"
+              />
+            </div>
+
+            <button
+              onClick={saveDisplayName}
+              disabled={saving}
+              className="w-full py-3.5 rounded-2xl text-sm font-semibold"
+              style={{ background: "var(--md-on-surface)", color: "#fff", opacity: saving ? 0.6 : 1 }}
+            >
+              {saving ? "Saving…" : "Save"}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Subscription card */}
       <div
