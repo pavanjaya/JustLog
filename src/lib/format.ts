@@ -1,22 +1,22 @@
 import type { Category, CategoryMeta } from "@/types";
 
 export const CATEGORY_META: Record<Category, CategoryMeta> = {
-  "Food & Drinks": { emoji: "☕", bg: "#FFF3E0" },
-  Groceries: { emoji: "🛒", bg: "#E8F5E9" },
-  Transport: { emoji: "🚗", bg: "#E3F2FD" },
-  Education: { emoji: "📚", bg: "#F3E5F5" },
-  Housing: { emoji: "🏠", bg: "#FFF8E1" },
-  Healthcare: { emoji: "💊", bg: "#FCE4EC" },
-  Shopping: { emoji: "🛍️", bg: "#F3E5F5" },
-  Entertainment: { emoji: "🎬", bg: "#E8EAF6" },
-  Bills: { emoji: "📄", bg: "#F5F5F5" },
-  Travel: { emoji: "✈️", bg: "#E0F2F1" },
-  Investment: { emoji: "📈", bg: "#E8F5E9" },
-  Salary: { emoji: "💵", bg: "#E8F5E9" },
-  Business: { emoji: "💼", bg: "#E3F2FD" },
-  Transfer: { emoji: "↔️", bg: "#F5F5F5" },
-  Refund: { emoji: "↩️", bg: "#FFF9C4" },
-  Other: { emoji: "📦", bg: "#F5F5F5" },
+  "Food & Drinks": { icon: "food",          bg: "#F5E6FF" },
+  Groceries:       { icon: "groceries",     bg: "#EDF7EE" },
+  Transport:       { icon: "transport",     bg: "#E6F0FF" },
+  Education:       { icon: "education",     bg: "#F3E6FF" },
+  Housing:         { icon: "housing",       bg: "#FFF5E6" },
+  Healthcare:      { icon: "healthcare",    bg: "#FFE6EE" },
+  Shopping:        { icon: "shopping",      bg: "#F5E6FF" },
+  Entertainment:   { icon: "entertainment", bg: "#E8E6FF" },
+  Bills:           { icon: "bills",         bg: "#F0F0F0" },
+  Travel:          { icon: "travel",        bg: "#E6F5F5" },
+  Investment:      { icon: "investment",    bg: "#E6F7E6" },
+  Salary:          { icon: "salary",        bg: "#E6F7E6" },
+  Business:        { icon: "business",      bg: "#E6F0FF" },
+  Transfer:        { icon: "transfer",      bg: "#F0F0F0" },
+  Refund:          { icon: "refund",        bg: "#FFFCE6" },
+  Other:           { icon: "other",         bg: "#F0F0F0" },
 };
 
 export function getCategoryMeta(category: string): CategoryMeta {

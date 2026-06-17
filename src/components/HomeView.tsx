@@ -109,9 +109,11 @@ export default function HomeView({ transactions, onAddTransactions, userName = "
       <div ref={feedRef} className="flex-1 overflow-y-auto no-scrollbar px-3 pt-3 pb-2 flex flex-col gap-1.5">
         {all.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center gap-3 py-16">
-            <div className="text-5xl opacity-20">📝</div>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.2} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-outline-variant)" }}>
+              <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+            </svg>
             <div className="text-base font-medium" style={{ color: "var(--md-on-surface-variant)" }}>
-              Hi {userName} 👋
+              Hi {userName}
             </div>
             <div className="text-sm text-center leading-relaxed" style={{ color: "var(--md-outline)" }}>
               Type anything below to log.

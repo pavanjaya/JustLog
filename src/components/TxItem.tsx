@@ -1,5 +1,6 @@
 import type { Transaction } from "@/types";
 import { getCategoryMeta, fmtFull } from "@/lib/format";
+import CategoryIcon from "@/components/CategoryIcon";
 
 interface TxItemProps {
   tx: Transaction;
@@ -23,12 +24,12 @@ export default function TxItem({ tx, index = 0, showDate = false }: TxItemProps)
         animationDelay: `${index * 0.04}s`,
       }}
     >
-      {/* MD3 Icon Container */}
+      {/* Icon container */}
       <div
-        className="w-10 h-10 rounded-[var(--md-shape-md)] flex items-center justify-center text-[18px] flex-shrink-0"
+        className="w-10 h-10 rounded-[var(--md-shape-md)] flex items-center justify-center flex-shrink-0"
         style={{ background: meta.bg }}
       >
-        {meta.emoji}
+        <CategoryIcon icon={meta.icon} size={18} color="#5a5a6e" />
       </div>
 
       {/* Text */}

@@ -2,17 +2,17 @@
 
 /* ─── MATERIAL DESIGN 3 TOKENS ─── */
 :root {
-  /* Primary - Blue */
-  --md-primary: #0061A4;
+  /* Primary - Brand Purple */
+  --md-primary: #C831FF;
   --md-on-primary: #FFFFFF;
-  --md-primary-container: #D1E4FF;
-  --md-on-primary-container: #001D36;
+  --md-primary-container: #F3D7FF;
+  --md-on-primary-container: #2D006B;
 
-  /* Secondary */
-  --md-secondary: #535F70;
+  /* Secondary - Muted purple */
+  --md-secondary: #7B4FA0;
   --md-on-secondary: #FFFFFF;
-  --md-secondary-container: #D7E3F7;
-  --md-on-secondary-container: #101C2B;
+  --md-secondary-container: #EDD9FF;
+  --md-on-secondary-container: #260038;
 
   /* Tertiary - Green (income) */
   --md-tertiary: #006E2C;

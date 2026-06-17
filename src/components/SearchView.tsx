@@ -8,13 +8,15 @@ interface SearchViewProps {
   transactions: Transaction[];
 }
 
-const SEARCH_CHIPS: { icon: string; label: string; query: string }[] = [
-  { icon: "📊", label: "Monthly spend", query: "How much did I spend this month?" },
-  { icon: "🍕", label: "Food expenses", query: "Show food expenses" },
-  { icon: "💰", label: "Income", query: "Income this month" },
-  { icon: "🗂️", label: "All entries", query: "Show all transactions" },
-  { icon: "🚗", label: "Transport", query: "Transport this month" },
-  { icon: "📈", label: "Biggest expense", query: "Biggest expense" },
+const ic = { width: 15, height: 15, viewBox: "0 0 24 24", fill: "none" as const, stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+
+const SEARCH_CHIPS: { icon: React.ReactNode; label: string; query: string }[] = [
+  { icon: <svg {...ic}><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>, label: "Monthly spend", query: "How much did I spend this month?" },
+  { icon: <svg {...ic}><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/></svg>, label: "Food", query: "Show food expenses" },
+  { icon: <svg {...ic}><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>, label: "Income", query: "Income this month" },
+  { icon: <svg {...ic}><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>, label: "All entries", query: "Show all transactions" },
+  { icon: <svg {...ic}><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>, label: "Transport", query: "Transport this month" },
+  { icon: <svg {...ic}><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>, label: "Top expense", query: "Biggest expense" },
 ];
 
 export default function SearchView({ transactions }: SearchViewProps) {
@@ -109,7 +111,7 @@ export default function SearchView({ transactions }: SearchViewProps) {
                 color: "var(--md-on-surface-variant)",
               }}
             >
-              <span className="text-base flex-shrink-0">{chip.icon}</span>
+              <span className="flex-shrink-0 flex items-center" style={{ color: "var(--md-primary)" }}>{chip.icon}</span>
               <span className="text-xs font-medium">{chip.label}</span>
             </button>
           ))}

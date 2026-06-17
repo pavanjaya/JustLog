@@ -30,6 +30,6 @@ export interface Transaction {
 export type View = "home" | "story" | "search" | "settings";
 
 export interface CategoryMeta {
-  emoji: string;
+  icon: string;
   bg: string;
 }

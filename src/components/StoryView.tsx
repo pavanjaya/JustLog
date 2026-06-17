@@ -2,6 +2,7 @@
 
 import type { Transaction } from "@/types";
 import { getCategoryMeta, fmtCompact, fmtFull } from "@/lib/format";
+import CategoryIcon from "@/components/CategoryIcon";
 
 interface StoryViewProps {
   transactions: Transaction[];
@@ -81,7 +82,7 @@ export default function StoryView({ transactions }: StoryViewProps) {
         style={{ background: "var(--md-surface-container-low)", border: "1px solid var(--md-outline-variant)" }}
       >
         <div className="flex items-center gap-2 mb-2">
-          <span style={{ color: "var(--md-primary)" }}>✦</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-primary)" }}><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
           <span className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--md-primary)" }}>
             Your Monthly Story
           </span>
@@ -111,7 +112,7 @@ export default function StoryView({ transactions }: StoryViewProps) {
                   className="w-10 h-10 rounded-[var(--md-shape-md)] flex items-center justify-center text-base flex-shrink-0"
                   style={{ background: meta.bg }}
                 >
-                  {meta.emoji}
+                  <CategoryIcon icon={meta.icon} size={16} color="#5a5a6e" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium mb-1.5" style={{ color: "var(--md-on-surface)" }}>{category}</div>

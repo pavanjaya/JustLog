@@ -48,25 +48,25 @@ export default function SettingsView({ user, onDeleteAll, onToast }: SettingsVie
 
       {/* Group 1 */}
       <SettingsGroup>
-        <SettingsItem icon="📤" label="Export Data" onClick={() => onToast("Export coming soon")} />
-        <SettingsItem icon="🗂️" label="Manage Spaces" onClick={() => onToast("Spaces coming in V2")} last />
+        <SettingsItem icon={<IconExport />} label="Export Data" onClick={() => onToast("Export coming soon")} />
+        <SettingsItem icon={<IconFolders />} label="Manage Spaces" onClick={() => onToast("Spaces coming in V2")} last />
       </SettingsGroup>
 
       {/* Group 2 */}
       <SettingsGroup>
-        <SettingsItem icon="🌙" label="Dark Mode" onClick={() => onToast("Dark mode coming soon")} rightSlot={<Toggle />} />
-        <SettingsItem icon="🔔" label="Notifications" onClick={() => onToast("Notifications coming in V2")} rightSlot={<Toggle />} last />
+        <SettingsItem icon={<IconMoon />} label="Dark Mode" onClick={() => onToast("Dark mode coming soon")} rightSlot={<Toggle />} />
+        <SettingsItem icon={<IconBell />} label="Notifications" onClick={() => onToast("Notifications coming in V2")} rightSlot={<Toggle />} last />
       </SettingsGroup>
 
       {/* Group 3 */}
       <SettingsGroup>
-        <SettingsItem icon="ℹ️" label="About JustLog" onClick={() => onToast("JustLog V1.0 — Just type.")} />
-        <SettingsItem icon="🗑️" label="Delete All Data" danger onClick={onDeleteAll} last />
+        <SettingsItem icon={<IconInfo />} label="About JustLog" onClick={() => onToast("JustLog V1.0 — Just type.")} />
+        <SettingsItem icon={<IconTrash />} label="Delete All Data" danger onClick={onDeleteAll} last />
       </SettingsGroup>
 
       {/* Sign out */}
       <SettingsGroup>
-        <SettingsItem icon="🚪" label="Sign Out" danger onClick={handleSignOut} last />
+        <SettingsItem icon={<IconLogOut />} label="Sign Out" danger onClick={handleSignOut} last />
       </SettingsGroup>
 
       <div className="text-center py-5 text-xs" style={{ color: "var(--md-outline)" }}>
@@ -101,8 +101,17 @@ function Toggle() {
   );
 }
 
+const iconProps = { width: 18, height: 18, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+function IconExport()   { return <svg {...iconProps}><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>; }
+function IconFolders()  { return <svg {...iconProps}><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>; }
+function IconMoon()     { return <svg {...iconProps}><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>; }
+function IconBell()     { return <svg {...iconProps}><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>; }
+function IconInfo()     { return <svg {...iconProps}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>; }
+function IconTrash()    { return <svg {...iconProps}><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>; }
+function IconLogOut()   { return <svg {...iconProps}><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>; }
+
 interface SettingsItemProps {
-  icon: string;
+  icon: React.ReactNode;
   label: string;
   onClick: () => void;
   danger?: boolean;
@@ -117,12 +126,12 @@ function SettingsItem({ icon, label, onClick, danger, last, rightSlot }: Setting
       className={`w-full flex items-center gap-4 px-4 py-4 text-left md-ripple transition-colors ${!last ? "border-b" : ""}`}
       style={{ borderColor: "var(--md-outline-variant)" }}
     >
-      <span className="text-xl w-7 text-center flex-shrink-0">{icon}</span>
+      <span className="w-5 flex-shrink-0 flex items-center justify-center" style={{ color: danger ? "var(--md-error)" : "var(--md-on-surface-variant)" }}>{icon}</span>
       <span className="flex-1 text-sm font-medium" style={{ color: danger ? "var(--md-error)" : "var(--md-on-surface)" }}>
         {label}
       </span>
       {rightSlot ?? (
-        <svg viewBox="0 0 24 24" className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} style={{ color: "var(--md-on-surface-variant)" }}>
+        <svg viewBox="0 0 24 24" className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={1.6} style={{ color: "var(--md-on-surface-variant)" }}>
           <polyline points="9 18 15 12 9 6" />
         </svg>
       )}
