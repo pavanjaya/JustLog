@@ -47,7 +47,7 @@ export default function BottomInput({ value, onChange, onSend, disabled }: Botto
   return (
     <div
       className="flex-shrink-0 px-3 pt-2 pb-3"
-      style={{ background: "var(--md-surface)", borderTop: "1px solid var(--md-outline-variant)" }}
+      style={{ background: "var(--md-surface)" }}
     >
       {/* Suggestion chips — scrollable row */}
       {!value && (

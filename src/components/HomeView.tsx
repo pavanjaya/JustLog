@@ -86,7 +86,7 @@ export default function HomeView({ transactions, onAddTransactions, userName = "
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Today summary cards */}
-      <div className="flex-shrink-0 grid grid-cols-2 gap-3 px-4 pt-3 pb-2">
+      <div className="flex-shrink-0 grid grid-cols-2 gap-3 px-4 pt-4 pb-2">
         <div className="rounded-[var(--md-shape-xl)] p-4" style={{ background: "var(--md-tertiary-container)" }}>
           <div className="text-[11px] font-medium uppercase tracking-wider mb-2" style={{ color: "var(--md-on-tertiary-container)", opacity: 0.7 }}>
             Received
