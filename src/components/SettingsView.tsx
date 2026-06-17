@@ -8,9 +8,10 @@ interface SettingsViewProps {
   user: User | null;
   onDeleteAll: () => void;
   onToast: (msg: string) => void;
+  subStatus?: "active" | "trialing" | "none" | "loading";
 }
 
-export default function SettingsView({ user, onDeleteAll, onToast }: SettingsViewProps) {
+export default function SettingsView({ user, onDeleteAll, onToast, subStatus = "active" }: SettingsViewProps) {
   const router = useRouter();
   const name = user?.user_metadata?.full_name ?? user?.email?.split("@")[0] ?? "You";
   const email = user?.email ?? "";
@@ -50,6 +51,37 @@ export default function SettingsView({ user, onDeleteAll, onToast }: SettingsVie
           <div className="text-base font-medium truncate" style={{ color: "var(--md-on-primary-container)" }}>{name}</div>
           <div className="text-sm truncate mt-0.5" style={{ color: "var(--md-on-primary-container)", opacity: 0.75 }}>{email}</div>
         </div>
+      </div>
+
+      {/* Subscription card */}
+      <div
+        className="mx-4 mb-3 p-4 rounded-2xl flex items-center justify-between gap-3"
+        style={{ background: "rgba(200,49,255,0.05)", border: "1px solid rgba(200,49,255,0.15)" }}
+      >
+        <div>
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>JustLog Pro</span>
+            <span
+              className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+              style={{
+                background: subStatus === "trialing" ? "rgba(200,49,255,0.12)" : subStatus === "active" ? "#E8F5E9" : "#FFF3E0",
+                color: subStatus === "trialing" ? "var(--md-primary)" : subStatus === "active" ? "#2E7D32" : "#E65100",
+              }}
+            >
+              {subStatus === "trialing" ? "Free Trial" : subStatus === "active" ? "Active" : "Inactive"}
+            </span>
+          </div>
+          <div className="text-xs" style={{ color: "var(--md-on-surface-variant)" }}>
+            {subStatus === "trialing" ? "Your free trial is active" : subStatus === "active" ? "₹99 / month" : "Subscribe to unlock all features"}
+          </div>
+        </div>
+        <button
+          onClick={subStatus === "none" ? () => onToast("Stripe setup pending") : handleManageBilling}
+          className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold"
+          style={{ background: "var(--md-primary)", color: "#fff" }}
+        >
+          {subStatus === "none" ? "Subscribe" : "Manage"}
+        </button>
       </div>
 
       {/* Group 1 */}

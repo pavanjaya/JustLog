@@ -215,7 +215,7 @@ export default function AppShell() {
         {(subStatus === "active" || subStatus === "trialing") && view === "story" && <StoryView transactions={transactions} />}
         {(subStatus === "active" || subStatus === "trialing") && view === "search" && <SearchView transactions={transactions} onDeleteTransaction={handleDeleteTransaction} />}
         {(subStatus === "active" || subStatus === "trialing") && view === "settings" && (
-          <SettingsView user={user} onDeleteAll={handleDeleteAll} onToast={showToast} />
+          <SettingsView user={user} onDeleteAll={handleDeleteAll} onToast={showToast} subStatus={subStatus} />
         )}
       </div>
 
