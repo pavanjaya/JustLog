@@ -104,7 +104,7 @@ function DrawerItem({ icon, label, onClick, danger, active }: { icon: React.Reac
       onClick={onClick}
       className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left md-ripple transition-colors"
       style={{
-        background: active ? "var(--md-primary-container)" : "transparent",
+        background: active ? "rgba(200,49,255,0.08)" : "transparent",
         color: danger ? "var(--md-error)" : active ? "var(--md-primary)" : "var(--md-on-surface)",
       }}
     >
