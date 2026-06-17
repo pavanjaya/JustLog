@@ -216,30 +216,7 @@ export default function StoryView({ transactions }: StoryViewProps) {
 
             {/* Daily spending chart */}
             {Object.keys(curr.dayTotals).length > 0 && (
-              <div className="mb-3 p-4 rounded-2xl" style={{ background: "var(--md-surface-container-low)" }}>
-                <div className="text-xs font-semibold mb-3" style={{ color: "var(--md-on-surface-variant)" }}>Daily Spending</div>
-                <div className="flex items-end gap-[3px] h-16">
-                  {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
-                    const amt = curr.dayTotals[day] || 0;
-                    const pct = amt > 0 ? Math.max((amt / maxDay) * 100, 8) : 0;
-                    const isToday = isCurrentMonth && day === now.getDate();
-                    return (
-                      <div key={day} className="flex-1 flex flex-col items-center justify-end h-full">
-                        <div className="w-full rounded-t-sm transition-all duration-500" style={{
-                          height: `${pct}%`,
-                          background: isToday ? "var(--md-primary)" : amt > 0 ? "rgba(200,49,255,0.15)" : "transparent",
-                          minHeight: amt > 0 ? 3 : 0,
-                        }} />
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="flex justify-between mt-1.5">
-                  <span className="text-[10px]" style={{ color: "var(--md-outline)" }}>1</span>
-                  <span className="text-[10px]" style={{ color: "var(--md-outline)" }}>{Math.ceil(daysInMonth / 2)}</span>
-                  <span className="text-[10px]" style={{ color: "var(--md-outline)" }}>{daysInMonth}</span>
-                </div>
-              </div>
+              <DailyChart dayTotals={curr.dayTotals} daysInMonth={daysInMonth} maxDay={maxDay} isCurrentMonth={isCurrentMonth} today={now.getDate()} />
             )}
 
             {/* Monthly top categories */}
@@ -270,6 +247,54 @@ export default function StoryView({ transactions }: StoryViewProps) {
             )}
           </>
         )}
+      </div>
+    </div>
+  );
+}
+
+function DailyChart({ dayTotals, daysInMonth, maxDay, isCurrentMonth, today }: {
+  dayTotals: Record<number, number>; daysInMonth: number; maxDay: number; isCurrentMonth: boolean; today: number;
+}) {
+  const [selected, setSelected] = useState<number | null>(null);
+
+  return (
+    <div className="mb-3 p-4 rounded-2xl" style={{ background: "var(--md-surface-container-low)" }}>
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-xs font-semibold" style={{ color: "var(--md-on-surface-variant)" }}>Daily Spending</span>
+        {selected !== null && dayTotals[selected] ? (
+          <span className="text-xs font-semibold" style={{ color: "var(--md-primary)" }}>
+            Day {selected} · {fmtFull(dayTotals[selected])}
+          </span>
+        ) : (
+          <span className="text-[10px]" style={{ color: "var(--md-outline)" }}>tap a bar</span>
+        )}
+      </div>
+      <div className="flex items-end gap-[3px] h-16">
+        {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
+          const amt = dayTotals[day] || 0;
+          const pct = amt > 0 ? Math.max((amt / maxDay) * 100, 8) : 0;
+          const isToday = isCurrentMonth && day === today;
+          const isSelected = selected === day;
+          return (
+            <div
+              key={day}
+              className="flex-1 flex flex-col items-center justify-end h-full cursor-pointer"
+              onClick={() => setSelected(isSelected ? null : day)}
+            >
+              <div className="w-full rounded-t-sm transition-all duration-300" style={{
+                height: `${pct}%`,
+                background: isSelected ? "var(--md-primary)" : isToday ? "var(--md-primary)" : amt > 0 ? "rgba(200,49,255,0.2)" : "transparent",
+                minHeight: amt > 0 ? 3 : 0,
+                opacity: isSelected ? 1 : isToday ? 0.9 : 1,
+              }} />
+            </div>
+          );
+        })}
+      </div>
+      <div className="flex justify-between mt-1.5">
+        <span className="text-[10px]" style={{ color: "var(--md-outline)" }}>1</span>
+        <span className="text-[10px]" style={{ color: "var(--md-outline)" }}>{Math.ceil(daysInMonth / 2)}</span>
+        <span className="text-[10px]" style={{ color: "var(--md-outline)" }}>{daysInMonth}</span>
       </div>
     </div>
   );
