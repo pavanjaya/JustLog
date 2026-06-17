@@ -237,6 +237,10 @@ export default function AppShell() {
                 await loadTransactions(remaining[0].id);
               }
             }}
+            onDeleteSpaceData={async (id) => {
+              await supabase.from("transactions").delete().eq("space_id", id);
+              if (activeSpace?.id === id) setTransactions([]);
+            }}
           />
         )}
       </div>

@@ -15,6 +15,7 @@ interface SettingsViewProps {
   onToast: (msg: string) => void;
   onRenameSpace: (id: string, name: string) => void;
   onDeleteSpace: (id: string) => void;
+  onDeleteSpaceData: (id: string) => void;
   subStatus?: "active" | "trialing" | "none" | "loading";
 }
 
@@ -22,7 +23,7 @@ type Sheet = "none" | "profile" | "spaces" | "about";
 
 export default function SettingsView({
   user, spaces, transactions, activeSpace,
-  onDeleteAll, onToast, onRenameSpace, onDeleteSpace,
+  onDeleteAll, onToast, onRenameSpace, onDeleteSpace, onDeleteSpaceData,
   subStatus = "active",
 }: SettingsViewProps) {
   const router = useRouter();
@@ -260,6 +261,21 @@ export default function SettingsView({
                       </svg>
                     </button>
                   )}
+                  <button
+                    onClick={() => {
+                      if (confirm(`Clear all transactions in "${sp.name}"? This cannot be undone.`)) {
+                        onDeleteSpaceData(sp.id);
+                        onToast(`"${sp.name}" cleared`);
+                      }
+                    }}
+                    className="p-1.5 rounded-full"
+                    style={{ color: "var(--md-outline)" }}
+                    title="Clear all data"
+                  >
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/>
+                    </svg>
+                  </button>
                   {spaces.length > 1 && sp.name !== "Personal" && (
                     <button onClick={() => confirmDeleteSpace(sp)} className="p-1.5 rounded-full" style={{ color: "var(--md-error)" }}>
                       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
