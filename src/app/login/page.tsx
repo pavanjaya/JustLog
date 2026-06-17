@@ -18,8 +18,7 @@ export default function LoginPage() {
   return (
     <div
       className="flex flex-col max-w-[430px] mx-auto items-center justify-center px-6"
-      style={{ minHeight: "100dvh" }}
-      style={{ background: "var(--md-surface)" }}
+      style={{ minHeight: "100dvh", background: "var(--md-surface)" }}
     >
       <div className="w-full flex flex-col items-center gap-8">
         {/* Logo — MD3 Large icon container */}
