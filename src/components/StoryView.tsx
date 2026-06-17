@@ -110,7 +110,7 @@ export default function StoryView({ transactions }: StoryViewProps) {
                 const meta = getCategoryMeta(category);
                 const pct = Math.round((amount / maxAllCat) * 100);
                 return (
-                  <div key={category} className="flex items-center gap-3 px-3 py-2.5 rounded-2xl" style={{ background: "var(--md-surface-container-low)" }}>
+                  <div key={category} className="flex items-center gap-3 px-3 py-2.5">
                     <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: meta.bg }}>
                       <CategoryIcon icon={meta.icon} size={14} color="#5a5a6e" />
                     </div>
@@ -228,7 +228,7 @@ export default function StoryView({ transactions }: StoryViewProps) {
                     const meta = getCategoryMeta(category);
                     const pct = Math.round((amount / maxCat) * 100);
                     return (
-                      <div key={category} className="flex items-center gap-3 px-3 py-2.5 rounded-2xl" style={{ background: "var(--md-surface-container-low)" }}>
+                      <div key={category} className="flex items-center gap-3 px-3 py-2.5">
                         <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: meta.bg }}>
                           <CategoryIcon icon={meta.icon} size={14} color="#5a5a6e" />
                         </div>
