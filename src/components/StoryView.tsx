@@ -113,29 +113,22 @@ export default function StoryView({ transactions }: StoryViewProps) {
         </div>
       </div>
 
-      {/* Totals with vs last month */}
+      {/* Stat cards */}
       <div className="grid grid-cols-3 gap-2 px-4 pb-4">
-        <StatCard label="Income" value={fmtCompact(curr.income)} delta={incomeDelta} bg="var(--md-tertiary-container)" color="var(--md-on-tertiary-container)" positiveIsGood />
-        <StatCard label="Spent" value={fmtCompact(curr.expense)} delta={expenseDelta} bg="var(--md-error-container)" color="var(--md-on-error-container)" positiveIsGood={false} />
-        <StatCard label="Saved" value={fmtCompact(curr.income - curr.expense)} delta={savedDelta} bg="var(--md-primary-container)" color="var(--md-on-primary-container)" positiveIsGood />
+        <StatCard label="Income" value={fmtCompact(curr.income)} delta={incomeDelta} bg="#F0FBF4" color="#1B5E20" accentColor="#2E7D32" positiveIsGood />
+        <StatCard label="Spent" value={fmtCompact(curr.expense)} delta={expenseDelta} bg="#FFF5F5" color="#B71C1C" accentColor="#C62828" positiveIsGood={false} />
+        <StatCard label="Saved" value={fmtCompact(curr.income - curr.expense)} delta={savedDelta} bg="rgba(200,49,255,0.05)" color="#7B1FA2" accentColor="var(--md-primary)" positiveIsGood />
       </div>
 
       {/* Savings rate */}
       {savingsRate !== null && (
-        <div className="mx-4 mb-4 px-4 py-3 rounded-[var(--md-shape-xl)] flex items-center justify-between"
-          style={{ background: savingsRate >= 20 ? "var(--md-tertiary-container)" : savingsRate >= 0 ? "var(--md-surface-container)" : "var(--md-error-container)" }}>
+        <div className="mx-4 mb-4 px-4 py-3 rounded-2xl flex items-center justify-between"
+          style={{ background: "var(--md-surface-container-low)" }}>
           <div>
-            <div className="text-[10px] font-semibold uppercase tracking-wider mb-0.5"
-              style={{ color: savingsRate >= 20 ? "var(--md-on-tertiary-container)" : savingsRate >= 0 ? "var(--md-on-surface-variant)" : "var(--md-on-error-container)", opacity: 0.7 }}>
-              Savings Rate
-            </div>
-            <div className="text-xl font-bold"
-              style={{ color: savingsRate >= 20 ? "var(--md-on-tertiary-container)" : savingsRate >= 0 ? "var(--md-on-surface)" : "var(--md-on-error-container)" }}>
-              {savingsRate}%
-            </div>
+            <div className="text-[10px] font-semibold uppercase tracking-wider mb-0.5" style={{ color: "var(--md-on-surface-variant)" }}>Savings Rate</div>
+            <div className="text-xl font-bold" style={{ color: savingsRate >= 0 ? "#1B5E20" : "#B71C1C" }}>{savingsRate}%</div>
           </div>
-          <div className="text-xs text-right max-w-[120px]"
-            style={{ color: savingsRate >= 20 ? "var(--md-on-tertiary-container)" : "var(--md-on-surface-variant)", opacity: 0.8 }}>
+          <div className="text-xs text-right max-w-[120px]" style={{ color: "var(--md-on-surface-variant)" }}>
             {savingsRate >= 30 ? "Excellent saving!" : savingsRate >= 20 ? "Good job!" : savingsRate >= 10 ? "Room to improve" : savingsRate >= 0 ? "Save more if you can" : "Overspent this month"}
           </div>
         </div>
@@ -143,26 +136,24 @@ export default function StoryView({ transactions }: StoryViewProps) {
 
       {/* Biggest transaction */}
       {curr.biggest && (
-        <div className="mx-4 mb-4 px-4 py-3 rounded-[var(--md-shape-xl)] flex items-center gap-3"
-          style={{ background: "var(--md-surface-container-low)", border: "1px solid var(--md-outline-variant)" }}>
-          <div className="w-9 h-9 rounded-[var(--md-shape-md)] flex items-center justify-center flex-shrink-0"
-            style={{ background: getCategoryMeta(curr.biggest.category).bg }}>
+        <div className="mx-4 mb-4 px-4 py-3 rounded-2xl flex items-center gap-3" style={{ background: "var(--md-surface-container-low)" }}>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: getCategoryMeta(curr.biggest.category).bg }}>
             <CategoryIcon icon={getCategoryMeta(curr.biggest.category).icon} size={16} color="#5a5a6e" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-[10px] font-semibold uppercase tracking-wider mb-0.5" style={{ color: "var(--md-on-surface-variant)" }}>Biggest Transaction</div>
+            <div className="text-[10px] font-semibold uppercase tracking-wider mb-0.5" style={{ color: "var(--md-outline)" }}>Biggest</div>
             <div className="text-sm font-medium truncate" style={{ color: "var(--md-on-surface)" }}>{curr.biggest.description}</div>
           </div>
-          <div className="text-sm font-bold flex-shrink-0" style={{ color: curr.biggest.type === "income" ? "#2E7D32" : "#C62828" }}>
+          <div className="text-sm font-bold flex-shrink-0" style={{ color: curr.biggest.type === "income" ? "#1B7A3E" : "#C62828" }}>
             {curr.biggest.type === "income" ? "+" : "−"}{fmtFull(curr.biggest.amount)}
           </div>
         </div>
       )}
 
-      {/* Day-wise spend chart */}
+      {/* Daily spending chart */}
       {Object.keys(curr.dayTotals).length > 0 && (
-        <div className="mx-4 mb-4 p-4 rounded-[var(--md-shape-xl)]" style={{ background: "var(--md-surface-container-low)" }}>
-          <div className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--md-on-surface-variant)" }}>Daily Spending</div>
+        <div className="mx-4 mb-4 p-4 rounded-2xl" style={{ background: "var(--md-surface-container-low)" }}>
+          <div className="text-xs font-semibold mb-3" style={{ color: "var(--md-on-surface-variant)" }}>Daily Spending</div>
           <div className="flex items-end gap-[3px] h-16">
             {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
               const amt = curr.dayTotals[day] || 0;
@@ -174,7 +165,7 @@ export default function StoryView({ transactions }: StoryViewProps) {
                     className="w-full rounded-t-sm transition-all duration-500"
                     style={{
                       height: `${pct}%`,
-                      background: isToday ? "var(--md-primary)" : amt > 0 ? "var(--md-primary-container)" : "transparent",
+                      background: isToday ? "var(--md-primary)" : amt > 0 ? "rgba(200,49,255,0.15)" : "transparent",
                       minHeight: amt > 0 ? 3 : 0,
                     }}
                   />
@@ -190,9 +181,8 @@ export default function StoryView({ transactions }: StoryViewProps) {
         </div>
       )}
 
-      {/* Narrative */}
-      <div className="mx-4 mb-4 p-4 rounded-[var(--md-shape-xl)]"
-        style={{ background: "var(--md-surface-container-low)", border: "1px solid var(--md-outline-variant)" }}>
+      {/* Your story narrative */}
+      <div className="mx-4 mb-4 p-4 rounded-2xl" style={{ background: "rgba(200,49,255,0.05)" }}>
         <div className="flex items-center gap-2 mb-2">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-primary)" }}><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
           <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--md-primary)" }}>Your Story</span>
@@ -204,20 +194,20 @@ export default function StoryView({ transactions }: StoryViewProps) {
       {topCats.length > 0 && (
         <>
           <div className="px-4 pb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--md-on-surface-variant)" }}>Top Categories</span>
+            <span className="text-xs font-semibold" style={{ color: "var(--md-on-surface-variant)" }}>Top Categories</span>
           </div>
-          <div className="px-4 flex flex-col gap-2">
+          <div className="px-4 flex flex-col gap-1.5">
             {topCats.map(([category, amount]) => {
               const meta = getCategoryMeta(category);
               const pct = Math.round((amount / maxCat) * 100);
               return (
-                <div key={category} className="flex items-center gap-3 p-3 rounded-[var(--md-shape-xl)]" style={{ background: "var(--md-surface-container-low)" }}>
-                  <div className="w-10 h-10 rounded-[var(--md-shape-md)] flex items-center justify-center flex-shrink-0" style={{ background: meta.bg }}>
+                <div key={category} className="flex items-center gap-3 px-3 py-3 rounded-2xl" style={{ background: "var(--md-surface-container-low)" }}>
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: meta.bg }}>
                     <CategoryIcon icon={meta.icon} size={16} color="#5a5a6e" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium mb-1.5" style={{ color: "var(--md-on-surface)" }}>{category}</div>
-                    <div className="h-1 rounded-full overflow-hidden" style={{ background: "var(--md-surface-container-highest)" }}>
+                    <div className="h-1 rounded-full overflow-hidden" style={{ background: "var(--md-outline-variant)" }}>
                       <div className="h-full rounded-full transition-[width] duration-700" style={{ width: `${pct}%`, background: "var(--md-primary)" }} />
                     </div>
                   </div>
@@ -232,18 +222,18 @@ export default function StoryView({ transactions }: StoryViewProps) {
   );
 }
 
-function StatCard({ label, value, delta, bg, color, positiveIsGood }: {
-  label: string; value: string; delta: number | null; bg: string; color: string; positiveIsGood: boolean;
+function StatCard({ label, value, delta, bg, color, accentColor, positiveIsGood }: {
+  label: string; value: string; delta: number | null; bg: string; color: string; accentColor: string; positiveIsGood: boolean;
 }) {
   const isGood = delta !== null && (positiveIsGood ? delta > 0 : delta < 0);
   const isBad = delta !== null && (positiveIsGood ? delta < 0 : delta > 0);
 
   return (
-    <div className="rounded-[var(--md-shape-xl)] p-3 text-center" style={{ background: bg }}>
-      <div className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color, opacity: 0.7 }}>{label}</div>
+    <div className="rounded-2xl px-3 py-3" style={{ background: bg }}>
+      <div className="text-[10px] font-semibold uppercase tracking-wider mb-1.5" style={{ color: accentColor }}>{label}</div>
       <div className="text-sm font-bold mb-1" style={{ color }}>{value}</div>
       {delta !== null && (
-        <div className="text-[10px] font-medium" style={{ color: isGood ? "#2E7D32" : isBad ? "#C62828" : color, opacity: 0.9 }}>
+        <div className="text-[10px] font-medium" style={{ color: isGood ? "#2E7D32" : isBad ? "#C62828" : "var(--md-outline)" }}>
           {delta > 0 ? "↑" : "↓"}{Math.abs(delta)}% vs last
         </div>
       )}
