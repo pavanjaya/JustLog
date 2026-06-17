@@ -29,12 +29,13 @@ export default function TopBar({ onNavigate, onAvatarClick, onSpaceClick, active
         {/* Space switcher */}
         <button
           onClick={onSpaceClick}
-          className="flex items-center gap-1 md-ripple rounded-lg px-1 py-0.5 min-w-0"
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full min-w-0"
+          style={{ background: "var(--md-surface-container-low)", border: "1px solid var(--md-outline-variant)" }}
         >
-          <span className="text-sm font-medium truncate" style={{ color: "var(--md-on-surface-variant)" }}>
+          <span className="text-xs font-semibold truncate" style={{ color: "var(--md-on-surface)" }}>
             {activeSpace?.name ?? "Personal"}
           </span>
-          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-outline)", flexShrink: 0 }}>
+          <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-on-surface-variant)", flexShrink: 0 }}>
             <polyline points="6 9 12 15 18 9"/>
           </svg>
         </button>
