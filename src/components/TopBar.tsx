@@ -27,12 +27,12 @@ export default function TopBar({ onNavigate, onAvatarClick, onSpaceClick, active
         <button
           onClick={onSpaceClick}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full md-ripple transition-all"
-          style={{ background: "rgba(200,49,255,0.07)" }}
+          style={{ background: "transparent", border: "1.5px solid var(--md-outline-variant)" }}
         >
-          <span className="text-xs font-semibold max-w-[120px] truncate" style={{ color: "var(--md-on-primary-container)" }}>
+          <span className="text-xs font-semibold max-w-[120px] truncate" style={{ color: "var(--md-on-surface)" }}>
             {activeSpace?.name ?? "Personal"}
           </span>
-          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-primary)", flexShrink: 0 }}>
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-on-surface-variant)", flexShrink: 0 }}>
             <polyline points="6 9 12 15 18 9"/>
           </svg>
         </button>
