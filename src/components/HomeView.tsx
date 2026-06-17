@@ -35,8 +35,9 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
   const all = transactions.slice();
 
   function scrollToBottom() {
+    // flex-col-reverse inverts scroll: top=0 is visually the bottom
     setTimeout(() => {
-      feedRef.current?.scrollTo({ top: feedRef.current.scrollHeight, behavior: "smooth" });
+      feedRef.current?.scrollTo({ top: 0, behavior: "smooth" });
     }, 60);
   }
 

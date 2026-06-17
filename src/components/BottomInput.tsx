@@ -25,7 +25,7 @@ export default function BottomInput({ value, onChange, onSend, disabled }: Botto
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === "Enter" && e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
@@ -82,7 +82,7 @@ export default function BottomInput({ value, onChange, onSend, disabled }: Botto
             value={value}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
-            placeholder="Type anything… 500 coffee, 25k salary"
+            placeholder={"500 coffee\n300 tea\n25000 salary"}
             autoComplete="off"
             autoCorrect="off"
             disabled={disabled}
