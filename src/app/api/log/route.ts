@@ -38,7 +38,7 @@ Rules:
 - AMOUNT: "5k" = 5000, "2k" = 2000, "40k" = 40000, "1.5k" = 1500, "2L" = 200000, "1L" = 100000. The suffix "k" or "K" after a number is a multiplier (×1000), NEVER part of a person's name. "lend to ashok 40k" → amount=40000, name=Ashok (the K belongs to the number, not the name).
 - TYPE: salary/received/income/got/from [person] = "income"; everything else = "expense". Exception: "lent to X" or "gave loan to X" = "expense".
 - SALARY vs TRANSFER: "salary", "stipend", "paycheck", "income" keywords = "Salary" category. But "from [person name]" (e.g. "4k from Jaya", "got 500 from Rahul") = "Transfer" category — it's a person sending money, not an employer paying salary.
-- DESCRIPTION: Fix spelling mistakes ("cofee" → "Coffee"). Use clean title case. Do NOT include the amount. Preserve meaningful words like "Loan", "Rent", "Fee" — do not replace them with generic words.
+- DESCRIPTION: ALWAYS fix spelling mistakes before writing the description. Examples: "cofee"→"Coffee", "icecreame"→"Ice Cream", "restraunt"→"Restaurant", "medecine"→"Medicine", "petrol"→"Petrol". Use clean title case. Do NOT include the amount. Preserve meaningful words like "Loan", "Rent", "Fee".
 - CATEGORY PRIORITY (higher rules override lower ones):
   1. loan/borrowed/lent/gave loan = "Transfer" (HIGHEST PRIORITY — overrides all other rules)
   2. chai/tea/coffee/food/lunch/dinner/breakfast/snack/restaurant/swiggy/zomato = "Food & Drinks"
