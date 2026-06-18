@@ -139,7 +139,7 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
               placeholder="Space name (e.g. Business)"
               maxLength={30}
               autoFocus
-              className="w-full px-4 py-3 rounded-2xl text-sm outline-none mb-1"
+              className="w-full px-4 py-3 rounded-2xl text-sm outline-none mb-4"
               style={{
                 background: "var(--md-surface-container-low)",
                 border: `1.5px solid ${nameError ? "var(--md-error)" : "var(--md-outline-variant)"}`,
@@ -218,8 +218,11 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
             <button
               onClick={handleCreate}
               disabled={!newName.trim() || saving}
-              className="w-full py-3.5 rounded-2xl text-sm font-semibold disabled:opacity-40"
-              style={{ background: "var(--md-primary)", color: "#fff" }}
+              className="w-full py-3.5 rounded-2xl text-sm font-semibold mt-1"
+              style={{
+                background: !newName.trim() || saving ? "var(--md-surface-container-high)" : "var(--md-primary)",
+                color: !newName.trim() || saving ? "var(--md-outline)" : "#fff",
+              }}
             >
               {saving ? "Creating…" : "Create Space"}
             </button>
