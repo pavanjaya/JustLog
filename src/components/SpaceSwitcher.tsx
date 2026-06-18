@@ -229,7 +229,7 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
               <span className="text-base font-semibold" style={{ color: "var(--md-on-surface)" }}>Your Spaces</span>
             </div>
 
-            <div className="px-4 pb-3 flex flex-col gap-1">
+            <div className="px-4 pb-3 flex flex-col gap-1 overflow-y-auto no-scrollbar" style={{ maxHeight: "55vh" }}>
               {spaces.map((space) => {
                 const isActive = space.id === activeSpaceId;
                 return (
