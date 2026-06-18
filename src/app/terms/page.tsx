@@ -7,185 +7,140 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-2xl mx-auto px-6 py-12">
-        {/* Header */}
-        <Link href="/" className="inline-flex items-center gap-2 text-sm font-medium mb-10" style={{ color: "#C831FF" }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5M12 5l-7 7 7 7"/>
-          </svg>
-          Back to JustLog
-        </Link>
+    <div style={{ minHeight: "100vh", background: "#fafafa", fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif" }}>
 
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Terms of Service</h1>
-          <p className="text-sm text-gray-500">Last updated: June 18, 2025 · Effective: June 18, 2025</p>
-        </div>
-
-        <div className="prose prose-gray max-w-none space-y-8 text-gray-700 leading-relaxed">
-
-          <section>
-            <p>
-              These Terms of Service ("Terms") govern your use of JustLog, a personal finance journaling application
-              ("the App") operated by Pavan Jaya ("we", "us", "our"), India. By creating an account or using the App,
-              you agree to be bound by these Terms.
-            </p>
-            <p className="mt-3">
-              If you do not agree with any part of these Terms, you must not use the App.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">1. What JustLog Is</h2>
-            <p>
-              JustLog is a personal finance journal. It lets you log income and expenses by typing natural language,
-              which is parsed using AI. JustLog is <strong>not</strong> a bank, payment processor, financial advisor,
-              or investment platform. It does not connect to any financial institution on your behalf.
-            </p>
-            <p className="mt-3">
-              Nothing in the App constitutes financial, tax, investment, or legal advice.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">2. Eligibility</h2>
-            <ul className="list-disc pl-5 space-y-2">
-              <li>You must be at least 13 years old to use JustLog</li>
-              <li>If you are under 18, you represent that your parent or legal guardian has consented to these Terms</li>
-              <li>You must provide accurate account information</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">3. Your Account</h2>
-            <ul className="list-disc pl-5 space-y-2">
-              <li>You are responsible for keeping your account credentials secure</li>
-              <li>You are responsible for all activity that occurs under your account</li>
-              <li>Notify us immediately at <a href="mailto:jangidpavan@gmail.com" style={{ color: "#C831FF" }}>jangidpavan@gmail.com</a> if you suspect unauthorised access</li>
-              <li>We reserve the right to suspend or terminate accounts that violate these Terms</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">4. Acceptable Use</h2>
-            <p>You agree not to:</p>
-            <ul className="list-disc pl-5 space-y-2 mt-3">
-              <li>Use the App for any unlawful purpose or in violation of any Indian law</li>
-              <li>Attempt to reverse engineer, decompile, or extract source code</li>
-              <li>Use automated tools to scrape or extract data from the App</li>
-              <li>Attempt to gain unauthorised access to other users' data</li>
-              <li>Use the App to store data belonging to other people without their consent</li>
-              <li>Upload content that is defamatory, obscene, or violates any third-party rights</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">5. Subscription and Payments</h2>
-            <p>
-              JustLog may offer paid subscription plans. If you subscribe:
-            </p>
-            <ul className="list-disc pl-5 space-y-2 mt-3">
-              <li>Payments are processed by Stripe. We do not store your payment card details</li>
-              <li>Subscriptions auto-renew unless cancelled before the renewal date</li>
-              <li>You can cancel at any time from Settings. Access continues until the end of the billing period</li>
-              <li>Refunds are handled on a case-by-case basis — contact us within 7 days of a charge</li>
-              <li>Prices are in INR and inclusive of applicable GST</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">6. Your Data</h2>
-            <p>
-              You own all the data you enter into JustLog. We do not claim any ownership over your financial journal entries.
-              By using the App, you grant us a limited licence to store, process, and display your data solely for the
-              purpose of providing the service to you.
-            </p>
-            <p className="mt-3">
-              You can export or delete your data at any time from Settings.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">7. AI Processing</h2>
-            <p>
-              Text you type in JustLog is sent to Anthropic's Claude API to parse transaction details. By using the App,
-              you consent to this processing. Anthropic's use of this data is governed by their{" "}
-              <a href="https://www.anthropic.com/privacy" style={{ color: "#C831FF" }} target="_blank" rel="noopener">Privacy Policy</a>.
-            </p>
-            <p className="mt-3">
-              AI-parsed transaction details (amount, category, description) may not always be accurate.
-              You are responsible for reviewing and correcting entries.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">8. Disclaimer of Warranties</h2>
-            <p>
-              The App is provided "as is" and "as available" without warranties of any kind, express or implied.
-              We do not warrant that:
-            </p>
-            <ul className="list-disc pl-5 space-y-2 mt-3">
-              <li>The App will be uninterrupted, error-free, or secure</li>
-              <li>AI-parsed data will be accurate or complete</li>
-              <li>The App will meet your specific requirements</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">9. Limitation of Liability</h2>
-            <p>
-              To the maximum extent permitted by law, JustLog and its operators shall not be liable for any indirect,
-              incidental, special, consequential, or punitive damages, including loss of data, financial loss, or loss
-              of profits arising from your use of the App.
-            </p>
-            <p className="mt-3">
-              Our total liability to you for any claim shall not exceed the amount you paid us in the 3 months
-              preceding the claim, or ₹500, whichever is higher.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">10. Termination</h2>
-            <p>
-              You may stop using the App and delete your account at any time from Settings.
-              We may suspend or terminate your account if you violate these Terms, with or without notice.
-              Upon termination, your right to use the App ceases and your data will be deleted within 30 days.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">11. Governing Law & Dispute Resolution</h2>
-            <p>
-              These Terms are governed by the laws of India. Any disputes arising out of or relating to these Terms
-              shall be subject to the exclusive jurisdiction of the courts of India. We encourage you to contact us
-              first to resolve any disputes amicably.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">12. Changes to Terms</h2>
-            <p>
-              We may revise these Terms at any time. We will notify you of material changes via email or an in-app
-              notice at least 7 days before the new Terms take effect. Continued use of the App after changes
-              constitutes acceptance of the new Terms.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">13. Contact</h2>
-            <p>
-              For questions about these Terms, contact us at{" "}
-              <a href="mailto:jangidpavan@gmail.com" style={{ color: "#C831FF" }}>jangidpavan@gmail.com</a>.
-            </p>
-          </section>
-
-        </div>
-
-        <div className="mt-12 pt-6 border-t border-gray-100 flex gap-4 text-sm" style={{ color: "#C831FF" }}>
-          <Link href="/privacy">Privacy Policy</Link>
-          <Link href="/">Back to App</Link>
+      {/* Top nav */}
+      <div style={{ background: "#fff", borderBottom: "1px solid #f0f0f0", position: "sticky", top: 0, zIndex: 10 }}>
+        <div style={{ maxWidth: 680, margin: "0 auto", padding: "0 24px", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
+            <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+              <rect width="32" height="32" rx="8" fill="#C831FF" fillOpacity="0.1"/>
+              <path d="M17 6L7 18h9l-1 8 10-12h-9l1-8z" stroke="#C831FF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span style={{ fontSize: 16, fontWeight: 700, color: "#C831FF", letterSpacing: "-0.3px" }}>JustLog</span>
+          </Link>
+          <Link href="/privacy" style={{ fontSize: 13, fontWeight: 500, color: "#888", textDecoration: "none" }}>Privacy Policy →</Link>
         </div>
       </div>
+
+      {/* Hero */}
+      <div style={{ background: "linear-gradient(135deg, rgba(200,49,255,0.06) 0%, rgba(200,49,255,0.02) 100%)", borderBottom: "1px solid rgba(200,49,255,0.1)", padding: "48px 24px 40px" }}>
+        <div style={{ maxWidth: 680, margin: "0 auto" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(200,49,255,0.08)", borderRadius: 20, padding: "4px 12px", marginBottom: 16 }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#C831FF" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
+            </svg>
+            <span style={{ fontSize: 11, fontWeight: 600, color: "#C831FF", letterSpacing: "0.04em" }}>TERMS OF SERVICE</span>
+          </div>
+          <h1 style={{ fontSize: 36, fontWeight: 800, color: "#111", letterSpacing: "-0.8px", margin: "0 0 8px" }}>Simple, fair terms.</h1>
+          <p style={{ fontSize: 16, color: "#666", margin: "0 0 16px", lineHeight: 1.6 }}>You own your data. We just help you log it.</p>
+          <p style={{ fontSize: 13, color: "#aaa" }}>Last updated: June 18, 2025 · Effective: June 18, 2025</p>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div style={{ maxWidth: 680, margin: "0 auto", padding: "40px 24px 80px" }}>
+
+        <Section>
+          <p style={body}>These Terms of Service ("Terms") govern your use of JustLog, operated by Pavan Jaya ("we", "us", "our"), India. By creating an account or using the App, you agree to be bound by these Terms.</p>
+        </Section>
+
+        <Section title="1. What JustLog Is">
+          <p style={body}>JustLog is a personal finance journal. It lets you log income and expenses by typing natural language, parsed using AI. JustLog is <b>not</b> a bank, payment processor, financial advisor, or investment platform. Nothing in the App constitutes financial, tax, investment, or legal advice.</p>
+        </Section>
+
+        <Section title="2. Eligibility">
+          <List items={[
+            "You must be at least 13 years old to use JustLog",
+            "If you are under 18, your parent or legal guardian must have consented to these Terms",
+            "You must provide accurate account information",
+          ]} />
+        </Section>
+
+        <Section title="3. Your Account">
+          <List items={[
+            "You are responsible for keeping your credentials secure",
+            "You are responsible for all activity under your account",
+            "Notify us immediately at jangidpavan@gmail.com if you suspect unauthorised access",
+            "We may suspend accounts that violate these Terms",
+          ]} />
+        </Section>
+
+        <Section title="4. Acceptable Use">
+          <p style={{ ...body, marginBottom: 10 }}>You agree not to:</p>
+          <List items={[
+            "Use the App for any unlawful purpose or in violation of Indian law",
+            "Attempt to reverse engineer or extract source code",
+            "Use automated tools to scrape data from the App",
+            "Attempt to access other users' data",
+            "Upload defamatory, obscene, or rights-violating content",
+          ]} />
+        </Section>
+
+        <Section title="5. Subscription and Payments">
+          <List items={[
+            "Payments processed by Stripe — we never store your card details",
+            "Subscriptions auto-renew unless cancelled before renewal date",
+            "Cancel anytime from Settings — access continues until end of billing period",
+            "Refund requests handled within 7 days of a charge — contact us",
+            "Prices in INR, inclusive of applicable GST",
+          ]} />
+        </Section>
+
+        <Section title="6. Your Data">
+          <p style={body}>You own all the data you enter into JustLog. We claim no ownership over your financial journal entries. By using the App, you grant us a limited licence to store, process, and display your data solely to provide the service to you.</p>
+          <p style={{ ...body, marginTop: 12 }}>You can export or delete your data at any time from Settings.</p>
+        </Section>
+
+        <Section title="7. AI Processing">
+          <p style={body}>Text you type is sent to Anthropic's Claude API to parse transaction details. By using the App, you consent to this processing. AI-parsed details may not always be accurate — you are responsible for reviewing and correcting entries.</p>
+        </Section>
+
+        <Section title="8. Disclaimer of Warranties">
+          <p style={body}>The App is provided "as is" without warranties of any kind. We do not warrant that the App will be uninterrupted, error-free, or that AI-parsed data will be accurate.</p>
+        </Section>
+
+        <Section title="9. Limitation of Liability">
+          <p style={body}>To the maximum extent permitted by law, JustLog shall not be liable for indirect, incidental, or consequential damages. Our total liability shall not exceed the amount you paid us in the 3 months preceding the claim, or ₹500, whichever is higher.</p>
+        </Section>
+
+        <Section title="10. Governing Law">
+          <p style={body}>These Terms are governed by the laws of India. Disputes shall be subject to the exclusive jurisdiction of courts in India.</p>
+        </Section>
+
+        <Section title="11. Contact">
+          <p style={body}>For questions about these Terms, email <a href="mailto:jangidpavan@gmail.com" style={{ color: "#C831FF", textDecoration: "none", fontWeight: 500 }}>jangidpavan@gmail.com</a>.</p>
+        </Section>
+
+        {/* Footer */}
+        <div style={{ marginTop: 48, paddingTop: 24, borderTop: "1px solid #f0f0f0", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+          <span style={{ fontSize: 13, color: "#bbb" }}>© 2025 JustLog</span>
+          <div style={{ display: "flex", gap: 20 }}>
+            <Link href="/privacy" style={{ fontSize: 13, color: "#888", textDecoration: "none" }}>Privacy Policy</Link>
+            <Link href="/" style={{ fontSize: 13, color: "#C831FF", textDecoration: "none", fontWeight: 500 }}>Open App →</Link>
+          </div>
+        </div>
+
+      </div>
     </div>
+  );
+}
+
+const body: React.CSSProperties = { fontSize: 15, color: "#444", lineHeight: 1.7, margin: 0 };
+
+function Section({ title, children }: { title?: string; children: React.ReactNode }) {
+  return (
+    <div style={{ marginBottom: 36 }}>
+      {title && <h2 style={{ fontSize: 18, fontWeight: 700, color: "#111", letterSpacing: "-0.3px", margin: "0 0 14px" }}>{title}</h2>}
+      {children}
+    </div>
+  );
+}
+
+function List({ items }: { items: string[] }) {
+  return (
+    <ul style={{ margin: 0, paddingLeft: 20, display: "flex", flexDirection: "column", gap: 6 }}>
+      {items.map((item) => <li key={item} style={{ fontSize: 14, color: "#555", lineHeight: 1.6 }}>{item}</li>)}
+    </ul>
   );
 }

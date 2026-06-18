@@ -7,175 +7,168 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-2xl mx-auto px-6 py-12">
-        {/* Header */}
-        <Link href="/" className="inline-flex items-center gap-2 text-sm font-medium mb-10" style={{ color: "#C831FF" }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5M12 5l-7 7 7 7"/>
-          </svg>
-          Back to JustLog
-        </Link>
+    <div style={{ minHeight: "100vh", background: "#fafafa", fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif" }}>
 
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Privacy Policy</h1>
-          <p className="text-sm text-gray-500">Last updated: June 18, 2025 · Effective: June 18, 2025</p>
-        </div>
-
-        <div className="prose prose-gray max-w-none space-y-8 text-gray-700 leading-relaxed">
-
-          <section>
-            <p>
-              JustLog ("we", "us", or "our") is a personal finance journaling application operated by Pavan Jaya, India.
-              This Privacy Policy explains how we collect, use, store, and protect your information when you use JustLog
-              ("the App"). By using the App, you agree to the terms of this Policy.
-            </p>
-            <p className="mt-3">
-              This Policy is published in compliance with the <strong>Information Technology Act, 2000</strong> and the{" "}
-              <strong>Information Technology (Reasonable Security Practices and Procedures and Sensitive Personal Data or Information) Rules, 2011</strong> (SPDI Rules).
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">1. Information We Collect</h2>
-            <h3 className="font-semibold text-gray-800 mb-2">1.1 Account Information</h3>
-            <ul className="list-disc pl-5 space-y-1">
-              <li>Email address (used for sign-in)</li>
-              <li>Name and profile photo (if you sign in via Google)</li>
-            </ul>
-            <h3 className="font-semibold text-gray-800 mt-4 mb-2">1.2 Financial Journal Data (Sensitive Personal Data)</h3>
-            <p>
-              Under the SPDI Rules, financial information constitutes sensitive personal data. We collect:
-            </p>
-            <ul className="list-disc pl-5 space-y-1 mt-2">
-              <li>Transaction descriptions and amounts you manually type</li>
-              <li>Transaction categories (e.g. Food, Salary, Transport)</li>
-              <li>Dates and times of logged entries</li>
-              <li>Space/workspace names you create</li>
-            </ul>
-            <p className="mt-3 text-sm bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-              <strong>Important:</strong> JustLog is a personal journal. We do not connect to your bank accounts, payment cards, or any financial institution. All data is entered manually by you.
-            </p>
-            <h3 className="font-semibold text-gray-800 mt-4 mb-2">1.3 Technical Data</h3>
-            <ul className="list-disc pl-5 space-y-1">
-              <li>Device type and browser (for app compatibility)</li>
-              <li>Usage analytics (page views, feature usage — anonymised)</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">2. How We Use Your Information</h2>
-            <ul className="list-disc pl-5 space-y-2">
-              <li>To provide and operate the JustLog service</li>
-              <li>To process your text entries using AI (Claude by Anthropic) to parse transactions — your text is sent to Anthropic's API and is subject to their privacy policy</li>
-              <li>To sync your data across devices via your account</li>
-              <li>To send transactional emails (account confirmation, password reset)</li>
-              <li>To improve the App based on anonymised usage patterns</li>
-            </ul>
-            <p className="mt-3">We do <strong>not</strong> sell, rent, or share your personal data with third parties for marketing purposes.</p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">3. Data Storage and Security</h2>
-            <p>Your data is stored on <strong>Supabase</strong> (hosted on AWS infrastructure). We implement the following security measures:</p>
-            <ul className="list-disc pl-5 space-y-2 mt-3">
-              <li><strong>Encryption in transit:</strong> All data is transmitted over HTTPS/TLS</li>
-              <li><strong>Encryption at rest:</strong> Database storage is encrypted by Supabase/AWS</li>
-              <li><strong>Row-level security:</strong> Your data is isolated — no other user can access your entries</li>
-              <li><strong>Authentication:</strong> Secure token-based auth via Supabase Auth</li>
-            </ul>
-            <p className="mt-3">
-              In accordance with SPDI Rule 8, we have implemented reasonable security practices and procedures commensurate with the sensitivity of the information held.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">4. Third-Party Services</h2>
-            <div className="space-y-3">
-              <div className="border border-gray-100 rounded-lg p-4">
-                <div className="font-semibold text-gray-800">Supabase</div>
-                <div className="text-sm mt-1">Database, authentication, and storage. Your account and transaction data is stored here.</div>
-              </div>
-              <div className="border border-gray-100 rounded-lg p-4">
-                <div className="font-semibold text-gray-800">Anthropic (Claude API)</div>
-                <div className="text-sm mt-1">Parses your typed text into structured transactions. Text you enter is sent to Anthropic's API. Anthropic does not train on API data by default. <a href="https://www.anthropic.com/privacy" className="underline" style={{ color: "#C831FF" }} target="_blank" rel="noopener">Anthropic Privacy Policy</a></div>
-              </div>
-              <div className="border border-gray-100 rounded-lg p-4">
-                <div className="font-semibold text-gray-800">Vercel</div>
-                <div className="text-sm mt-1">App hosting and delivery. Processes request metadata (IP addresses, device info) for routing.</div>
-              </div>
-              <div className="border border-gray-100 rounded-lg p-4">
-                <div className="font-semibold text-gray-800">Stripe (future)</div>
-                <div className="text-sm mt-1">Payment processing for subscriptions. We never store your payment card details — Stripe handles this entirely.</div>
-              </div>
-            </div>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">5. Your Rights (SPDI Rules, IT Act)</h2>
-            <p>As a user, you have the right to:</p>
-            <ul className="list-disc pl-5 space-y-2 mt-3">
-              <li><strong>Access:</strong> Request a copy of all data we hold about you</li>
-              <li><strong>Correction:</strong> Correct inaccurate personal information</li>
-              <li><strong>Deletion:</strong> Delete your account and all associated data permanently. You can do this from Settings → Manage Spaces → Clear All, or by emailing us</li>
-              <li><strong>Withdraw consent:</strong> Stop using the App at any time. Deletion of your account constitutes withdrawal of consent</li>
-              <li><strong>Grievance redressal:</strong> Contact our Grievance Officer (details below) for any privacy concerns</li>
-            </ul>
-            <p className="mt-3">
-              We will respond to all requests within <strong>30 days</strong> as required under SPDI Rule 5(7).
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">6. Data Retention</h2>
-            <p>
-              We retain your data for as long as your account is active. If you delete your account, all personal data is permanently deleted within <strong>30 days</strong>.
-              Anonymised, aggregated analytics data may be retained indefinitely.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">7. Children's Privacy</h2>
-            <p>
-              JustLog is not intended for users under 13 years of age. We do not knowingly collect data from children. If you believe a child has provided us personal data, please contact us immediately.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">8. Changes to This Policy</h2>
-            <p>
-              We may update this Privacy Policy from time to time. We will notify you of material changes via email or an in-app notice at least 7 days before the changes take effect.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">9. Grievance Officer</h2>
-            <p>
-              In accordance with the Information Technology Act, 2000 and SPDI Rules, the name and contact details of the Grievance Officer are:
-            </p>
-            <div className="mt-3 border border-gray-100 rounded-lg p-4 space-y-1">
-              <div><strong>Name:</strong> Pavan Jaya</div>
-              <div><strong>Email:</strong> <a href="mailto:jangidpavan@gmail.com" style={{ color: "#C831FF" }}>jangidpavan@gmail.com</a></div>
-              <div><strong>Address:</strong> India</div>
-              <div><strong>Response time:</strong> Within 30 days of receiving the grievance</div>
-            </div>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-3">10. Contact Us</h2>
-            <p>
-              For any privacy-related questions, data requests, or concerns, email us at{" "}
-              <a href="mailto:jangidpavan@gmail.com" style={{ color: "#C831FF" }}>jangidpavan@gmail.com</a>.
-            </p>
-          </section>
-
-        </div>
-
-        <div className="mt-12 pt-6 border-t border-gray-100 flex gap-4 text-sm" style={{ color: "#C831FF" }}>
-          <Link href="/terms">Terms of Service</Link>
-          <Link href="/">Back to App</Link>
+      {/* Top nav */}
+      <div style={{ background: "#fff", borderBottom: "1px solid #f0f0f0", position: "sticky", top: 0, zIndex: 10 }}>
+        <div style={{ maxWidth: 680, margin: "0 auto", padding: "0 24px", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
+            <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+              <rect width="32" height="32" rx="8" fill="#C831FF" fillOpacity="0.1"/>
+              <path d="M17 6L7 18h9l-1 8 10-12h-9l1-8z" stroke="#C831FF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span style={{ fontSize: 16, fontWeight: 700, color: "#C831FF", letterSpacing: "-0.3px" }}>JustLog</span>
+          </Link>
+          <Link href="/terms" style={{ fontSize: 13, fontWeight: 500, color: "#888", textDecoration: "none" }}>Terms of Service →</Link>
         </div>
       </div>
+
+      {/* Hero */}
+      <div style={{ background: "linear-gradient(135deg, rgba(200,49,255,0.06) 0%, rgba(200,49,255,0.02) 100%)", borderBottom: "1px solid rgba(200,49,255,0.1)", padding: "48px 24px 40px" }}>
+        <div style={{ maxWidth: 680, margin: "0 auto" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(200,49,255,0.08)", borderRadius: 20, padding: "4px 12px", marginBottom: 16 }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#C831FF" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <span style={{ fontSize: 11, fontWeight: 600, color: "#C831FF", letterSpacing: "0.04em" }}>PRIVACY POLICY</span>
+          </div>
+          <h1 style={{ fontSize: 36, fontWeight: 800, color: "#111", letterSpacing: "-0.8px", margin: "0 0 8px" }}>Your privacy matters.</h1>
+          <p style={{ fontSize: 16, color: "#666", margin: "0 0 16px", lineHeight: 1.6 }}>We keep your financial data private, secure, and fully under your control.</p>
+          <p style={{ fontSize: 13, color: "#aaa" }}>Last updated: June 18, 2025 · Effective: June 18, 2025</p>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div style={{ maxWidth: 680, margin: "0 auto", padding: "40px 24px 80px" }}>
+
+        <Section>
+          <p style={body}>JustLog ("we", "us", or "our") is a personal finance journaling application operated by Pavan Jaya, India. This Privacy Policy explains how we collect, use, store, and protect your information. By using the App, you agree to the terms of this Policy.</p>
+          <p style={{ ...body, marginTop: 12 }}>This Policy is published in compliance with the <b>Information Technology Act, 2000</b> and the <b>IT (SPDI) Rules, 2011</b>.</p>
+        </Section>
+
+        <Section title="1. Information We Collect">
+          <Sub>1.1 Account Information</Sub>
+          <List items={["Email address (used for sign-in)", "Name and profile photo (if you sign in via Google)"]} />
+          <Sub>1.2 Financial Journal Data (Sensitive Personal Data)</Sub>
+          <Note>JustLog is a personal journal. We do not connect to your bank accounts, payment cards, or any financial institution. All data is entered manually by you.</Note>
+          <List items={["Transaction descriptions and amounts you manually type", "Transaction categories (e.g. Food, Salary, Transport)", "Dates and times of logged entries", "Space/workspace names you create"]} />
+          <Sub>1.3 Technical Data</Sub>
+          <List items={["Device type and browser (for app compatibility)", "Usage analytics (page views, feature usage — anonymised)"]} />
+        </Section>
+
+        <Section title="2. How We Use Your Information">
+          <List items={[
+            "To provide and operate the JustLog service",
+            "To process your text using AI (Claude by Anthropic) to parse transactions — your text is sent to Anthropic's API",
+            "To sync your data across devices",
+            "To send transactional emails (account confirmation, password reset)",
+            "To improve the App based on anonymised usage patterns",
+          ]} />
+          <p style={{ ...body, marginTop: 12 }}>We do <b>not</b> sell, rent, or share your personal data with third parties for marketing purposes.</p>
+        </Section>
+
+        <Section title="3. Data Storage and Security">
+          <p style={body}>Your data is stored on <b>Supabase</b> (AWS infrastructure). Security measures include:</p>
+          <List items={[
+            "Encryption in transit: All data transmitted over HTTPS/TLS",
+            "Encryption at rest: Database storage encrypted by Supabase/AWS",
+            "Row-level security: Your data is isolated — no other user can access your entries",
+            "Secure token-based authentication via Supabase Auth",
+          ]} />
+        </Section>
+
+        <Section title="4. Third-Party Services">
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 4 }}>
+            {[
+              { name: "Supabase", desc: "Database, authentication, and storage. Your account and transaction data is stored here." },
+              { name: "Anthropic (Claude API)", desc: "Parses your typed text into structured transactions. Anthropic does not train on API data by default." },
+              { name: "Vercel", desc: "App hosting and delivery. Processes request metadata for routing." },
+              { name: "Stripe (future)", desc: "Payment processing for subscriptions. We never store your payment card details." },
+            ].map(({ name, desc }) => (
+              <div key={name} style={{ background: "#fff", border: "1px solid #f0f0f0", borderRadius: 12, padding: "14px 16px" }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: "#111", marginBottom: 4 }}>{name}</div>
+                <div style={{ fontSize: 13, color: "#666", lineHeight: 1.5 }}>{desc}</div>
+              </div>
+            ))}
+          </div>
+        </Section>
+
+        <Section title="5. Your Rights">
+          <List items={[
+            "Access: Request a copy of all data we hold about you",
+            "Correction: Correct inaccurate personal information",
+            "Deletion: Delete your account and all data — from Settings or by emailing us",
+            "Withdraw consent: Stop using the App at any time",
+            "Grievance redressal: Contact our Grievance Officer below",
+          ]} />
+          <p style={{ ...body, marginTop: 12 }}>We respond to all requests within <b>30 days</b> as required under SPDI Rule 5(7).</p>
+        </Section>
+
+        <Section title="6. Data Retention">
+          <p style={body}>We retain your data as long as your account is active. If you delete your account, all personal data is permanently deleted within <b>30 days</b>.</p>
+        </Section>
+
+        <Section title="7. Children's Privacy">
+          <p style={body}>JustLog is not intended for users under 13 years of age. We do not knowingly collect data from children.</p>
+        </Section>
+
+        <Section title="8. Grievance Officer">
+          <p style={{ ...body, marginBottom: 12 }}>In accordance with the IT Act, 2000 and SPDI Rules:</p>
+          <div style={{ background: "#fff", border: "1.5px solid rgba(200,49,255,0.15)", borderRadius: 14, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 8 }}>
+            {[["Name", "Pavan Jaya"], ["Email", "jangidpavan@gmail.com"], ["Address", "India"], ["Response time", "Within 30 days"]].map(([k, v]) => (
+              <div key={k} style={{ display: "flex", gap: 12, fontSize: 14 }}>
+                <span style={{ color: "#aaa", minWidth: 110 }}>{k}</span>
+                <span style={{ color: "#111", fontWeight: 500 }}>{k === "Email" ? <a href={`mailto:${v}`} style={{ color: "#C831FF", textDecoration: "none" }}>{v}</a> : v}</span>
+              </div>
+            ))}
+          </div>
+        </Section>
+
+        <Section title="9. Contact Us">
+          <p style={body}>For any privacy questions, email <a href="mailto:jangidpavan@gmail.com" style={{ color: "#C831FF", textDecoration: "none", fontWeight: 500 }}>jangidpavan@gmail.com</a>.</p>
+        </Section>
+
+        {/* Footer */}
+        <div style={{ marginTop: 48, paddingTop: 24, borderTop: "1px solid #f0f0f0", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+          <span style={{ fontSize: 13, color: "#bbb" }}>© 2025 JustLog</span>
+          <div style={{ display: "flex", gap: 20 }}>
+            <Link href="/terms" style={{ fontSize: 13, color: "#888", textDecoration: "none" }}>Terms of Service</Link>
+            <Link href="/" style={{ fontSize: 13, color: "#C831FF", textDecoration: "none", fontWeight: 500 }}>Open App →</Link>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+const body: React.CSSProperties = { fontSize: 15, color: "#444", lineHeight: 1.7, margin: 0 };
+
+function Section({ title, children }: { title?: string; children: React.ReactNode }) {
+  return (
+    <div style={{ marginBottom: 36 }}>
+      {title && <h2 style={{ fontSize: 18, fontWeight: 700, color: "#111", letterSpacing: "-0.3px", margin: "0 0 14px" }}>{title}</h2>}
+      {children}
+    </div>
+  );
+}
+
+function Sub({ children }: { children: React.ReactNode }) {
+  return <h3 style={{ fontSize: 14, fontWeight: 600, color: "#333", margin: "16px 0 6px" }}>{children}</h3>;
+}
+
+function List({ items }: { items: string[] }) {
+  return (
+    <ul style={{ margin: 0, paddingLeft: 20, display: "flex", flexDirection: "column", gap: 6 }}>
+      {items.map((item) => <li key={item} style={{ fontSize: 14, color: "#555", lineHeight: 1.6 }}>{item}</li>)}
+    </ul>
+  );
+}
+
+function Note({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{ background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 10, padding: "10px 14px", margin: "10px 0", fontSize: 13, color: "#92400E", lineHeight: 1.5 }}>
+      ⚡ {children}
     </div>
   );
 }
