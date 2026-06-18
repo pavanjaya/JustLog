@@ -30,18 +30,24 @@ Format:
     "amount": <number, no symbols>,
     "type": "income" or "expense",
     "category": <one of: ${VALID_CATEGORIES.join(", ")}>,
-    "description": <clean title case, e.g. "Morning Coffee", "School Fees", "Income from Jaya">
+    "description": <clean title case, e.g. "Morning Coffee", "School Fees", "Income from Client">
   }
 ]
 
 Rules:
-- Fix spelling mistakes in descriptions (e.g. "cofee" → "Coffee", "petrol" → "Petrol")
-- Use clean title case for descriptions (e.g. "Morning Coffee", "School Fees")
-- salary/received/income/from [person]/got = "income"; everything else = "expense"
-- "5k" = 5000, "2L" = 200000, "1.5k" = 1500
-- Pick the most specific matching category from the list
+- AMOUNT: "5k" = 5000, "2k" = 2000, "1.5k" = 1500, "2L" = 200000, "1L" = 100000. NEVER split the number from its suffix — "5k" is ONE token meaning 5000.
+- TYPE: salary/received/income/got/from [person] = "income"; everything else = "expense"
+- DESCRIPTION: Fix spelling mistakes ("cofee" → "Coffee", "petrol" → "Petrol"). Use clean title case. Do NOT include the amount in the description.
+- CATEGORY: chai/tea/coffee/food/lunch/dinner/breakfast/snack/restaurant/swiggy/zomato = "Food & Drinks". grocery/vegetables/fruits/milk = "Groceries". uber/ola/petrol/fuel/auto/bus/metro = "Transport". rent/electricity/wifi/internet/phone/recharge = "Bills". medicine/doctor/hospital = "Healthcare". movie/netflix/game/spotify = "Entertainment". salary/freelance/client payment = "Salary". shopping/clothes/amazon = "Shopping". school/fees/tuition/college = "Education".
+- Pick the MOST SPECIFIC matching category — "chai with friends" is Food & Drinks, NOT Entertainment
 - Each line or item = separate object in the array
-- Return ONLY the JSON array, nothing else`;
+- Return ONLY the JSON array, nothing else
+
+Examples:
+"got 5k from client" → [{"amount": 5000, "type": "income", "category": "Salary", "description": "Income from Client"}]
+"spent 500 on chai with friends" → [{"amount": 500, "type": "expense", "category": "Food & Drinks", "description": "Chai with Friends"}]
+"paid mom 2000 for house rent" → [{"amount": 2000, "type": "expense", "category": "Housing", "description": "House Rent"}]
+"400 cofee" → [{"amount": 400, "type": "expense", "category": "Food & Drinks", "description": "Coffee"}]`;
 
 interface ParsedTx {
   amount: number;
