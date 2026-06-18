@@ -75,7 +75,10 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
         body: JSON.stringify({ text }),
       });
 
-      if (!res.ok) throw new Error("API error");
+      if (!res.ok) {
+        const errText = await res.text().catch(() => "unknown");
+        throw new Error(`API error ${res.status}: ${errText}`);
+      }
 
       const data = await res.json();
       const parsed: Array<{ amount: number; type: "income" | "expense"; category: string; description: string }> = data.transactions;
@@ -94,7 +97,8 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
       setAiState("success");
       scrollToBottom();
       setTimeout(() => setAiState("idle"), created.length > 1 ? 3000 : 2000);
-    } catch {
+    } catch (err) {
+      console.error("Log error:", err);
       setAiState("error");
       setTimeout(() => setAiState("idle"), 3000);
     } finally {
