@@ -197,18 +197,18 @@ export default function SearchView({ transactions, onDeleteTransaction, onEditTr
           </div>
         )}
 
-        {/* Suggestion chips — only show when search is focused */}
+        {/* Suggestion chips — horizontal scroll, only when search focused */}
         {!result && searchFocused && (
-          <div className="grid grid-cols-2 gap-2 px-4 mb-4">
+          <div className="flex gap-2 px-4 mb-3 overflow-x-auto no-scrollbar">
             {SEARCH_CHIPS.map((chip) => (
               <button
                 key={chip.label}
                 onClick={() => runSearch(chip.query)}
-                className="flex items-center gap-2.5 px-4 py-3 rounded-2xl text-left"
+                className="flex items-center gap-2 px-3 py-2 rounded-full text-left flex-shrink-0"
                 style={{ background: "var(--md-surface-container-low)" }}
               >
                 <span className="flex-shrink-0" style={{ color: "var(--md-on-surface-variant)" }}>{chip.icon}</span>
-                <span className="text-xs font-medium" style={{ color: "var(--md-on-surface)" }}>{chip.label}</span>
+                <span className="text-xs font-medium whitespace-nowrap" style={{ color: "var(--md-on-surface)" }}>{chip.label}</span>
               </button>
             ))}
           </div>
