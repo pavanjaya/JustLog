@@ -1,6 +1,13 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+function getNavBarHeight(): number {
+  if (typeof window === "undefined") return 0;
+  const cap = (window as unknown as { Capacitor?: { getPlatform?: () => string } }).Capacitor;
+  if (cap?.getPlatform?.() === "android") return 32;
+  return 0;
+}
 
 interface BottomInputProps {
   value: string;
@@ -14,6 +21,11 @@ const SUGGESTIONS = ["500 coffee", "25000 salary", "1200 petrol", "17000 school 
 export default function BottomInput({ value, onChange, onSend, disabled }: BottomInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [popping, setPopping] = useState(false);
+  const [navBarHeight, setNavBarHeight] = useState(0);
+
+  useEffect(() => {
+    setNavBarHeight(getNavBarHeight());
+  }, []);
 
   function autoGrow(el: HTMLTextAreaElement) {
     el.style.height = "auto";
@@ -50,8 +62,8 @@ export default function BottomInput({ value, onChange, onSend, disabled }: Botto
 
   return (
     <div
-      className="flex-shrink-0 px-3 pt-2 pb-4"
-      style={{ background: "#fff" }}
+      className="flex-shrink-0 px-3 pt-2"
+      style={{ background: "#fff", paddingBottom: `${navBarHeight + 16}px` }}
     >
       {/* Suggestion chips — scrollable row */}
       {value.trim().length < 4 && (

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import type { View, Space } from "@/types";
 
 interface TopBarProps {
@@ -11,11 +12,24 @@ interface TopBarProps {
   userInitial?: string;
 }
 
+function getStatusBarHeight(): number {
+  if (typeof window === "undefined") return 0;
+  const cap = (window as unknown as { Capacitor?: { getPlatform?: () => string } }).Capacitor;
+  if (cap?.getPlatform?.() === "android") return 28;
+  return 0;
+}
+
 export default function TopBar({ onNavigate, onAvatarClick, onSpaceClick, activeSpace, avatarUrl, userInitial = "?" }: TopBarProps) {
+  const [statusBarHeight, setStatusBarHeight] = useState(0);
+
+  useEffect(() => {
+    setStatusBarHeight(getStatusBarHeight());
+  }, []);
+
   return (
     <div
       className="flex-shrink-0 flex items-center px-4 gap-2"
-      style={{ background: "#fff", paddingTop: "calc(env(safe-area-inset-top) + 12px)", paddingBottom: "12px", minHeight: "56px" }}
+      style={{ background: "#fff", paddingTop: `${statusBarHeight + 12}px`, paddingBottom: "12px", minHeight: "56px" }}
     >
       {/* Logo + Space switcher — left side */}
       <div className="flex items-center gap-2 flex-1 min-w-0">
