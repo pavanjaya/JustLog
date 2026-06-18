@@ -114,6 +114,29 @@ export default function AppShell() {
     setSubStatus("active");
   }, []);
 
+  // Handle deep link auth callback from Capacitor (com.justlog.app://auth/callback#...)
+  useEffect(() => {
+    async function handleDeepLink(url: string) {
+      const hashPart = url.split("#")[1] ?? url.split("?")[1] ?? "";
+      const params = new URLSearchParams(hashPart);
+      const accessToken = params.get("access_token");
+      const refreshToken = params.get("refresh_token");
+      if (accessToken && refreshToken) {
+        await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+      }
+    }
+
+    // Check if app was launched via deep link
+    if (typeof window !== "undefined") {
+      const cap = (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor;
+      if (cap?.isNativePlatform?.()) {
+        import("@capacitor/app").then(({ App }) => {
+          App.addListener("appUrlOpen", ({ url }) => { handleDeepLink(url); });
+        });
+      }
+    }
+  }, [supabase]);
+
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       setUser(user);

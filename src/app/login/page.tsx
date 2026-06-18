@@ -3,15 +3,22 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
+function isCapacitor() {
+  return typeof window !== "undefined" && !!(window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.();
+}
+
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   async function handleGoogleLogin() {
     setLoading(true);
     const supabase = createClient();
+    const redirectTo = isCapacitor()
+      ? "com.justlog.app://auth/callback"
+      : `${window.location.origin}/auth/callback`;
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo },
     });
   }
 
