@@ -126,12 +126,20 @@ export default function AppShell() {
       }
     }
 
-    // Check if app was launched via deep link
     if (typeof window !== "undefined") {
       const cap = (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor;
       if (cap?.isNativePlatform?.()) {
         import("@capacitor/app").then(({ App }) => {
+          // Catch deep link when app is already open
           App.addListener("appUrlOpen", ({ url }) => { handleDeepLink(url); });
+          // Catch deep link when app resumes from background
+          App.addListener("appStateChange", ({ isActive }) => {
+            if (isActive) {
+              supabase.auth.getSession().then(({ data: { session } }) => {
+                if (session?.user) window.location.reload();
+              });
+            }
+          });
         });
       }
     }
