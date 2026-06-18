@@ -91,6 +91,7 @@ export default function SearchView({ transactions, onDeleteTransaction, onEditTr
   async function runSearch(q: string) {
     if (!q.trim()) return;
     setQuery(q);
+    setSearchFocused(true);
     setLoading(true);
     setResult("");
 
