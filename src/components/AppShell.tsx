@@ -147,6 +147,12 @@ export default function AppShell() {
     setTransactions((prev) => prev.filter((tx) => tx.id !== id));
   }
 
+  async function handleEditTransaction(id: string, updates: Partial<Transaction>) {
+    if (!user) return;
+    const { data, error } = await supabase.from("transactions").update(updates).eq("id", id).eq("user_id", user.id).select().single();
+    if (!error && data) setTransactions((prev) => prev.map((tx) => tx.id === id ? { ...tx, ...data } : tx));
+  }
+
   async function handleAddTransactions(txs: Transaction[]) {
     if (!user || !activeSpace) return;
     const rows = txs.map((tx) => ({ ...tx, user_id: user.id, space_id: activeSpace.id }));
@@ -217,12 +223,13 @@ export default function AppShell() {
             transactions={transactions}
             onAddTransactions={handleAddTransactions}
             onDeleteTransaction={handleDeleteTransaction}
+            onEditTransaction={handleEditTransaction}
             onSeeAll={() => setView("search")}
             userName={userName}
           />
         )}
         {!spaceLoading && (subStatus === "active" || subStatus === "trialing") && view === "story" && <StoryView transactions={transactions} />}
-        {!spaceLoading && (subStatus === "active" || subStatus === "trialing") && view === "search" && <SearchView transactions={transactions} onDeleteTransaction={handleDeleteTransaction} />}
+        {!spaceLoading && (subStatus === "active" || subStatus === "trialing") && view === "search" && <SearchView transactions={transactions} onDeleteTransaction={handleDeleteTransaction} onEditTransaction={handleEditTransaction} />}
         {(subStatus === "active" || subStatus === "trialing") && view === "settings" && (
           <SettingsView
             user={user}

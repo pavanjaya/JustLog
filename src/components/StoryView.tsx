@@ -74,6 +74,24 @@ export default function StoryView({ transactions }: StoryViewProps) {
 
   const expenseDelta = delta(curr.expense, prev.expense);
 
+  if (transactions.length === 0) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center gap-4 px-8" style={{ background: "#fff" }}>
+        <div className="w-16 h-16 rounded-3xl flex items-center justify-center" style={{ background: "var(--md-surface-container-low)" }}>
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-outline)" }}>
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+        </div>
+        <div className="text-center">
+          <div className="text-base font-semibold mb-1" style={{ color: "var(--md-on-surface)" }}>Your story starts here</div>
+          <div className="text-sm leading-relaxed" style={{ color: "var(--md-outline)" }}>
+            Log a few transactions on the home screen and we'll build your financial story
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 overflow-y-auto no-scrollbar pb-8" style={{ background: "#fff" }}>
 

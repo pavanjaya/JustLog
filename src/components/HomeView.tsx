@@ -11,13 +11,14 @@ interface HomeViewProps {
   transactions: Transaction[];
   onAddTransactions: (txs: Transaction[]) => Promise<void>;
   onDeleteTransaction: (id: string) => void;
+  onEditTransaction: (id: string, updates: Partial<Transaction>) => void;
   onSeeAll: () => void;
   userName?: string;
 }
 
 type AiState = "idle" | "loading" | "success" | "error";
 
-export default function HomeView({ transactions, onAddTransactions, onDeleteTransaction, onSeeAll, userName = "there" }: HomeViewProps) {
+export default function HomeView({ transactions, onAddTransactions, onDeleteTransaction, onEditTransaction, onSeeAll, userName = "there" }: HomeViewProps) {
   const [input, setInput] = useState("");
   const [aiState, setAiState] = useState<AiState>("idle");
   const [newTxs, setNewTxs] = useState<Transaction[]>([]);
@@ -174,7 +175,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
             </div>
           </div>
         ) : (
-          all.map((tx, i) => <TxItem key={tx.id} tx={tx} index={i} showDate onDelete={onDeleteTransaction} />)
+          all.map((tx, i) => <TxItem key={tx.id} tx={tx} index={i} showDate onDelete={onDeleteTransaction} onEdit={onEditTransaction} />)
         )}
       </div>
 

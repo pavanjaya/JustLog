@@ -7,6 +7,7 @@ import TxItem from "@/components/TxItem";
 interface SearchViewProps {
   transactions: Transaction[];
   onDeleteTransaction: (id: string) => void;
+  onEditTransaction: (id: string, updates: Partial<Transaction>) => void;
 }
 
 const ic = { width: 16, height: 16, viewBox: "0 0 24 24", fill: "none" as const, stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
@@ -60,7 +61,7 @@ function groupByMonthAndDate(transactions: Transaction[]) {
   return months;
 }
 
-export default function SearchView({ transactions, onDeleteTransaction }: SearchViewProps) {
+export default function SearchView({ transactions, onDeleteTransaction, onEditTransaction }: SearchViewProps) {
   const [query, setQuery] = useState("");
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -179,7 +180,7 @@ export default function SearchView({ transactions, onDeleteTransaction }: Search
                   {/* Transactions */}
                   <div className="px-3">
                     {txs.map((tx, i) => (
-                      <TxItem key={tx.id} tx={tx} index={i} onDelete={onDeleteTransaction} />
+                      <TxItem key={tx.id} tx={tx} index={i} onDelete={onDeleteTransaction} onEdit={onEditTransaction} />
                     ))}
                   </div>
                 </div>
