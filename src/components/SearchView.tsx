@@ -142,8 +142,8 @@ export default function SearchView({ transactions, onDeleteTransaction, onEditTr
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex-shrink-0 px-4 pb-3 flex flex-col gap-2">
+      {/* Filters — hidden when search is active */}
+      {!searchFocused && !result && <div className="flex-shrink-0 px-4 pb-3 flex flex-col gap-2">
         {/* Type filter */}
         <div className="flex gap-2">
           {(["all", "income", "expense"] as const).map(t => (
@@ -176,7 +176,7 @@ export default function SearchView({ transactions, onDeleteTransaction, onEditTr
             </button>
           ))}
         </div>
-      </div>
+      </div>}
 
       <div className="flex-1 overflow-y-auto no-scrollbar pb-6">
         {/* AI result */}
