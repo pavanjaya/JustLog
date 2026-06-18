@@ -149,7 +149,9 @@ export default function AppShell() {
         await loadSubscription(user.id);
       } else {
         setSubStatus("none");
-        window.location.href = "/login";
+        if (!window.location.pathname.startsWith("/login") && !window.location.pathname.startsWith("/auth")) {
+          window.location.href = "/login";
+        }
       }
     });
 
@@ -165,7 +167,9 @@ export default function AppShell() {
         await loadSubscription(session.user.id);
       } else {
         setSubStatus("none");
-        window.location.href = "/login";
+        if (!window.location.pathname.startsWith("/login") && !window.location.pathname.startsWith("/auth")) {
+          window.location.href = "/login";
+        }
       }
     });
 
