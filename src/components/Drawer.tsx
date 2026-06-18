@@ -53,8 +53,6 @@ export default function Drawer({ open, view, onClose, onNavigate, onDeleteAll, u
           background: "var(--md-surface-container-low)",
           transform: open ? "translateX(0)" : "translateX(100%)",
           transitionTimingFunction: "cubic-bezier(0.2, 0, 0, 1)",
-          borderTopLeftRadius: 28,
-          borderBottomLeftRadius: 28,
         }}
       >
         {/* Profile */}

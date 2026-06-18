@@ -19,7 +19,7 @@ interface SettingsViewProps {
   subStatus?: "active" | "trialing" | "none" | "loading";
 }
 
-type Sheet = "none" | "profile" | "spaces" | "about";
+type Sheet = "none" | "profile" | "spaces" | "about" | "privacy" | "terms";
 
 export default function SettingsView({
   user, spaces, transactions, activeSpace,
@@ -179,8 +179,8 @@ export default function SettingsView({
 
       {/* Group 3 — legal + info */}
       <SettingsGroup>
-        <SettingsItem icon={<IconShield />} label="Privacy Policy" onClick={() => window.open("/privacy", "_blank")} />
-        <SettingsItem icon={<IconScroll />} label="Terms of Service" onClick={() => window.open("/terms", "_blank")} />
+        <SettingsItem icon={<IconShield />} label="Privacy Policy" onClick={() => setSheet("privacy")} />
+        <SettingsItem icon={<IconScroll />} label="Terms of Service" onClick={() => setSheet("terms")} />
         <SettingsItem icon={<IconInfo />} label="About JustLog" onClick={() => setSheet("about")} last />
       </SettingsGroup>
 
@@ -352,6 +352,60 @@ export default function SettingsView({
             <AboutRow label="Plan" value={subStatus === "trialing" ? "Free Trial" : subStatus === "active" ? "Pro" : "Free"} />
             <AboutRow label="Transactions" value={String(transactions.length)} last />
           </div>
+        </div>
+      </Sheet>
+
+      {/* Privacy sheet */}
+      <Sheet open={sheet === "privacy"} onClose={() => setSheet("none")}>
+        <div className="flex flex-col gap-5">
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: "rgba(200,49,255,0.08)" }}>
+            <IconShield />
+          </div>
+          <div>
+            <div className="text-base font-semibold mb-1" style={{ color: "var(--md-on-surface)" }}>Data Privacy</div>
+            <div className="text-sm leading-relaxed" style={{ color: "var(--md-on-surface-variant)" }}>
+              JustLog believes in transparent data practices. Your financial journal is private and only visible to you — we never sell or share your data.
+            </div>
+          </div>
+          <div className="text-sm leading-relaxed" style={{ color: "var(--md-on-surface-variant)" }}>
+            Keeping your data safe is our priority. All entries are encrypted in transit and at rest. Visit our full Privacy Policy for complete details on how your information is protected.
+          </div>
+          <a
+            href="/privacy"
+            target="_blank"
+            rel="noopener"
+            className="w-full py-3.5 rounded-2xl text-sm font-semibold text-center block"
+            style={{ background: "var(--md-primary)", color: "#fff" }}
+          >
+            Read Privacy Policy
+          </a>
+        </div>
+      </Sheet>
+
+      {/* Terms sheet */}
+      <Sheet open={sheet === "terms"} onClose={() => setSheet("none")}>
+        <div className="flex flex-col gap-5">
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: "rgba(200,49,255,0.08)" }}>
+            <IconScroll />
+          </div>
+          <div>
+            <div className="text-base font-semibold mb-1" style={{ color: "var(--md-on-surface)" }}>Terms of Service</div>
+            <div className="text-sm leading-relaxed" style={{ color: "var(--md-on-surface-variant)" }}>
+              You own all the data you enter into JustLog. We just help you log it. JustLog is a personal journal — not a bank, financial advisor, or investment platform.
+            </div>
+          </div>
+          <div className="text-sm leading-relaxed" style={{ color: "var(--md-on-surface-variant)" }}>
+            By using JustLog you agree to our terms, including acceptable use and our AI processing policy. Read the full Terms of Service for details.
+          </div>
+          <a
+            href="/terms"
+            target="_blank"
+            rel="noopener"
+            className="w-full py-3.5 rounded-2xl text-sm font-semibold text-center block"
+            style={{ background: "var(--md-primary)", color: "#fff" }}
+          >
+            Read Terms of Service
+          </a>
         </div>
       </Sheet>
 
