@@ -25,6 +25,7 @@ export default function AppShell() {
   const [activeSpace, setActiveSpace] = useState<Space | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [subStatus, setSubStatus] = useState<SubStatus>("loading");
+  const ensureDefaultSpaceRunning = useRef(false);
   const [spaceLoading, setSpaceLoading] = useState(false);
   const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: "", visible: false });
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -57,20 +58,30 @@ export default function AppShell() {
 
   // Ensures the user has at least one space; creates "Personal" if not
   const ensureDefaultSpace = useCallback(async (userId: string): Promise<Space> => {
-    const existing = await loadSpaces(userId);
-    if (existing.length > 0) {
-      setSpaces(existing);
+    // Prevent concurrent calls from both seeing "no spaces" and creating duplicates
+    if (ensureDefaultSpaceRunning.current) {
+      const existing = await loadSpaces(userId);
       return existing[0];
     }
-    const { data, error } = await supabase
-      .from("spaces")
-      .insert({ user_id: userId, name: "Personal", icon: "home", color: "#C831FF" })
-      .select()
-      .single();
-    if (error || !data) throw new Error("Failed to create default space");
-    const space = data as Space;
-    setSpaces([space]);
-    return space;
+    ensureDefaultSpaceRunning.current = true;
+    try {
+      const existing = await loadSpaces(userId);
+      if (existing.length > 0) {
+        setSpaces(existing);
+        return existing[0];
+      }
+      const { data, error } = await supabase
+        .from("spaces")
+        .insert({ user_id: userId, name: "Personal", icon: "home", color: "#C831FF" })
+        .select()
+        .single();
+      if (error || !data) throw new Error("Failed to create default space");
+      const space = data as Space;
+      setSpaces([space]);
+      return space;
+    } finally {
+      ensureDefaultSpaceRunning.current = false;
+    }
   }, [supabase, loadSpaces]);
 
   const loadSubscription = useCallback(async (_userId: string) => {
@@ -91,7 +102,9 @@ export default function AppShell() {
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      // INITIAL_SESSION is already handled by getUser() above — skip to avoid duplicate space creation
+      if (event === "INITIAL_SESSION") return;
       setUser(session?.user ?? null);
       if (session?.user) {
         const space = await ensureDefaultSpace(session.user.id);
