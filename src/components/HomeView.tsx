@@ -93,10 +93,10 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
       setNewTxs(created);
       setAiState("success");
       scrollToBottom();
-      setTimeout(() => setAiState("idle"), created.length > 1 ? 6000 : 4000);
+      setTimeout(() => setAiState("idle"), created.length > 1 ? 3000 : 2000);
     } catch {
       setAiState("error");
-      setTimeout(() => setAiState("idle"), 5000);
+      setTimeout(() => setAiState("idle"), 3000);
     } finally {
       setIsLoading(false);
     }
@@ -118,7 +118,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
     setNewTxs([tx]);
     setAiState("success");
     scrollToBottom();
-    setTimeout(() => setAiState("idle"), 4000);
+    setTimeout(() => setAiState("idle"), 2000);
   }
 
   return (
