@@ -138,6 +138,9 @@ export default function AppShell() {
       }
     }
 
+    // Native deep link handler (set on window so MainActivity can call it)
+    (window as unknown as { __handleDeepLink: (url: string) => void }).__handleDeepLink = handleDeepLink;
+
     import("@capacitor/app").then(({ App }) => {
       App.addListener("appUrlOpen", ({ url }) => { handleDeepLink(url); });
       App.getLaunchUrl().then((result) => {
