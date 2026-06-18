@@ -25,6 +25,7 @@ export interface Space {
   icon: string;
   color: string;
   include_in_personal: boolean;
+  people_count: number;
   created_at: string;
 }
 

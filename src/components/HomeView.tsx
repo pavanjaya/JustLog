@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import type { Transaction } from "@/types";
+import type { Transaction, Space } from "@/types";
 import TxItem from "@/components/TxItem";
 import AiBubble from "@/components/AiBubble";
 import BottomInput from "@/components/BottomInput";
@@ -15,11 +15,12 @@ interface HomeViewProps {
   onEditTransaction: (id: string, updates: Partial<Transaction>) => void;
   onSeeAll: () => void;
   userName?: string;
+  activeSpace?: Space | null;
 }
 
 type AiState = "idle" | "loading" | "success" | "error" | "clarify";
 
-export default function HomeView({ transactions, onAddTransactions, onDeleteTransaction, onEditTransaction, onSeeAll, userName = "there" }: HomeViewProps) {
+export default function HomeView({ transactions, onAddTransactions, onDeleteTransaction, onEditTransaction, onSeeAll, userName = "there", activeSpace }: HomeViewProps) {
   const [input, setInput] = useState("");
   const [aiState, setAiState] = useState<AiState>("idle");
   const [newTxs, setNewTxs] = useState<Transaction[]>([]);
@@ -162,6 +163,24 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
             <div className="text-lg font-bold" style={{ color: "#B71C1C" }}>{fmtCompact(animatedExpense)}</div>
           </div>
         </div>
+
+        {/* Per head split — shown when space has people_count > 1 */}
+        {activeSpace && activeSpace.people_count > 1 && totalExpense > 0 && (
+          <div className="mt-3 flex items-center gap-2 px-4 py-2.5 rounded-2xl" style={{ background: "rgba(200,49,255,0.06)", border: "1px solid rgba(200,49,255,0.12)" }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-primary)", flexShrink: 0 }}>
+              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
+            </svg>
+            <span className="text-xs" style={{ color: "var(--md-on-surface-variant)" }}>
+              Per head
+            </span>
+            <span className="text-sm font-semibold" style={{ color: "var(--md-primary)" }}>
+              {fmtFull(Math.round(totalExpense / activeSpace.people_count))}
+            </span>
+            <span className="text-xs ml-auto" style={{ color: "var(--md-outline)" }}>
+              ÷ {activeSpace.people_count} people
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Section header */}

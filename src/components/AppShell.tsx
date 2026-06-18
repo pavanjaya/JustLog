@@ -158,11 +158,11 @@ export default function AppShell() {
     setSpaceLoading(false);
   }
 
-  async function handleCreateSpace(name: string, icon: string, includeInPersonal: boolean) {
+  async function handleCreateSpace(name: string, icon: string, includeInPersonal: boolean, peopleCount: number) {
     if (!user) return;
     const { data, error } = await supabase
       .from("spaces")
-      .insert({ user_id: user.id, name, icon, color: "#C831FF", include_in_personal: includeInPersonal })
+      .insert({ user_id: user.id, name, icon, color: "#C831FF", include_in_personal: includeInPersonal, people_count: peopleCount })
       .select()
       .single();
     if (error || !data) { showToast("Failed to create space"); return; }
