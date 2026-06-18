@@ -115,9 +115,9 @@ export default function SearchView({ transactions, onDeleteTransaction, onEditTr
   return (
     <div className="flex-1 flex flex-col overflow-hidden" style={{ background: "#fff" }}>
       {/* Search bar */}
-      <div className="px-4 pt-4 pb-3 flex-shrink-0">
+      <div className="px-4 pt-4 pb-3 flex-shrink-0 flex items-center gap-2">
         <div
-          className="flex items-center gap-3 px-4 py-3 rounded-2xl"
+          className="flex-1 flex items-center gap-3 px-4 py-3 rounded-2xl"
           style={{ background: "var(--md-surface-container-low)", border: "1px solid var(--md-outline-variant)" }}
         >
           <svg viewBox="0 0 24 24" className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-outline)" }}>
@@ -128,7 +128,6 @@ export default function SearchView({ transactions, onDeleteTransaction, onEditTr
             onChange={(e) => { setQuery(e.target.value); queryRef.current = e.target.value; }}
             onKeyDown={(e) => e.key === "Enter" && runSearch(query)}
             onFocus={() => setSearchFocused(true)}
-            onBlur={() => { if (!queryRef.current) setSearchFocused(false); }}
             type="text"
             placeholder="Ask about your money..."
             autoComplete="off"
@@ -143,6 +142,15 @@ export default function SearchView({ transactions, onDeleteTransaction, onEditTr
             </button>
           )}
         </div>
+        {searchFocused && (
+          <button
+            onClick={() => { setQuery(""); queryRef.current = ""; setResult(null); setSearchFocused(false); }}
+            className="text-sm font-medium flex-shrink-0"
+            style={{ color: "var(--md-primary)" }}
+          >
+            Cancel
+          </button>
+        )}
       </div>
 
       {/* Filters — hidden when search is active */}
