@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAnthropicClient, AI_MODEL } from "@/lib/anthropic";
+import Groq from "groq-sdk";
 
 const VALID_CATEGORIES = [
   "Salary",
@@ -136,8 +136,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing text" }, { status: 400, headers: CORS_HEADERS });
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY ?? "";
-  const isMock = !apiKey || apiKey.includes("xxx");
+  const apiKey = process.env.GROQ_API_KEY ?? "";
+  const isMock = !apiKey;
 
   if (isMock) {
     const transactions = mockParse(text);
@@ -146,17 +146,18 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const anthropic = getAnthropicClient();
+    const groq = new Groq({ apiKey });
 
-    const response = await anthropic.messages.create({
-      model: AI_MODEL,
+    const response = await groq.chat.completions.create({
+      model: "llama-3.1-8b-instant",
       max_tokens: 1000,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content: text }],
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: text },
+      ],
     });
 
-    const textBlock = response.content.find((block) => block.type === "text");
-    const raw = textBlock && "text" in textBlock ? textBlock.text : "";
+    const raw = response.choices[0]?.message?.content ?? "";
 
     const cleaned = raw.replace(/```json|```/g, "").trim();
     let parsed: unknown;

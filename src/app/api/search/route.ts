@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAnthropicClient, AI_MODEL } from "@/lib/anthropic";
+import Groq from "groq-sdk";
 import type { Transaction } from "@/types";
 
 const SYSTEM_PROMPT = `You are JustLog's search assistant. The user has logged transaction data and wants to query it in natural language.
@@ -35,22 +35,18 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const anthropic = getAnthropicClient();
+    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY ?? "" });
 
-    const response = await anthropic.messages.create({
-      model: AI_MODEL,
+    const response = await groq.chat.completions.create({
+      model: "llama-3.1-8b-instant",
       max_tokens: 1000,
-      system: SYSTEM_PROMPT,
       messages: [
-        {
-          role: "user",
-          content: `Transactions: ${JSON.stringify(transactions)}\n\nQuestion: ${query}`,
-        },
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: `Transactions: ${JSON.stringify(transactions)}\n\nQuestion: ${query}` },
       ],
     });
 
-    const textBlock = response.content.find((block) => block.type === "text");
-    const answer = textBlock && "text" in textBlock ? textBlock.text : "No answer found.";
+    const answer = response.choices[0]?.message?.content ?? "No answer found.";
 
     return NextResponse.json({ answer }, { headers: CORS_HEADERS });
   } catch (err) {
