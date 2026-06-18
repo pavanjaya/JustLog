@@ -247,7 +247,7 @@ export default function SettingsView({
         {!spaceActionTarget && (
           <>
             <div className="text-base font-semibold mb-4" style={{ color: "var(--md-on-surface)" }}>Manage Spaces</div>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 overflow-y-auto no-scrollbar" style={{ maxHeight: "55vh" }}>
               {spaces.map((sp) => (
                 <button
                   key={sp.id}
