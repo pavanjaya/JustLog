@@ -102,8 +102,8 @@ export default function BottomInput({ value, onChange, onSend, disabled }: Botto
           className={`w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 md-ripple ${popping ? "animate-send-pop" : ""}`}
           style={{ background: disabled || !value.trim() ? "var(--md-surface-container-highest)" : "var(--md-primary)", color: disabled || !value.trim() ? "var(--md-on-surface-variant)" : "var(--md-on-primary)" }}
         >
-          <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-            <path d="M2 12L22 2L12 22L10 14L2 12Z" />
+          <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>
           </svg>
         </button>
       </div>
