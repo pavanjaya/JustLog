@@ -36,7 +36,8 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
   const [saving, setSaving] = useState(false);
   const [nameError, setNameError] = useState("");
   const [includeInPersonal, setIncludeInPersonal] = useState(false);
-  const [peopleCount, setPeopleCount] = useState(1);
+  const [sharedExpense, setSharedExpense] = useState(false);
+  const [peopleCount, setPeopleCount] = useState(2);
 
   // Reset create form whenever sheet closes
   useEffect(() => {
@@ -46,7 +47,8 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
       setNewIcon("home");
       setNameError("");
       setIncludeInPersonal(false);
-      setPeopleCount(1);
+      setSharedExpense(false);
+      setPeopleCount(2);
     }
   }, [open]);
 
@@ -58,7 +60,7 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
     setSaving(true);
     setNameError("");
     onClose();
-    await onCreate(trimmed, newIcon, includeInPersonal, peopleCount);
+    await onCreate(trimmed, newIcon, includeInPersonal, sharedExpense ? peopleCount : 1);
     setSaving(false);
   }
 
@@ -171,34 +173,47 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
               </div>
             </button>
 
-            {/* People count stepper */}
-            <div className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl mb-3" style={{ background: "var(--md-surface-container-low)" }}>
+            {/* Shared Expense toggle */}
+            <button
+              type="button"
+              onClick={() => setSharedExpense((v) => !v)}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl mb-2 text-left"
+              style={{ background: sharedExpense ? "rgba(200,49,255,0.06)" : "var(--md-surface-container-low)", border: `1.5px solid ${sharedExpense ? "var(--md-primary)" : "transparent"}` }}
+            >
+              <div
+                className="flex items-center justify-center flex-shrink-0"
+                style={{ width: 18, height: 18, borderRadius: 4, background: sharedExpense ? "var(--md-primary)" : "transparent", border: `2px solid ${sharedExpense ? "var(--md-primary)" : "var(--md-outline-variant)"}` }}
+              >
+                {sharedExpense && (
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                )}
+              </div>
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>People</div>
-                <div className="text-[11px] mt-0.5" style={{ color: "var(--md-on-surface-variant)" }}>
-                  {peopleCount === 1 ? "Just you — no split" : `Total ÷ ${peopleCount} per head`}
+                <div className="text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>Shared Expense</div>
+                <div className="text-[11px] mt-0.5" style={{ color: "var(--md-on-surface-variant)" }}>Split total by number of people</div>
+              </div>
+            </button>
+
+            {/* People stepper — only when Shared Expense is on */}
+            {sharedExpense && (
+              <div className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl mb-3 animate-fade-up" style={{ background: "rgba(200,49,255,0.06)", border: "1.5px solid rgba(200,49,255,0.15)" }}>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>People</div>
+                  <div className="text-[11px] mt-0.5" style={{ color: "var(--md-primary)" }}>Total ÷ {peopleCount} per head</div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button type="button" onClick={() => setPeopleCount((n) => Math.max(2, n - 1))} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "var(--md-surface-container)", color: "var(--md-on-surface)" }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  </button>
+                  <span className="text-base font-bold w-5 text-center" style={{ color: "var(--md-on-surface)" }}>{peopleCount}</span>
+                  <button type="button" onClick={() => setPeopleCount((n) => Math.min(20, n + 1))} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "var(--md-primary)", color: "#fff" }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  </button>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setPeopleCount((n) => Math.max(1, n - 1))}
-                  className="w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{ background: peopleCount <= 1 ? "var(--md-surface-container)" : "var(--md-primary)", color: peopleCount <= 1 ? "var(--md-outline)" : "#fff" }}
-                >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                </button>
-                <span className="text-sm font-semibold w-5 text-center" style={{ color: "var(--md-on-surface)" }}>{peopleCount}</span>
-                <button
-                  type="button"
-                  onClick={() => setPeopleCount((n) => Math.min(20, n + 1))}
-                  className="w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{ background: "var(--md-primary)", color: "#fff" }}
-                >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                </button>
-              </div>
-            </div>
+            )}
 
             <button
               onClick={handleCreate}
