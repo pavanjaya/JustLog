@@ -6,6 +6,7 @@ import TxItem from "@/components/TxItem";
 import AiBubble from "@/components/AiBubble";
 import BottomInput from "@/components/BottomInput";
 import { fmtCompact, fmtFull, getGreeting } from "@/lib/format";
+import { useCountUp } from "@/lib/useCountUp";
 
 interface HomeViewProps {
   transactions: Transaction[];
@@ -36,6 +37,10 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
   const totalIncome = transactions.filter((tx) => tx.type === "income").reduce((sum, tx) => sum + tx.amount, 0);
   const totalExpense = transactions.filter((tx) => tx.type === "expense").reduce((sum, tx) => sum + tx.amount, 0);
   const balance = totalIncome - totalExpense;
+
+  const animatedBalance = useCountUp(balance);
+  const animatedIncome = useCountUp(todayIncome);
+  const animatedExpense = useCountUp(todayExpense);
 
   const all = [...transactions].reverse();
 
@@ -128,7 +133,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
         <div className="mb-4">
           <div className="text-xs font-medium mb-1" style={{ color: "var(--md-on-surface-variant)" }}>Total Balance</div>
           <div className="text-3xl font-bold tracking-tight" style={{ color: balance >= 0 ? "#1B5E20" : "#B71C1C" }}>
-            {balance < 0 ? "−" : ""}{fmtFull(Math.abs(balance))}
+            {animatedBalance < 0 ? "−" : ""}{fmtFull(Math.abs(animatedBalance))}
           </div>
         </div>
 
@@ -142,7 +147,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
               </div>
               <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#2E7D32" }}>Today's Income</span>
             </div>
-            <div className="text-lg font-bold" style={{ color: "#1B5E20" }}>{fmtCompact(todayIncome)}</div>
+            <div className="text-lg font-bold" style={{ color: "#1B5E20" }}>{fmtCompact(animatedIncome)}</div>
           </div>
 
           <div className="rounded-2xl px-4 py-3" style={{ background: "#FFF5F5", border: "1px solid #FFCDD2" }}>
@@ -154,7 +159,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
               </div>
               <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#C62828" }}>Today's Spend</span>
             </div>
-            <div className="text-lg font-bold" style={{ color: "#B71C1C" }}>{fmtCompact(todayExpense)}</div>
+            <div className="text-lg font-bold" style={{ color: "#B71C1C" }}>{fmtCompact(animatedExpense)}</div>
           </div>
         </div>
       </div>

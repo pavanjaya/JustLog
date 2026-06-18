@@ -56,14 +56,15 @@ export default function BottomInput({ value, onChange, onSend, disabled }: Botto
       {/* Suggestion chips — scrollable row */}
       {value.trim().length < 4 && (
         <div className="flex gap-1.5 overflow-x-auto pb-2 no-scrollbar">
-          {SUGGESTIONS.map((s) => (
+          {SUGGESTIONS.map((s, i) => (
             <button
               key={s}
               onClick={() => fillSuggestion(s)}
-              className="flex-shrink-0 px-3 py-1.5 text-xs font-medium rounded-full whitespace-nowrap transition-colors"
+              className="flex-shrink-0 px-3 py-1.5 text-xs font-medium rounded-full whitespace-nowrap animate-fade-up"
               style={{
                 background: "rgba(200,49,255,0.05)",
                 color: "var(--md-primary)",
+                animationDelay: `${i * 0.04}s`,
               }}
             >
               {s}

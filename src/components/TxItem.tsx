@@ -92,11 +92,12 @@ export default function TxItem({ tx, index = 0, showDate = false, onDelete, onEd
     <>
       <div className={deleting ? "animate-delete" : "animate-fade-up"} style={{ animationDelay: deleting ? "0s" : `${index * 0.04}s` }}>
         <div
-          className="flex items-center gap-3 px-3 py-3 select-none transition-all duration-200"
+          className="flex items-center gap-3 px-3 py-3 select-none"
           style={{
             background: showDelete ? "var(--md-error-container)" : "transparent",
             borderRadius: showDelete ? "14px" : "0",
-            transform: showDelete ? "scale(0.98)" : "scale(1)",
+            transform: showDelete ? "scale(0.975)" : "scale(1)",
+            transition: "background 180ms ease, border-radius 220ms ease, transform 350ms cubic-bezier(0.34, 1.56, 0.64, 1)",
           }}
           onMouseDown={startPress}
           onMouseUp={cancelPress}

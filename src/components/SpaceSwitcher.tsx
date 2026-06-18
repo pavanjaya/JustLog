@@ -49,21 +49,29 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
     setCreating(false);
   }
 
-  if (!open) return null;
-
   return (
     <>
       {/* Backdrop */}
       <div
         className="absolute inset-0 z-20"
-        style={{ background: "rgba(0,0,0,0.3)" }}
+        style={{
+          background: "rgba(0,0,0,0.3)",
+          opacity: open ? 1 : 0,
+          pointerEvents: open ? "auto" : "none",
+          transition: "opacity 250ms ease",
+        }}
         onClick={onClose}
       />
 
       {/* Sheet */}
       <div
         className="absolute bottom-0 left-0 right-0 z-30 rounded-t-3xl overflow-hidden"
-        style={{ background: "#fff", boxShadow: "0 -4px 32px rgba(0,0,0,0.12)" }}
+        style={{
+          background: "#fff",
+          boxShadow: "0 -4px 32px rgba(0,0,0,0.12)",
+          transform: open ? "translateY(0)" : "translateY(100%)",
+          transition: "transform 350ms cubic-bezier(0.2, 0, 0, 1)",
+        }}
       >
         {/* Handle */}
         <div className="flex justify-center pt-3 pb-1">
