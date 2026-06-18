@@ -26,6 +26,7 @@ export default function AppShell() {
   const [user, setUser] = useState<User | null>(null);
   const [subStatus, setSubStatus] = useState<SubStatus>("loading");
   const ensureDefaultSpaceRunning = useRef(false);
+  const personalSpaceId = useRef<string | null>(null);
   const [spaceLoading, setSpaceLoading] = useState(false);
   const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: "", visible: false });
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -37,13 +38,35 @@ export default function AppShell() {
     toastTimer.current = setTimeout(() => setToast((t) => ({ ...t, visible: false })), 2800);
   }
 
-  const loadTransactions = useCallback(async (spaceId: string) => {
+  const loadTransactions = useCallback(async (spaceId: string, allSpaces?: Space[]) => {
     const { data, error } = await supabase
       .from("transactions")
       .select("*")
       .eq("space_id", spaceId)
       .order("created_at", { ascending: true });
-    if (!error && data) setTransactions(data as Transaction[]);
+    if (error || !data) return;
+
+    let txs: Transaction[] = data as Transaction[];
+
+    // If this is the Personal space, also load transactions from linked spaces
+    if (spaceId === personalSpaceId.current && allSpaces) {
+      const linked = allSpaces.filter((s) => s.include_in_personal && s.id !== spaceId);
+      for (const space of linked) {
+        const { data: linked_data } = await supabase
+          .from("transactions")
+          .select("*")
+          .eq("space_id", space.id)
+          .order("created_at", { ascending: true });
+        if (linked_data) {
+          const tagged = (linked_data as Transaction[]).map((tx) => ({ ...tx, spaceName: space.name }));
+          txs = [...txs, ...tagged];
+        }
+      }
+      // Re-sort by created_at after merging
+      txs.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+    }
+
+    setTransactions(txs);
   }, [supabase]);
 
   const loadSpaces = useCallback(async (userId: string): Promise<Space[]> => {
@@ -68,6 +91,7 @@ export default function AppShell() {
       const existing = await loadSpaces(userId);
       if (existing.length > 0) {
         setSpaces(existing);
+        personalSpaceId.current = existing[0].id;
         return existing[0];
       }
       const { data, error } = await supabase
@@ -78,6 +102,7 @@ export default function AppShell() {
       if (error || !data) throw new Error("Failed to create default space");
       const space = data as Space;
       setSpaces([space]);
+      personalSpaceId.current = space.id;
       return space;
     } finally {
       ensureDefaultSpaceRunning.current = false;
@@ -95,7 +120,8 @@ export default function AppShell() {
       if (user) {
         const space = await ensureDefaultSpace(user.id);
         setActiveSpace(space);
-        await loadTransactions(space.id);
+        const allSpaces = await loadSpaces(user.id);
+        await loadTransactions(space.id, allSpaces);
         await loadSubscription(user.id);
       } else {
         setSubStatus("none");
@@ -109,7 +135,8 @@ export default function AppShell() {
       if (session?.user) {
         const space = await ensureDefaultSpace(session.user.id);
         setActiveSpace(space);
-        await loadTransactions(space.id);
+        const allSpaces = await loadSpaces(session.user.id);
+        await loadTransactions(space.id, allSpaces);
         await loadSubscription(session.user.id);
       } else {
         setSubStatus("none");
@@ -122,26 +149,27 @@ export default function AppShell() {
     };
   }, [ensureDefaultSpace, loadTransactions, loadSubscription, supabase]);
 
-  async function handleSwitchSpace(space: Space) {
+  async function handleSwitchSpace(space: Space, allSpaces?: Space[]) {
     setActiveSpace(space);
     setTransactions([]);
     setSpaceLoading(true);
     setView("home");
-    await loadTransactions(space.id);
+    await loadTransactions(space.id, allSpaces ?? spaces);
     setSpaceLoading(false);
   }
 
-  async function handleCreateSpace(name: string, icon: string) {
+  async function handleCreateSpace(name: string, icon: string, includeInPersonal: boolean) {
     if (!user) return;
     const { data, error } = await supabase
       .from("spaces")
-      .insert({ user_id: user.id, name, icon, color: "#C831FF" })
+      .insert({ user_id: user.id, name, icon, color: "#C831FF", include_in_personal: includeInPersonal })
       .select()
       .single();
     if (error || !data) { showToast("Failed to create space"); return; }
     const space = data as Space;
-    setSpaces((prev) => [...prev, space]);
-    await handleSwitchSpace(space);
+    const updatedSpaces = [...spaces, space];
+    setSpaces(updatedSpaces);
+    await handleSwitchSpace(space, updatedSpaces);
     showToast(`"${name}" created`);
   }
 

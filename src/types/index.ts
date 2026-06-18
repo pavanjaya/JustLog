@@ -24,12 +24,14 @@ export interface Space {
   name: string;
   icon: string;
   color: string;
+  include_in_personal: boolean;
   created_at: string;
 }
 
 export interface Transaction {
   id: string;
   space_id?: string;
+  spaceName?: string; // in-memory only — set when loaded from a linked space
   amount: number;
   type: TxType;
   category: Category;

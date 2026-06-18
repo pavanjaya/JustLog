@@ -25,7 +25,7 @@ interface SpaceSwitcherProps {
   spaces: Space[];
   activeSpaceId: string;
   onSwitch: (space: Space) => void;
-  onCreate: (name: string, icon: string) => Promise<void>;
+  onCreate: (name: string, icon: string, includeInPersonal: boolean) => Promise<void>;
   onClose: () => void;
 }
 
@@ -35,6 +35,7 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
   const [newIcon, setNewIcon] = useState("home");
   const [saving, setSaving] = useState(false);
   const [nameError, setNameError] = useState("");
+  const [includeInPersonal, setIncludeInPersonal] = useState(false);
 
   // Reset create form whenever sheet closes
   useEffect(() => {
@@ -43,6 +44,7 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
       setNewName("");
       setNewIcon("home");
       setNameError("");
+      setIncludeInPersonal(false);
     }
   }, [open]);
 
@@ -54,7 +56,7 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
     setSaving(true);
     setNameError("");
     onClose();
-    await onCreate(trimmed, newIcon);
+    await onCreate(trimmed, newIcon, includeInPersonal);
     setSaving(false);
   }
 
@@ -143,6 +145,29 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
             {nameError && (
               <div className="text-xs px-1 mb-2" style={{ color: "var(--md-error)" }}>{nameError}</div>
             )}
+
+            {/* Include in Personal toggle */}
+            <button
+              type="button"
+              onClick={() => setIncludeInPersonal((v) => !v)}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl mb-3 text-left"
+              style={{ background: includeInPersonal ? "rgba(200,49,255,0.06)" : "var(--md-surface-container-low)", border: `1.5px solid ${includeInPersonal ? "var(--md-primary)" : "transparent"}` }}
+            >
+              <div
+                className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0"
+                style={{ background: includeInPersonal ? "var(--md-primary)" : "transparent", border: `2px solid ${includeInPersonal ? "var(--md-primary)" : "var(--md-outline-variant)"}` }}
+              >
+                {includeInPersonal && (
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>Include in Personal</div>
+                <div className="text-[11px] mt-0.5" style={{ color: "var(--md-on-surface-variant)" }}>Entries also appear in your Personal space</div>
+              </div>
+            </button>
 
             <button
               onClick={handleCreate}

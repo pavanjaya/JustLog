@@ -120,8 +120,13 @@ export default function TxItem({ tx, index = 0, showDate = false, onDelete, onEd
             <div className="text-sm font-medium leading-tight whitespace-nowrap overflow-hidden text-ellipsis" style={{ color: "var(--md-on-surface)" }}>
               {tx.description}
             </div>
-            <div className="text-xs mt-0.5" style={{ color: "var(--md-outline)" }}>
+            <div className="text-xs mt-0.5 flex items-center gap-1.5 flex-wrap" style={{ color: "var(--md-outline)" }}>
               {showDelete ? "Edit or delete this entry" : metaText}
+              {!showDelete && tx.spaceName && (
+                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-medium" style={{ background: "rgba(200,49,255,0.1)", color: "var(--md-primary)" }}>
+                  {tx.spaceName}
+                </span>
+              )}
             </div>
           </div>
 
