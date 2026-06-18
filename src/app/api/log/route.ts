@@ -35,7 +35,11 @@ Format:
 ]
 
 Rules:
-- salary/received/income/from [person] = "income"; everything else = "expense"
+- Fix spelling mistakes in descriptions (e.g. "cofee" → "Coffee", "petrol" → "Petrol")
+- Use clean title case for descriptions (e.g. "Morning Coffee", "School Fees")
+- salary/received/income/from [person]/got = "income"; everything else = "expense"
+- "5k" = 5000, "2L" = 200000, "1.5k" = 1500
+- Pick the most specific matching category from the list
 - Each line or item = separate object in the array
 - Return ONLY the JSON array, nothing else`;
 
