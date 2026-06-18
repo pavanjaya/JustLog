@@ -151,23 +151,11 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
               <div className="text-xs px-1 mb-2" style={{ color: "var(--md-error)" }}>{nameError}</div>
             )}
 
-            <button
-              onClick={handleCreate}
-              disabled={!newName.trim() || saving}
-              className="w-full py-3.5 rounded-2xl text-sm font-semibold"
-              style={{
-                background: !newName.trim() || saving ? "var(--md-surface-container-high)" : "var(--md-primary)",
-                color: !newName.trim() || saving ? "var(--md-outline)" : "#fff",
-              }}
-            >
-              {saving ? "Creating…" : "Create Space"}
-            </button>
-
-            {/* More options — progressive disclosure */}
+            {/* More options — above Create button so it's visible before keyboard hides it */}
             <button
               type="button"
               onClick={() => setShowMore((v) => !v)}
-              className="w-full flex items-center justify-center gap-1 py-2 mt-1"
+              className="w-full flex items-center justify-center gap-1 py-2"
             >
               <span className="text-xs font-medium" style={{ color: "var(--md-outline)" }}>
                 {showMore ? "Less options" : "More options"}
@@ -221,6 +209,18 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
                 )}
               </div>
             )}
+
+            <button
+              onClick={handleCreate}
+              disabled={!newName.trim() || saving}
+              className="w-full py-3.5 rounded-2xl text-sm font-semibold mt-2"
+              style={{
+                background: !newName.trim() || saving ? "var(--md-surface-container-high)" : "var(--md-primary)",
+                color: !newName.trim() || saving ? "var(--md-outline)" : "#fff",
+              }}
+            >
+              {saving ? "Creating…" : "Create Space"}
+            </button>
           </div>
         ) : (
           /* ── Browse mode: list + CTA ── */
