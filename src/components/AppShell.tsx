@@ -127,18 +127,14 @@ export default function AppShell() {
     }
 
     if (typeof window !== "undefined") {
-      const cap = (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor;
-      if (cap?.isNativePlatform?.()) {
-        import("@capacitor/app").then(({ App }) => {
-          App.addListener("appUrlOpen", ({ url }) => { handleDeepLink(url); });
+      import("@capacitor/app").then(({ App }) => {
+        // Fired when Android deep link opens/resumes the app
+        App.addListener("appUrlOpen", ({ url }) => { handleDeepLink(url); });
+        // Also check launch URL (app opened cold from deep link)
+        App.getLaunchUrl().then((result) => {
+          if (result?.url) handleDeepLink(result.url);
         });
-        import("@capacitor/browser").then(({ Browser }) => {
-          Browser.addListener("browserFinished", async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session?.user) window.location.reload();
-          });
-        });
-      }
+      }).catch(() => {/* not in Capacitor context */});
     }
   }, [supabase]);
 
