@@ -219,7 +219,12 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
             </div>
           </div>
         ) : (
-          all.map((tx, i) => <TxItem key={tx.id} tx={tx} index={i} showDate onDelete={onDeleteTransaction} onEdit={onEditTransaction} />)
+          <>
+            <div className="flex justify-center px-3 py-5">
+              <span className="text-[11px] font-medium" style={{ color: "var(--md-outline)" }}>you're all caught up</span>
+            </div>
+            {all.map((tx, i) => <TxItem key={tx.id} tx={tx} index={i} showDate onDelete={onDeleteTransaction} onEdit={onEditTransaction} />)}
+          </>
         )}
       </div>
 

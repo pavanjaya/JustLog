@@ -50,7 +50,7 @@ export default function BottomInput({ value, onChange, onSend, disabled }: Botto
       style={{ background: "#fff" }}
     >
       {/* Suggestion chips — scrollable row */}
-      {!value && (
+      {value.trim().length < 4 && (
         <div className="flex gap-1.5 overflow-x-auto pb-2 no-scrollbar">
           {SUGGESTIONS.map((s) => (
             <button
@@ -81,7 +81,7 @@ export default function BottomInput({ value, onChange, onSend, disabled }: Botto
             value={value}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
-            placeholder={"500 coffee\n300 tea\n25000 salary"}
+            placeholder="Just type what you spent or earned..."
             autoComplete="off"
             autoCorrect="off"
             disabled={disabled}
