@@ -125,6 +125,7 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
               onChange={(e) => setNewName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleCreate()}
               placeholder="Space name (e.g. Business)"
+              maxLength={30}
               autoFocus
               className="w-full px-4 py-3 rounded-2xl text-sm outline-none mb-3"
               style={{
