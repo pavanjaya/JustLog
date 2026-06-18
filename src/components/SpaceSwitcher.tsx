@@ -249,7 +249,12 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
                       <div className="text-sm font-medium truncate" style={{ color: isActive ? "var(--md-primary)" : "var(--md-on-surface)" }}>{space.name}</div>
                       {space.people_count > 1 && (
                         <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ background: "rgba(200,49,255,0.1)", color: "var(--md-primary)" }}>
-                          split · {space.people_count}
+                          split
+                        </span>
+                      )}
+                      {space.include_in_personal && (
+                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ background: "rgba(200,49,255,0.06)", color: "var(--md-primary)", border: "1px solid rgba(200,49,255,0.2)" }}>
+                          personal
                         </span>
                       )}
                     </div>
