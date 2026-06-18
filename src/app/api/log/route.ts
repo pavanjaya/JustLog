@@ -36,11 +36,21 @@ Format:
 
 Rules:
 - AMOUNT: "5k" = 5000, "2k" = 2000, "1.5k" = 1500, "2L" = 200000, "1L" = 100000. NEVER split the number from its suffix — "5k" is ONE token meaning 5000.
-- TYPE: salary/received/income/got/from [person] = "income"; everything else = "expense"
-- DESCRIPTION: Fix spelling mistakes ("cofee" → "Coffee", "petrol" → "Petrol"). Use clean title case. Do NOT include the amount in the description.
-- CATEGORY: chai/tea/coffee/food/lunch/dinner/breakfast/snack/restaurant/swiggy/zomato = "Food & Drinks". grocery/vegetables/fruits/milk = "Groceries". uber/ola/petrol/fuel/auto/bus/metro = "Transport". rent/electricity/wifi/internet/phone/recharge = "Bills". medicine/doctor/hospital = "Healthcare". movie/netflix/game/spotify = "Entertainment". salary/freelance/client payment = "Salary". shopping/clothes/amazon = "Shopping". school/fees/tuition/college = "Education". loan/borrowed/lent/transfer/sent = "Transfer".
-- Pick the MOST SPECIFIC matching category — "chai with friends" is Food & Drinks NOT Entertainment; "loan from X" is Transfer NOT Housing
-- "loan from X" or "borrowed from X" = ONE income entry (Transfer). "lent to X" or "gave loan to X" = ONE expense entry (Transfer). Never create two entries for a single loan.
+- TYPE: salary/received/income/got/from [person] = "income"; everything else = "expense". Exception: "lent to X" or "gave loan to X" = "expense".
+- DESCRIPTION: Fix spelling mistakes ("cofee" → "Coffee"). Use clean title case. Do NOT include the amount. Preserve meaningful words like "Loan", "Rent", "Fee" — do not replace them with generic words.
+- CATEGORY PRIORITY (higher rules override lower ones):
+  1. loan/borrowed/lent/gave loan = "Transfer" (HIGHEST PRIORITY — overrides all other rules)
+  2. chai/tea/coffee/food/lunch/dinner/breakfast/snack/restaurant/swiggy/zomato = "Food & Drinks"
+  3. grocery/vegetables/fruits/milk = "Groceries"
+  4. uber/ola/petrol/fuel/auto/bus/metro = "Transport"
+  5. rent/electricity/wifi/internet/phone/recharge/bill = "Bills"
+  6. medicine/doctor/hospital/pharmacy = "Healthcare"
+  7. movie/netflix/game/spotify/cinema = "Entertainment"
+  8. salary/freelance/client = "Salary"
+  9. shopping/clothes/amazon/flipkart = "Shopping"
+  10. school/fees/tuition/college/course = "Education"
+  11. house/home/flat/property (but NOT loan) = "Housing"
+- "loan from X" = ONE income entry, category "Transfer", description "Loan from X". Never say "Income from X" when the word "loan" is present.
 - Each line or item = separate object in the array
 - Return ONLY the JSON array, nothing else
 
