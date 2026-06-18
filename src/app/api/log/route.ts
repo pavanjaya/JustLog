@@ -38,8 +38,9 @@ Rules:
 - AMOUNT: "5k" = 5000, "2k" = 2000, "1.5k" = 1500, "2L" = 200000, "1L" = 100000. NEVER split the number from its suffix — "5k" is ONE token meaning 5000.
 - TYPE: salary/received/income/got/from [person] = "income"; everything else = "expense"
 - DESCRIPTION: Fix spelling mistakes ("cofee" → "Coffee", "petrol" → "Petrol"). Use clean title case. Do NOT include the amount in the description.
-- CATEGORY: chai/tea/coffee/food/lunch/dinner/breakfast/snack/restaurant/swiggy/zomato = "Food & Drinks". grocery/vegetables/fruits/milk = "Groceries". uber/ola/petrol/fuel/auto/bus/metro = "Transport". rent/electricity/wifi/internet/phone/recharge = "Bills". medicine/doctor/hospital = "Healthcare". movie/netflix/game/spotify = "Entertainment". salary/freelance/client payment = "Salary". shopping/clothes/amazon = "Shopping". school/fees/tuition/college = "Education".
-- Pick the MOST SPECIFIC matching category — "chai with friends" is Food & Drinks, NOT Entertainment
+- CATEGORY: chai/tea/coffee/food/lunch/dinner/breakfast/snack/restaurant/swiggy/zomato = "Food & Drinks". grocery/vegetables/fruits/milk = "Groceries". uber/ola/petrol/fuel/auto/bus/metro = "Transport". rent/electricity/wifi/internet/phone/recharge = "Bills". medicine/doctor/hospital = "Healthcare". movie/netflix/game/spotify = "Entertainment". salary/freelance/client payment = "Salary". shopping/clothes/amazon = "Shopping". school/fees/tuition/college = "Education". loan/borrowed/lent/transfer/sent = "Transfer".
+- Pick the MOST SPECIFIC matching category — "chai with friends" is Food & Drinks NOT Entertainment; "loan from X" is Transfer NOT Housing
+- "loan from X" or "borrowed from X" = ONE income entry (Transfer). "lent to X" or "gave loan to X" = ONE expense entry (Transfer). Never create two entries for a single loan.
 - Each line or item = separate object in the array
 - Return ONLY the JSON array, nothing else
 
@@ -47,7 +48,9 @@ Examples:
 "got 5k from client" → [{"amount": 5000, "type": "income", "category": "Salary", "description": "Income from Client"}]
 "spent 500 on chai with friends" → [{"amount": 500, "type": "expense", "category": "Food & Drinks", "description": "Chai with Friends"}]
 "paid mom 2000 for house rent" → [{"amount": 2000, "type": "expense", "category": "Housing", "description": "House Rent"}]
-"400 cofee" → [{"amount": 400, "type": "expense", "category": "Food & Drinks", "description": "Coffee"}]`;
+"400 cofee" → [{"amount": 400, "type": "expense", "category": "Food & Drinks", "description": "Coffee"}]
+"loan from Rohit 2.5L" → [{"amount": 250000, "type": "income", "category": "Transfer", "description": "Loan from Rohit"}]
+"lent 5000 to Rahul" → [{"amount": 5000, "type": "expense", "category": "Transfer", "description": "Lent to Rahul"}]`;
 
 interface ParsedTx {
   amount: number;
