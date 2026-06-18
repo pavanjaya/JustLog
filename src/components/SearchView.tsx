@@ -98,10 +98,10 @@ export default function SearchView({ transactions, onDeleteTransaction, onEditTr
       const res = await fetch(apiUrl("/api/search"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: q, transactions: transactions.slice(-50) }),
+        body: JSON.stringify({ query: q, transactions }),
       });
       const data = await res.json();
-      setResult(data.answer || "No answer found.");
+      setResult(data.answer || data.error || "No answer found.");
     } catch {
       setResult("Couldn't process that right now.");
     } finally {
