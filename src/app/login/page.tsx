@@ -15,18 +15,24 @@ export default function LoginPage() {
     const supabase = createClient();
 
     if (isCapacitor()) {
-      const { data } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: "com.justlog.app://auth/callback",
-          skipBrowserRedirect: true,
-        },
-      });
-      if (data?.url) {
-        const { Browser } = await import("@capacitor/browser");
-        await Browser.open({ url: data.url });
+      try {
+        const { GoogleAuth } = await import("@codetrix-studio/capacitor-google-auth");
+        await GoogleAuth.initialize({
+          clientId: "756989560868-hcod837ib8atuo11dtnkrm3nves8i916.apps.googleusercontent.com",
+          scopes: ["profile", "email"],
+          grantOfflineAccess: true,
+        });
+        const googleUser = await GoogleAuth.signIn();
+        const idToken = googleUser.authentication.idToken;
+        const { error } = await supabase.auth.signInWithIdToken({
+          provider: "google",
+          token: idToken,
+        });
+        if (error) console.error("Supabase sign in error:", error);
+      } catch (e) {
+        console.error("Google sign in error:", e);
+        setLoading(false);
       }
-      setLoading(false);
     } else {
       await supabase.auth.signInWithOAuth({
         provider: "google",
