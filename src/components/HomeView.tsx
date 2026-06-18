@@ -39,8 +39,8 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
   const balance = totalIncome - totalExpense;
 
   const animatedBalance = useCountUp(balance);
-  const animatedIncome = useCountUp(todayIncome);
-  const animatedExpense = useCountUp(todayExpense);
+  const animatedIncome = useCountUp(totalIncome);
+  const animatedExpense = useCountUp(totalExpense);
 
   const all = [...transactions].reverse();
 
@@ -145,7 +145,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
                   <path d="M5 2 L5 8 M2 5 L5 8 L8 5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
-              <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#2E7D32" }}>Today's Income</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#2E7D32" }}>Total Income</span>
             </div>
             <div className="text-lg font-bold" style={{ color: "#1B5E20" }}>{fmtCompact(animatedIncome)}</div>
           </div>
@@ -157,7 +157,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
                   <path d="M5 8 L5 2 M2 5 L5 2 L8 5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
-              <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#C62828" }}>Today's Spend</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#C62828" }}>Total Spend</span>
             </div>
             <div className="text-lg font-bold" style={{ color: "#B71C1C" }}>{fmtCompact(animatedExpense)}</div>
           </div>
