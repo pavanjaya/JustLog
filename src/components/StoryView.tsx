@@ -164,7 +164,17 @@ export default function StoryView({ transactions }: StoryViewProps) {
         </div>
 
         {curr.filtered.length === 0 ? (
-          <div className="py-8 text-center text-sm" style={{ color: "var(--md-outline)" }}>No transactions this month</div>
+          <div className="py-10 flex flex-col items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: "var(--md-surface-container-low)" }}>
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-outline)" }}>
+                <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+            </div>
+            <div className="text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>No entries in {monthLabel}</div>
+            <div className="text-xs text-center" style={{ color: "var(--md-outline)" }}>
+              Log transactions on the home screen<br />and they'll appear here
+            </div>
+          </div>
         ) : (
           <>
             {/* Monthly narrative — first thing you see */}

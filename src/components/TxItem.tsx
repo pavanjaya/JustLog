@@ -35,7 +35,10 @@ export default function TxItem({ tx, index = 0, showDate = false, onDelete }: Tx
   }
 
   function cancelPress() {
-    if (pressTimer.current) clearTimeout(pressTimer.current);
+    if (pressTimer.current) {
+      clearTimeout(pressTimer.current);
+      pressTimer.current = null;
+    }
   }
 
   function handleDelete(e: React.MouseEvent) {
@@ -58,6 +61,7 @@ export default function TxItem({ tx, index = 0, showDate = false, onDelete }: Tx
         onMouseLeave={cancelPress}
         onTouchStart={startPress}
         onTouchEnd={cancelPress}
+        onTouchCancel={cancelPress}
         onClick={() => showDelete && setShowDelete(false)}
       >
         {/* Category icon circle */}

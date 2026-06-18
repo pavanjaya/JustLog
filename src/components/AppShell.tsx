@@ -25,6 +25,7 @@ export default function AppShell() {
   const [activeSpace, setActiveSpace] = useState<Space | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [subStatus, setSubStatus] = useState<SubStatus>("loading");
+  const [spaceLoading, setSpaceLoading] = useState(false);
   const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: "", visible: false });
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const supabase = createClient();
@@ -111,8 +112,10 @@ export default function AppShell() {
   async function handleSwitchSpace(space: Space) {
     setActiveSpace(space);
     setTransactions([]);
-    await loadTransactions(space.id);
+    setSpaceLoading(true);
     setView("home");
+    await loadTransactions(space.id);
+    setSpaceLoading(false);
   }
 
   async function handleCreateSpace(name: string, icon: string) {
@@ -203,7 +206,13 @@ export default function AppShell() {
         )}
         {subStatus === "none" && <PaywallView onSubscribe={handleSubscribe} />}
 
-        {(subStatus === "active" || subStatus === "trialing") && view === "home" && (
+        {spaceLoading && (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "var(--md-primary)", borderTopColor: "transparent" }} />
+          </div>
+        )}
+
+        {!spaceLoading && (subStatus === "active" || subStatus === "trialing") && view === "home" && (
           <HomeView
             transactions={transactions}
             onAddTransactions={handleAddTransactions}
@@ -212,8 +221,8 @@ export default function AppShell() {
             userName={userName}
           />
         )}
-        {(subStatus === "active" || subStatus === "trialing") && view === "story" && <StoryView transactions={transactions} />}
-        {(subStatus === "active" || subStatus === "trialing") && view === "search" && <SearchView transactions={transactions} onDeleteTransaction={handleDeleteTransaction} />}
+        {!spaceLoading && (subStatus === "active" || subStatus === "trialing") && view === "story" && <StoryView transactions={transactions} />}
+        {!spaceLoading && (subStatus === "active" || subStatus === "trialing") && view === "search" && <SearchView transactions={transactions} onDeleteTransaction={handleDeleteTransaction} />}
         {(subStatus === "active" || subStatus === "trialing") && view === "settings" && (
           <SettingsView
             user={user}
