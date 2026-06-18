@@ -38,6 +38,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [clarifyPerson, setClarifyPerson] = useState<{ amount: number; name: string } | null>(null);
   const feedRef = useRef<HTMLDivElement>(null);
 
   function enterSelectMode(id: string) {
@@ -105,6 +106,24 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
       return;
     }
 
+    // Ambiguous: "3000 sameer" or "sameer 3000" — amount + single name, no direction keywords
+    const DIRECTION_KEYWORDS = ["from", "to", "for", "paid", "received", "got", "lend", "lent", "loan", "sent", "give", "gave", "salary", "income", "spend", "spent", "bought", "buy"];
+    const ambiguousMatch = text.match(/^(\d+(?:\.\d+)?(?:k|K|l|L)?)\s+([a-zA-Z]+)$/) || text.match(/^([a-zA-Z]+)\s+(\d+(?:\.\d+)?(?:k|K|l|L)?)$/);
+    if (ambiguousMatch) {
+      const hasDirection = DIRECTION_KEYWORDS.some(kw => text.toLowerCase().includes(kw));
+      if (!hasDirection) {
+        const numStr = ambiguousMatch[1].match(/\d/) ? ambiguousMatch[1] : ambiguousMatch[2];
+        const name = ambiguousMatch[1].match(/\d/) ? ambiguousMatch[2] : ambiguousMatch[1];
+        const raw = numStr.toLowerCase();
+        const amount = raw.endsWith("k") ? parseFloat(raw) * 1000 : raw.endsWith("l") ? parseFloat(raw) * 100000 : parseFloat(raw);
+        setClarifyPerson({ amount, name: name.charAt(0).toUpperCase() + name.slice(1) });
+        setAiState("clarify");
+        setIsLoading(false);
+        scrollToBottom();
+        return;
+      }
+    }
+
     try {
       let parsed: Array<{ amount: number; type: "income" | "expense"; category: string; description: string }>;
       try {
@@ -156,6 +175,26 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
       created_at: new Date().toISOString(),
     };
     setClarifyAmount(null);
+    setAiState("loading");
+    await onAddTransactions([tx]);
+    setNewTxs([tx]);
+    setAiState("success");
+    scrollToBottom();
+    setTimeout(() => setAiState("idle"), 2000);
+  }
+
+  async function logClarifiedPerson(type: "income" | "expense") {
+    if (!clarifyPerson) return;
+    const { amount, name } = clarifyPerson;
+    const tx: Transaction = {
+      id: crypto.randomUUID(),
+      amount,
+      type,
+      category: "Transfer",
+      description: type === "income" ? `From ${name}` : `To ${name}`,
+      created_at: new Date().toISOString(),
+    };
+    setClarifyPerson(null);
     setAiState("loading");
     await onAddTransactions([tx]);
     setNewTxs([tx]);
@@ -257,6 +296,37 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
 
       {/* Chat feed */}
       <div ref={feedRef} className="flex-1 overflow-y-auto no-scrollbar px-3 pt-2 pb-2 flex flex-col-reverse gap-1">
+        {aiState === "clarify" && clarifyPerson && (
+          <div className="pb-1 animate-fade-up">
+            <div className="rounded-2xl p-4" style={{ background: "var(--md-surface-container-low)", border: "1px solid var(--md-outline-variant)" }}>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "var(--md-primary)", color: "#fff" }}>
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                </div>
+                <span className="text-sm font-medium" style={{ color: "var(--md-on-secondary-container)" }}>
+                  ₹{clarifyPerson.amount.toLocaleString("en-IN")} with {clarifyPerson.name} — paid or received?
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => logClarifiedPerson("income")}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold"
+                  style={{ background: "#E8F5E9", color: "#2E7D32" }}
+                >
+                  + Received
+                </button>
+                <button
+                  onClick={() => logClarifiedPerson("expense")}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold"
+                  style={{ background: "#FFF5F5", color: "#C62828" }}
+                >
+                  − Paid
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {aiState === "clarify" && clarifyAmount && (
           <div className="pb-1 animate-fade-up">
             <div className="rounded-2xl p-4" style={{ background: "var(--md-surface-container-low)", border: "1px solid var(--md-outline-variant)" }}>
@@ -288,7 +358,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
           </div>
         )}
 
-        <AiBubble state={aiState === "clarify" ? "idle" : aiState} newTxs={newTxs} />
+        <AiBubble state={(aiState === "clarify") ? "idle" : aiState} newTxs={newTxs} />
 
         {all.length === 0 && aiState === "idle" ? (
           <div className="flex flex-col items-center justify-center gap-3 py-16">
