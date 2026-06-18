@@ -187,7 +187,14 @@ export default function SettingsView({
         <SettingsItem icon={<IconLogOut />} label="Sign Out" danger onClick={handleSignOut} last />
       </SettingsGroup>
 
-      <div className="text-center py-5 text-xs" style={{ color: "var(--md-outline)" }}>JustLog V1.0 · Just type.</div>
+      <div className="flex flex-col items-center gap-2 py-6">
+        <div className="text-xs" style={{ color: "var(--md-outline)" }}>JustLog V1.0 · Just type.</div>
+        <div className="flex items-center gap-3 text-xs font-medium" style={{ color: "var(--md-primary)" }}>
+          <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>
+          <span style={{ color: "var(--md-outline-variant)" }}>·</span>
+          <a href="/terms" target="_blank" rel="noopener">Terms of Service</a>
+        </div>
+      </div>
 
       {/* ── Sheets ── */}
 
@@ -349,10 +356,6 @@ export default function SettingsView({
             <AboutRow label="Version" value="1.0.0" />
             <AboutRow label="Plan" value={subStatus === "trialing" ? "Free Trial" : subStatus === "active" ? "Pro" : "Free"} />
             <AboutRow label="Transactions" value={String(transactions.length)} last />
-          </div>
-          <div className="flex gap-4 mt-2">
-            <a href="/privacy" target="_blank" rel="noopener" className="text-xs font-medium" style={{ color: "var(--md-primary)" }}>Privacy Policy</a>
-            <a href="/terms" target="_blank" rel="noopener" className="text-xs font-medium" style={{ color: "var(--md-primary)" }}>Terms of Service</a>
           </div>
         </div>
       </Sheet>
