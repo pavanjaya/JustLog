@@ -154,8 +154,8 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
               style={{ background: includeInPersonal ? "rgba(200,49,255,0.06)" : "var(--md-surface-container-low)", border: `1.5px solid ${includeInPersonal ? "var(--md-primary)" : "transparent"}` }}
             >
               <div
-                className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0"
-                style={{ background: includeInPersonal ? "var(--md-primary)" : "transparent", border: `2px solid ${includeInPersonal ? "var(--md-primary)" : "var(--md-outline-variant)"}` }}
+                className="flex items-center justify-center flex-shrink-0"
+                style={{ width: 18, height: 18, borderRadius: 4, background: includeInPersonal ? "var(--md-primary)" : "transparent", border: `2px solid ${includeInPersonal ? "var(--md-primary)" : "var(--md-outline-variant)"}` }}
               >
                 {includeInPersonal && (
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
