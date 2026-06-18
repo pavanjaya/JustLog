@@ -16,13 +16,14 @@ interface HomeViewProps {
   userName?: string;
 }
 
-type AiState = "idle" | "loading" | "success" | "error";
+type AiState = "idle" | "loading" | "success" | "error" | "clarify";
 
 export default function HomeView({ transactions, onAddTransactions, onDeleteTransaction, onEditTransaction, onSeeAll, userName = "there" }: HomeViewProps) {
   const [input, setInput] = useState("");
   const [aiState, setAiState] = useState<AiState>("idle");
   const [newTxs, setNewTxs] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [clarifyAmount, setClarifyAmount] = useState<number | null>(null);
   const feedRef = useRef<HTMLDivElement>(null);
 
   const today = new Date().toDateString();
@@ -50,6 +51,15 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
     setInput("");
     setAiState("loading");
     scrollToBottom();
+
+    // Bare number — ask income or expense
+    if (/^\d+(\.\d+)?$/.test(text)) {
+      setClarifyAmount(parseFloat(text));
+      setAiState("clarify");
+      setIsLoading(false);
+      scrollToBottom();
+      return;
+    }
 
     try {
       const res = await fetch("/api/log", {
@@ -83,6 +93,25 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
     } finally {
       setIsLoading(false);
     }
+  }
+
+  async function logClarified(type: "income" | "expense") {
+    if (!clarifyAmount) return;
+    const tx: Transaction = {
+      id: crypto.randomUUID(),
+      amount: clarifyAmount,
+      type,
+      category: type === "income" ? "Salary" : "Other",
+      description: type === "income" ? "Income" : "Expense",
+      created_at: new Date().toISOString(),
+    };
+    setClarifyAmount(null);
+    setAiState("loading");
+    await onAddTransactions([tx]);
+    setNewTxs([tx]);
+    setAiState("success");
+    scrollToBottom();
+    setTimeout(() => setAiState("idle"), 4000);
   }
 
   return (
@@ -142,7 +171,38 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
 
       {/* Chat feed */}
       <div ref={feedRef} className="flex-1 overflow-y-auto no-scrollbar px-3 pt-2 pb-2 flex flex-col-reverse gap-1">
-        <AiBubble state={aiState} newTxs={newTxs} />
+        {aiState === "clarify" && clarifyAmount && (
+          <div className="pb-1 animate-fade-up">
+            <div className="rounded-[20px] rounded-tl-[4px] p-4" style={{ background: "var(--md-secondary-container)" }}>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "var(--md-primary)", color: "#fff" }}>
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                </div>
+                <span className="text-sm font-medium" style={{ color: "var(--md-on-secondary-container)" }}>
+                  ₹{clarifyAmount} — income or expense?
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => logClarified("income")}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold"
+                  style={{ background: "#E8F5E9", color: "#2E7D32" }}
+                >
+                  + Income
+                </button>
+                <button
+                  onClick={() => logClarified("expense")}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold"
+                  style={{ background: "#FFF5F5", color: "#C62828" }}
+                >
+                  − Expense
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <AiBubble state={aiState === "clarify" ? "idle" : aiState} newTxs={newTxs} />
 
         {all.length === 0 && aiState === "idle" ? (
           <div className="flex flex-col items-center justify-center gap-3 py-16">
