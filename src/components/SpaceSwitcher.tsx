@@ -245,8 +245,13 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
                     >
                       <SpaceIcon icon={space.icon} size={18} color={isActive ? "#fff" : "var(--md-on-surface-variant)"} />
                     </div>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium" style={{ color: isActive ? "var(--md-primary)" : "var(--md-on-surface)" }}>{space.name}</div>
+                    <div className="flex-1 min-w-0 flex items-center gap-2">
+                      <div className="text-sm font-medium truncate" style={{ color: isActive ? "var(--md-primary)" : "var(--md-on-surface)" }}>{space.name}</div>
+                      {space.people_count > 1 && (
+                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ background: "rgba(200,49,255,0.1)", color: "var(--md-primary)" }}>
+                          split · {space.people_count}
+                        </span>
+                      )}
                     </div>
                     {isActive && (
                       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-primary)" }}>
