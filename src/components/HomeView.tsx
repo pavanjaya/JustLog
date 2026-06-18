@@ -225,10 +225,27 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
           </div>
         ) : (
           <>
-            <div className="flex justify-center px-3 py-5">
-              <span className="text-[11px] font-medium" style={{ color: "var(--md-outline)" }}>you're all caught up</span>
-            </div>
+            {/* "caught up" only when there's enough history to scroll through */}
+            {all.length > 5 && (
+              <div className="flex justify-center px-3 py-5">
+                <span className="text-[11px] font-medium" style={{ color: "var(--md-outline)" }}>you're all caught up</span>
+              </div>
+            )}
             {all.map((tx, i) => <TxItem key={tx.id} tx={tx} index={i} showDate onDelete={onDeleteTransaction} onEdit={onEditTransaction} />)}
+            {/* Spacer card shown when few entries — fills the empty top space naturally */}
+            {all.length > 0 && all.length <= 5 && (
+              <div className="flex flex-col items-center gap-2 py-10 px-4">
+                <div className="w-10 h-10 rounded-2xl flex items-center justify-center mb-1" style={{ background: "rgba(200,49,255,0.08)" }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-primary)" }}>
+                    <path d="M17 6L7 18h9l-1 8 10-12h-9l1-8z"/>
+                  </svg>
+                </div>
+                <div className="text-[12px] font-medium text-center" style={{ color: "var(--md-on-surface)" }}>Keep it going</div>
+                <div className="text-[11px] text-center leading-relaxed" style={{ color: "var(--md-outline)" }}>
+                  Every entry builds your picture.<br />Type anything to log it.
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>
