@@ -287,7 +287,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
             <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>Recent</span>
             {all.length > 0 && (
               <button onClick={onSeeAll} className="text-xs font-semibold" style={{ color: "var(--md-on-surface)" }}>
-                See all ({transactions.length})
+                See all →
               </button>
             )}
           </>
@@ -416,7 +416,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
         </div>
       )}
 
-      {!selectMode && <BottomInput value={input} onChange={setInput} onSend={handleSend} disabled={isLoading} />}
+      {!selectMode && <BottomInput value={input} onChange={setInput} onSend={handleSend} disabled={isLoading} transactions={transactions} />}
     </div>
   );
 }

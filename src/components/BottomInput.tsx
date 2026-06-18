@@ -9,16 +9,41 @@ function getNavBarHeight(): number {
   return 0;
 }
 
+import type { Transaction } from "@/types";
+
 interface BottomInputProps {
   value: string;
   onChange: (value: string) => void;
   onSend: () => void;
   disabled?: boolean;
+  transactions?: Transaction[];
 }
 
-const SUGGESTIONS = ["500 coffee", "25000 salary", "1200 petrol", "17000 school fees", "3000 grocery"];
+function getSmartSuggestions(transactions: Transaction[]): string[] {
+  // Count frequency of each description in last 90 days
+  const cutoff = Date.now() - 90 * 24 * 60 * 60 * 1000;
+  const recent = transactions.filter(tx => new Date(tx.created_at).getTime() > cutoff);
 
-export default function BottomInput({ value, onChange, onSend, disabled }: BottomInputProps) {
+  const freq = new Map<string, { count: number; amount: number; type: string }>();
+  for (const tx of recent) {
+    const key = tx.description.toLowerCase();
+    const existing = freq.get(key);
+    if (existing) {
+      existing.count++;
+    } else {
+      freq.set(key, { count: 1, amount: tx.amount, type: tx.type });
+    }
+  }
+
+  // Keep only entries that appear 2+ times, sort by frequency
+  return [...freq.entries()]
+    .filter(([, v]) => v.count >= 2)
+    .sort((a, b) => b[1].count - a[1].count)
+    .slice(0, 5)
+    .map(([desc, v]) => `${v.amount} ${desc}`);
+}
+
+export default function BottomInput({ value, onChange, onSend, disabled, transactions = [] }: BottomInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [popping, setPopping] = useState(false);
   const [navBarHeight, setNavBarHeight] = useState(0);
@@ -65,10 +90,10 @@ export default function BottomInput({ value, onChange, onSend, disabled }: Botto
       className="flex-shrink-0 px-3 pt-2"
       style={{ background: "#fff", paddingBottom: `${navBarHeight + 16}px` }}
     >
-      {/* Suggestion chips — scrollable row */}
-      {value.trim().length < 4 && (
+      {/* Smart suggestion chips — scrollable row */}
+      {value.trim().length < 4 && getSmartSuggestions(transactions).length > 0 && (
         <div className="flex gap-1.5 overflow-x-auto pb-2 no-scrollbar">
-          {SUGGESTIONS.map((s, i) => (
+          {getSmartSuggestions(transactions).map((s, i) => (
             <button
               key={s}
               onClick={() => fillSuggestion(s)}
