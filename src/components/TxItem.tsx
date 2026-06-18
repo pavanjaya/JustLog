@@ -18,9 +18,13 @@ interface TxItemProps {
   showDate?: boolean;
   onDelete?: (id: string) => void;
   onEdit?: (id: string, updates: Partial<Transaction>) => void;
+  selectMode?: boolean;
+  selected?: boolean;
+  onSelect?: (id: string) => void;
+  onEnterSelectMode?: (id: string) => void;
 }
 
-export default function TxItem({ tx, index = 0, showDate = false, onDelete, onEdit }: TxItemProps) {
+export default function TxItem({ tx, index = 0, showDate = false, onDelete, onEdit, selectMode = false, selected = false, onSelect, onEnterSelectMode }: TxItemProps) {
   const meta = getCategoryMeta(tx.category);
   const date = new Date(tx.created_at);
   const [showDelete, setShowDelete] = useState(false);
@@ -48,7 +52,10 @@ export default function TxItem({ tx, index = 0, showDate = false, onDelete, onEd
   const metaText = `${tx.category} · ${smartTime(date)}`;
 
   function startPress() {
-    pressTimer.current = setTimeout(() => setShowDelete(true), 500);
+    if (selectMode) return;
+    pressTimer.current = setTimeout(() => {
+      onEnterSelectMode?.(tx.id);
+    }, 500);
   }
 
   function cancelPress() {
@@ -94,8 +101,8 @@ export default function TxItem({ tx, index = 0, showDate = false, onDelete, onEd
         <div
           className="flex items-center gap-3 px-3 py-3 select-none"
           style={{
-            background: showDelete ? "var(--md-surface-container-high)" : "transparent",
-            borderRadius: showDelete ? "14px" : "0",
+            background: selected ? "rgba(200,49,255,0.07)" : showDelete ? "var(--md-surface-container-high)" : "transparent",
+            borderRadius: (selected || showDelete) ? "14px" : "0",
             transform: showDelete ? "scale(0.975)" : "scale(1)",
             transition: "background 180ms ease, border-radius 220ms ease, transform 350ms cubic-bezier(0.34, 1.56, 0.64, 1)",
           }}
@@ -105,15 +112,30 @@ export default function TxItem({ tx, index = 0, showDate = false, onDelete, onEd
           onTouchStart={startPress}
           onTouchEnd={cancelPress}
           onTouchCancel={cancelPress}
-          onClick={() => showDelete && setShowDelete(false)}
+          onClick={() => {
+            if (selectMode) { onSelect?.(tx.id); return; }
+            if (showDelete) setShowDelete(false);
+          }}
         >
-          {/* Category icon */}
-          <div
-            className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-            style={{ background: showDelete ? "var(--md-surface-container-lowest)" : meta.bg }}
-          >
-            <CategoryIcon icon={meta.icon} size={17} color="#5a4e6e" />
-          </div>
+          {/* Checkbox (select mode) or category icon */}
+          {selectMode ? (
+            <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: selected ? "var(--md-primary)" : "var(--md-surface-container-low)" }}>
+              {selected ? (
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              ) : (
+                <div className="w-4 h-4 rounded-full border-2" style={{ borderColor: "var(--md-outline)" }} />
+              )}
+            </div>
+          ) : (
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+              style={{ background: showDelete ? "var(--md-surface-container-lowest)" : meta.bg }}
+            >
+              <CategoryIcon icon={meta.icon} size={17} color="#5a4e6e" />
+            </div>
+          )}
 
           {/* Description + meta */}
           <div className="flex-1 min-w-0">
@@ -131,7 +153,11 @@ export default function TxItem({ tx, index = 0, showDate = false, onDelete, onEd
           </div>
 
           {/* Actions or amount */}
-          {showDelete ? (
+          {selectMode ? (
+            <div className="text-sm font-semibold flex-shrink-0 tabular-nums" style={{ color: tx.type === "income" ? "#1B7A3E" : "var(--md-on-surface)", opacity: selected ? 1 : 0.5 }}>
+              {tx.type === "income" ? "+" : "−"}{fmtFull(tx.amount)}
+            </div>
+          ) : showDelete ? (
             <div className="flex items-center gap-2">
               <button onClick={openEdit} className="flex items-center justify-center w-8 h-8 rounded-full flex-shrink-0 active:scale-90 transition-transform" style={{ background: "var(--md-outline-variant)" }}>
                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-on-surface)" }}>

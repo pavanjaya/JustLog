@@ -224,6 +224,12 @@ export default function AppShell() {
     setTransactions((prev) => prev.filter((tx) => tx.id !== id));
   }
 
+  async function handleBulkDelete(ids: string[]) {
+    if (!user || ids.length === 0) return;
+    await supabase.from("transactions").delete().in("id", ids).eq("user_id", user.id);
+    setTransactions((prev) => prev.filter((tx) => !ids.includes(tx.id)));
+  }
+
   async function handleEditTransaction(id: string, updates: Partial<Transaction>) {
     if (!user) return;
     const { data, error } = await supabase.from("transactions").update(updates).eq("id", id).eq("user_id", user.id).select().single();
@@ -302,6 +308,7 @@ export default function AppShell() {
                 transactions={transactions}
                 onAddTransactions={handleAddTransactions}
                 onDeleteTransaction={handleDeleteTransaction}
+                onBulkDelete={handleBulkDelete}
                 onEditTransaction={handleEditTransaction}
                 onSeeAll={() => setView("search")}
                 userName={userName}

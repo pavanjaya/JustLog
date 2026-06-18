@@ -20,6 +20,7 @@ interface HomeViewProps {
   transactions: Transaction[];
   onAddTransactions: (txs: Transaction[]) => Promise<void>;
   onDeleteTransaction: (id: string) => void;
+  onBulkDelete: (ids: string[]) => Promise<void>;
   onEditTransaction: (id: string, updates: Partial<Transaction>) => void;
   onSeeAll: () => void;
   userName?: string;
@@ -28,13 +29,42 @@ interface HomeViewProps {
 
 type AiState = "idle" | "loading" | "success" | "error" | "clarify";
 
-export default function HomeView({ transactions, onAddTransactions, onDeleteTransaction, onEditTransaction, onSeeAll, userName = "there", activeSpace }: HomeViewProps) {
+export default function HomeView({ transactions, onAddTransactions, onDeleteTransaction, onBulkDelete, onEditTransaction, onSeeAll, userName = "there", activeSpace }: HomeViewProps) {
   const [input, setInput] = useState("");
   const [aiState, setAiState] = useState<AiState>("idle");
   const [newTxs, setNewTxs] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [clarifyAmount, setClarifyAmount] = useState<number | null>(null);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
   const feedRef = useRef<HTMLDivElement>(null);
+
+  function enterSelectMode(id: string) {
+    setSelectMode(true);
+    setSelectedIds(new Set([id]));
+  }
+
+  function toggleSelect(id: string) {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  function exitSelectMode() {
+    setSelectMode(false);
+    setSelectedIds(new Set());
+  }
+
+  async function handleBulkDelete() {
+    if (selectedIds.size === 0) return;
+    setBulkDeleting(true);
+    await onBulkDelete([...selectedIds]);
+    setBulkDeleting(false);
+    exitSelectMode();
+  }
 
   const today = new Date().toDateString();
   const todayIncome = transactions
@@ -199,11 +229,29 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
 
       {/* Section header */}
       <div className="flex-shrink-0 flex items-center justify-between px-4 pt-2 pb-2">
-        <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>Recent</span>
-        {all.length > 0 && (
-          <button onClick={onSeeAll} className="text-xs font-semibold" style={{ color: "var(--md-on-surface)" }}>
-            See all ({transactions.length})
-          </button>
+        {selectMode ? (
+          <>
+            <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>
+              {selectedIds.size} selected
+            </span>
+            <div className="flex items-center gap-3">
+              <button onClick={() => setSelectedIds(new Set(all.map(t => t.id)))} className="text-xs font-semibold" style={{ color: "var(--md-primary)" }}>
+                Select all
+              </button>
+              <button onClick={exitSelectMode} className="text-xs font-semibold" style={{ color: "var(--md-on-surface-variant)" }}>
+                Cancel
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>Recent</span>
+            {all.length > 0 && (
+              <button onClick={onSeeAll} className="text-xs font-semibold" style={{ color: "var(--md-on-surface)" }}>
+                See all ({transactions.length})
+              </button>
+            )}
+          </>
         )}
       </div>
 
@@ -264,12 +312,41 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
                 <span className="text-[11px] font-medium" style={{ color: "var(--md-outline)" }}>you're all caught up</span>
               </div>
             )}
-            {all.map((tx, i) => <TxItem key={tx.id} tx={tx} index={i} showDate onDelete={onDeleteTransaction} onEdit={onEditTransaction} />)}
+            {all.map((tx, i) => (
+              <TxItem
+                key={tx.id}
+                tx={tx}
+                index={i}
+                showDate
+                onDelete={onDeleteTransaction}
+                onEdit={onEditTransaction}
+                selectMode={selectMode}
+                selected={selectedIds.has(tx.id)}
+                onSelect={toggleSelect}
+                onEnterSelectMode={enterSelectMode}
+              />
+            ))}
           </>
         )}
       </div>
 
-      <BottomInput value={input} onChange={setInput} onSend={handleSend} disabled={isLoading} />
+      {selectMode && (
+        <div className="flex-shrink-0 px-4 pb-4 pt-2" style={{ background: "#fff" }}>
+          <button
+            onClick={handleBulkDelete}
+            disabled={selectedIds.size === 0 || bulkDeleting}
+            className="w-full py-3.5 rounded-2xl text-sm font-semibold disabled:opacity-40 flex items-center justify-center gap-2"
+            style={{ background: "var(--md-error)", color: "#fff" }}
+          >
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+            </svg>
+            {bulkDeleting ? "Deleting…" : `Delete ${selectedIds.size} ${selectedIds.size === 1 ? "entry" : "entries"}`}
+          </button>
+        </div>
+      )}
+
+      {!selectMode && <BottomInput value={input} onChange={setInput} onSend={handleSend} disabled={isLoading} />}
     </div>
   );
 }
