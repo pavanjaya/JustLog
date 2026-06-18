@@ -16,22 +16,12 @@ interface HomeViewProps {
   userName?: string;
 }
 
-type AiState = "idle" | "loading" | "review" | "success" | "error";
-
-type DraftTx = {
-  id: string;
-  amount: number;
-  type: "income" | "expense";
-  category: Transaction["category"];
-  description: string;
-  created_at: string;
-};
+type AiState = "idle" | "loading" | "success" | "error";
 
 export default function HomeView({ transactions, onAddTransactions, onDeleteTransaction, onEditTransaction, onSeeAll, userName = "there" }: HomeViewProps) {
   const [input, setInput] = useState("");
   const [aiState, setAiState] = useState<AiState>("idle");
   const [newTxs, setNewTxs] = useState<Transaction[]>([]);
-  const [drafts, setDrafts] = useState<DraftTx[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const feedRef = useRef<HTMLDivElement>(null);
 
@@ -73,7 +63,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
       const data = await res.json();
       const parsed: Array<{ amount: number; type: "income" | "expense"; category: string; description: string }> = data.transactions;
 
-      const created: DraftTx[] = parsed.map((tx) => ({
+      const created: Transaction[] = parsed.map((tx) => ({
         id: crypto.randomUUID(),
         amount: Number(tx.amount),
         type: tx.type,
@@ -82,28 +72,17 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
         created_at: new Date().toISOString(),
       }));
 
-      setDrafts(created);
-      setAiState("review");
+      await onAddTransactions(created);
+      setNewTxs(created);
+      setAiState("success");
       scrollToBottom();
+      setTimeout(() => setAiState("idle"), created.length > 1 ? 6000 : 4000);
     } catch {
       setAiState("error");
       setTimeout(() => setAiState("idle"), 5000);
     } finally {
       setIsLoading(false);
     }
-  }
-
-  async function confirmDrafts() {
-    await onAddTransactions(drafts as Transaction[]);
-    setNewTxs(drafts as Transaction[]);
-    setDrafts([]);
-    setAiState("success");
-    scrollToBottom();
-    setTimeout(() => setAiState("idle"), drafts.length > 1 ? 6000 : 4000);
-  }
-
-  function toggleDraftType(id: string) {
-    setDrafts(prev => prev.map(d => d.id === id ? { ...d, type: d.type === "income" ? "expense" : "income" } : d));
   }
 
   return (
@@ -163,67 +142,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
 
       {/* Chat feed */}
       <div ref={feedRef} className="flex-1 overflow-y-auto no-scrollbar px-3 pt-2 pb-2 flex flex-col-reverse gap-1">
-
-        {/* Review step — shown before confirming */}
-        {aiState === "review" && drafts.length > 0 && (
-          <div className="pb-1">
-            <div className="rounded-[20px] rounded-tl-[4px] p-4 animate-fade-up" style={{ background: "var(--md-secondary-container)" }}>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "var(--md-primary)", color: "#fff" }}>
-                  <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                </div>
-                <span className="text-xs font-semibold" style={{ color: "var(--md-on-secondary-container)" }}>
-                  {drafts.length === 1 ? "Confirm this entry" : `Confirm ${drafts.length} entries`}
-                </span>
-              </div>
-
-              <div className="flex flex-col gap-2 mb-3">
-                {drafts.map((d) => (
-                  <div key={d.id} className="flex items-center gap-3 px-3 py-2.5 rounded-xl" style={{ background: "rgba(255,255,255,0.55)" }}>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium truncate" style={{ color: "var(--md-on-surface)" }}>{d.description}</div>
-                      <div className="text-xs mt-0.5" style={{ color: "var(--md-outline)" }}>{d.category}</div>
-                    </div>
-                    {/* Income/Expense flip */}
-                    <button
-                      onClick={() => toggleDraftType(d.id)}
-                      className="flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold transition-all"
-                      style={{
-                        background: d.type === "income" ? "#E8F5E9" : "#FFF5F5",
-                        color: d.type === "income" ? "#2E7D32" : "#C62828",
-                      }}
-                    >
-                      {d.type === "income" ? `+₹${d.amount}` : `−₹${d.amount}`}
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              <div className="text-[10px] mb-3" style={{ color: "var(--md-on-secondary-container)", opacity: 0.7 }}>
-                Tap the amount to flip income ↔ expense
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={() => { setAiState("idle"); setDrafts([]); }}
-                  className="flex-1 py-2.5 rounded-xl text-xs font-medium"
-                  style={{ background: "rgba(0,0,0,0.08)", color: "var(--md-on-secondary-container)" }}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmDrafts}
-                  className="flex-1 py-2.5 rounded-xl text-xs font-semibold"
-                  style={{ background: "var(--md-primary)", color: "#fff" }}
-                >
-                  Confirm
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <AiBubble state={aiState === "review" ? "idle" : aiState} newTxs={newTxs} />
+        <AiBubble state={aiState} newTxs={newTxs} />
 
         {all.length === 0 && aiState === "idle" ? (
           <div className="flex flex-col items-center justify-center gap-3 py-16">
@@ -244,7 +163,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
         )}
       </div>
 
-      <BottomInput value={input} onChange={setInput} onSend={handleSend} disabled={isLoading || aiState === "review"} />
+      <BottomInput value={input} onChange={setInput} onSend={handleSend} disabled={isLoading} />
     </div>
   );
 }
