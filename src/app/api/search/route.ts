@@ -34,15 +34,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing transactions" }, { status: 400, headers: CORS_HEADERS });
   }
 
+  const apiKey = process.env.GROQ_API_KEY ?? "";
+  if (!apiKey) {
+    return NextResponse.json({ answer: "Search requires an AI key — not configured yet." }, { headers: CORS_HEADERS });
+  }
+
   try {
-    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY ?? "" });
+    const groq = new Groq({ apiKey });
+
+    // Summarise transactions to keep token count low
+    const txSummary = transactions.slice(-200).map(tx =>
+      `${tx.created_at.slice(0, 10)} | ${tx.type} | ${tx.category} | ${tx.description} | ₹${tx.amount}`
+    ).join("\n");
 
     const response = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
-      max_tokens: 1000,
+      max_tokens: 300,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: `Transactions: ${JSON.stringify(transactions)}\n\nQuestion: ${query}` },
+        { role: "user", content: `Transactions:\n${txSummary}\n\nQuestion: ${query}` },
       ],
     });
 
@@ -51,6 +61,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ answer }, { headers: CORS_HEADERS });
   } catch (err) {
     console.error("AI search error:", err);
-    return NextResponse.json({ error: "Search failed" }, { status: 500, headers: CORS_HEADERS });
+    return NextResponse.json({ error: `Search failed: ${err instanceof Error ? err.message : "unknown error"}` }, { status: 500, headers: CORS_HEADERS });
   }
 }
