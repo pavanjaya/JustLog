@@ -66,8 +66,26 @@ export default function SearchView({ transactions, onDeleteTransaction, onEditTr
   const [query, setQuery] = useState("");
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [typeFilter, setTypeFilter] = useState<"all" | "income" | "expense">("all");
+  const [timeFilter, setTimeFilter] = useState<"all" | "this_month" | "last_month">("all");
 
-  const grouped = groupByMonthAndDate(transactions);
+  const now = new Date();
+  const thisMonthKey = `${now.getFullYear()}-${now.getMonth()}`;
+  const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const lastMonthKey = `${lastMonthDate.getFullYear()}-${lastMonthDate.getMonth()}`;
+
+  const filtered = transactions.filter(tx => {
+    if (typeFilter !== "all" && tx.type !== typeFilter) return false;
+    if (timeFilter !== "all") {
+      const d = new Date(tx.created_at);
+      const key = `${d.getFullYear()}-${d.getMonth()}`;
+      if (timeFilter === "this_month" && key !== thisMonthKey) return false;
+      if (timeFilter === "last_month" && key !== lastMonthKey) return false;
+    }
+    return true;
+  });
+
+  const grouped = groupByMonthAndDate(filtered);
 
   async function runSearch(q: string) {
     if (!q.trim()) return;
@@ -121,6 +139,42 @@ export default function SearchView({ transactions, onDeleteTransaction, onEditTr
         </div>
       </div>
 
+      {/* Filters */}
+      <div className="flex-shrink-0 px-4 pb-3 flex flex-col gap-2">
+        {/* Type filter */}
+        <div className="flex gap-2">
+          {(["all", "income", "expense"] as const).map(t => (
+            <button
+              key={t}
+              onClick={() => setTypeFilter(t)}
+              className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
+              style={{
+                background: typeFilter === t ? "var(--md-on-surface)" : "var(--md-surface-container-low)",
+                color: typeFilter === t ? "#fff" : "var(--md-on-surface-variant)",
+              }}
+            >
+              {t === "all" ? "All" : t === "income" ? "Income" : "Expense"}
+            </button>
+          ))}
+        </div>
+        {/* Time filter */}
+        <div className="flex gap-2">
+          {(["all", "this_month", "last_month"] as const).map(t => (
+            <button
+              key={t}
+              onClick={() => setTimeFilter(t)}
+              className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
+              style={{
+                background: timeFilter === t ? "var(--md-primary)" : "var(--md-surface-container-low)",
+                color: timeFilter === t ? "#fff" : "var(--md-on-surface-variant)",
+              }}
+            >
+              {t === "all" ? "All time" : t === "this_month" ? "This month" : "Last month"}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="flex-1 overflow-y-auto no-scrollbar pb-6">
         {/* AI result */}
         {result !== null && (
@@ -158,8 +212,8 @@ export default function SearchView({ transactions, onDeleteTransaction, onEditTr
         )}
 
         {/* Grouped entries */}
-        {transactions.length === 0 ? (
-          <div className="px-6 py-10 text-center text-sm" style={{ color: "var(--md-outline)" }}>No transactions yet</div>
+        {filtered.length === 0 ? (
+          <div className="px-6 py-10 text-center text-sm" style={{ color: "var(--md-outline)" }}>No transactions found</div>
         ) : (
           grouped.map(({ monthKey, monthLabel, days }) => (
             <div key={monthKey}>
