@@ -129,7 +129,7 @@ export default function AppShell() {
     const space = data as Space;
     setSpaces((prev) => [...prev, space]);
     await handleSwitchSpace(space);
-    showToast(`Switched to "${name}"`);
+    showToast(`"${name}" created`);
   }
 
   async function handleDeleteAll() {

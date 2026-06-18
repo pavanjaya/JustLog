@@ -47,11 +47,9 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
   async function handleCreate() {
     if (!newName.trim()) return;
     setSaving(true);
+    onClose();
     await onCreate(newName.trim(), newIcon);
     setSaving(false);
-    setNewName("");
-    setNewIcon("home");
-    setCreating(false);
   }
 
   function handleBackdropClick() {
@@ -111,9 +109,12 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
                   key={key}
                   onClick={() => setNewIcon(key)}
                   className="flex-1 aspect-square rounded-2xl flex items-center justify-center transition-all"
-                  style={{ background: newIcon === key ? "var(--md-primary)" : "var(--md-surface-container-low)" }}
+                  style={{
+                    background: newIcon === key ? "rgba(200,49,255,0.1)" : "var(--md-surface-container-low)",
+                    border: newIcon === key ? "2px solid var(--md-primary)" : "2px solid transparent",
+                  }}
                 >
-                  <SpaceIcon icon={key} size={18} color={newIcon === key ? "#fff" : "var(--md-on-surface-variant)"} />
+                  <SpaceIcon icon={key} size={18} color={newIcon === key ? "var(--md-primary)" : "var(--md-on-surface-variant)"} />
                 </button>
               ))}
             </div>
