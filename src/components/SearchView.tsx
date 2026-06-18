@@ -66,6 +66,7 @@ export default function SearchView({ transactions, onDeleteTransaction, onEditTr
   const [query, setQuery] = useState("");
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [searchFocused, setSearchFocused] = useState(false);
   const [typeFilter, setTypeFilter] = useState<"all" | "income" | "expense">("all");
   const [timeFilter, setTimeFilter] = useState<"all" | "this_month" | "last_month">("all");
 
@@ -123,6 +124,8 @@ export default function SearchView({ transactions, onDeleteTransaction, onEditTr
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && runSearch(query)}
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => { if (!query) setSearchFocused(false); }}
             type="text"
             placeholder="Ask about your money..."
             autoComplete="off"
@@ -130,7 +133,7 @@ export default function SearchView({ transactions, onDeleteTransaction, onEditTr
             style={{ color: "var(--md-on-surface)" }}
           />
           {query && (
-            <button onClick={() => { setQuery(""); setResult(null); }} className="flex-shrink-0">
+            <button onClick={() => { setQuery(""); setResult(null); setSearchFocused(false); }} className="flex-shrink-0">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" style={{ color: "var(--md-outline)" }}>
                 <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
               </svg>
@@ -194,8 +197,8 @@ export default function SearchView({ transactions, onDeleteTransaction, onEditTr
           </div>
         )}
 
-        {/* Suggestion chips */}
-        {!result && (
+        {/* Suggestion chips — only show when search is focused */}
+        {!result && searchFocused && (
           <div className="grid grid-cols-2 gap-2 px-4 mb-4">
             {SEARCH_CHIPS.map((chip) => (
               <button
