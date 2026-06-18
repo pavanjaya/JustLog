@@ -65,6 +65,12 @@ export default function LoginPage() {
         <p className="text-xs text-center" style={{ color: "var(--md-outline)" }}>
           Your data is private and only visible to you.
         </p>
+        <p className="text-xs text-center" style={{ color: "var(--md-outline)" }}>
+          By continuing, you agree to our{" "}
+          <a href="/terms" target="_blank" rel="noopener" style={{ color: "var(--md-primary)" }}>Terms of Service</a>
+          {" "}and{" "}
+          <a href="/privacy" target="_blank" rel="noopener" style={{ color: "var(--md-primary)" }}>Privacy Policy</a>.
+        </p>
       </div>
     </div>
   );

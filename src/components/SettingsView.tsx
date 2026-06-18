@@ -350,6 +350,10 @@ export default function SettingsView({
             <AboutRow label="Plan" value={subStatus === "trialing" ? "Free Trial" : subStatus === "active" ? "Pro" : "Free"} />
             <AboutRow label="Transactions" value={String(transactions.length)} last />
           </div>
+          <div className="flex gap-4 mt-2">
+            <a href="/privacy" target="_blank" rel="noopener" className="text-xs font-medium" style={{ color: "var(--md-primary)" }}>Privacy Policy</a>
+            <a href="/terms" target="_blank" rel="noopener" className="text-xs font-medium" style={{ color: "var(--md-primary)" }}>Terms of Service</a>
+          </div>
         </div>
       </Sheet>
 
