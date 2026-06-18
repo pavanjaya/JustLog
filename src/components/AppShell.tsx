@@ -269,6 +269,7 @@ export default function AppShell() {
                 onEditTransaction={handleEditTransaction}
                 onSeeAll={() => setView("search")}
                 userName={userName}
+                activeSpace={activeSpace}
               />
             )}
             {view === "story" && <StoryView transactions={transactions} />}
