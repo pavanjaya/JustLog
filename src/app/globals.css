@@ -1,10 +1,5 @@
 @import "tailwindcss";
 
-/* Safe area for Android/iOS edge-to-edge */
-body {
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
-}
 
 /* ─── MATERIAL DESIGN 3 TOKENS ─── */
 :root {

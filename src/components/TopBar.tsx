@@ -14,8 +14,8 @@ interface TopBarProps {
 export default function TopBar({ onNavigate, onAvatarClick, onSpaceClick, activeSpace, avatarUrl, userInitial = "?" }: TopBarProps) {
   return (
     <div
-      className="flex-shrink-0 flex items-center px-4 h-14 gap-2"
-      style={{ background: "#fff" }}
+      className="flex-shrink-0 flex items-center px-4 gap-2"
+      style={{ background: "#fff", paddingTop: "calc(env(safe-area-inset-top) + 12px)", paddingBottom: "12px", minHeight: "56px" }}
     >
       {/* Logo + Space switcher — left side */}
       <div className="flex items-center gap-2 flex-1 min-w-0">
