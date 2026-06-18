@@ -35,7 +35,7 @@ Format:
 ]
 
 Rules:
-- AMOUNT: "5k" = 5000, "2k" = 2000, "1.5k" = 1500, "2L" = 200000, "1L" = 100000. NEVER split the number from its suffix — "5k" is ONE token meaning 5000.
+- AMOUNT: "5k" = 5000, "2k" = 2000, "40k" = 40000, "1.5k" = 1500, "2L" = 200000, "1L" = 100000. The suffix "k" or "K" after a number is a multiplier (×1000), NEVER part of a person's name. "lend to ashok 40k" → amount=40000, name=Ashok (the K belongs to the number, not the name).
 - TYPE: salary/received/income/got/from [person] = "income"; everything else = "expense". Exception: "lent to X" or "gave loan to X" = "expense".
 - DESCRIPTION: Fix spelling mistakes ("cofee" → "Coffee"). Use clean title case. Do NOT include the amount. Preserve meaningful words like "Loan", "Rent", "Fee" — do not replace them with generic words.
 - CATEGORY PRIORITY (higher rules override lower ones):
@@ -60,7 +60,8 @@ Examples:
 "paid mom 2000 for house rent" → [{"amount": 2000, "type": "expense", "category": "Housing", "description": "House Rent"}]
 "400 cofee" → [{"amount": 400, "type": "expense", "category": "Food & Drinks", "description": "Coffee"}]
 "loan from Rohit 2.5L" → [{"amount": 250000, "type": "income", "category": "Transfer", "description": "Loan from Rohit"}]
-"lent 5000 to Rahul" → [{"amount": 5000, "type": "expense", "category": "Transfer", "description": "Lent to Rahul"}]`;
+"lent 5000 to Rahul" → [{"amount": 5000, "type": "expense", "category": "Transfer", "description": "Lent to Rahul"}]
+"lend to ashok 40k" → [{"amount": 40000, "type": "expense", "category": "Transfer", "description": "Lent to Ashok"}]`;
 
 interface ParsedTx {
   amount: number;
