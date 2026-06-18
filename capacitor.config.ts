@@ -5,8 +5,6 @@ const config: CapacitorConfig = {
   appName: 'JustLog',
   webDir: 'out',
   server: {
-    url: 'https://just-log-nu.vercel.app',
-    cleartext: false,
     androidScheme: 'https',
   },
 };

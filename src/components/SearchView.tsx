@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Transaction } from "@/types";
 import TxItem from "@/components/TxItem";
+import { apiUrl } from "@/lib/api";
 
 interface SearchViewProps {
   transactions: Transaction[];
@@ -75,7 +76,7 @@ export default function SearchView({ transactions, onDeleteTransaction, onEditTr
     setResult("");
 
     try {
-      const res = await fetch("/api/search", {
+      const res = await fetch(apiUrl("/api/search"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: q, transactions: transactions.slice(-50) }),

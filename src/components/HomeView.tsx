@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import type { Transaction, Space } from "@/types";
 import TxItem from "@/components/TxItem";
+import { apiUrl } from "@/lib/api";
 import AiBubble from "@/components/AiBubble";
 import BottomInput from "@/components/BottomInput";
 import { fmtCompact, fmtFull, getGreeting } from "@/lib/format";
@@ -68,7 +69,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
     }
 
     try {
-      const res = await fetch("/api/log", {
+      const res = await fetch(apiUrl("/api/log"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text }),
