@@ -77,10 +77,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
 
     try {
       let parsed: Array<{ amount: number; type: "income" | "expense"; category: string; description: string }>;
-      if (isAndroid()) {
-        parsed = localParse(text);
-        if (parsed.length === 0) throw new Error("Could not parse");
-      } else {
+      try {
         const res = await fetch(apiUrl("/api/log"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -89,6 +86,10 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
         if (!res.ok) throw new Error(`API error ${res.status}`);
         const data = await res.json();
         parsed = data.transactions;
+      } catch {
+        // Fallback to local parsing if network/CORS fails
+        parsed = localParse(text);
+        if (parsed.length === 0) throw new Error("Could not parse");
       }
 
       const created: Transaction[] = parsed.map((tx) => ({
