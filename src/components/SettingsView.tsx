@@ -41,6 +41,7 @@ export default function SettingsView({
   const [renamingSpace, setRenamingSpace] = useState<Space | null>(null);
   const [renameVal, setRenameVal] = useState("");
   const [spaceActionTarget, setSpaceActionTarget] = useState<Space | null>(null);
+  const [confirmAction, setConfirmAction] = useState<null | "clear" | "delete">(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const initials = nameVal.charAt(0).toUpperCase();
@@ -113,11 +114,7 @@ export default function SettingsView({
 
   function confirmDeleteSpace(space: Space) {
     if (spaces.length <= 1) { onToast("Can't delete your only space"); return; }
-    if (confirm(`Delete "${space.name}"? All transactions in this space will be lost.`)) {
-      onDeleteSpace(space.id);
-      setSpaceActionTarget(null);
-      onToast(`"${space.name}" deleted`);
-    }
+    setConfirmAction("delete");
   }
 
   return (
@@ -250,7 +247,7 @@ export default function SettingsView({
       </Sheet>
 
       {/* Space action sheet */}
-      <Sheet open={!!spaceActionTarget} onClose={() => { setSpaceActionTarget(null); setRenamingSpace(null); }}>
+      <Sheet open={!!spaceActionTarget} onClose={() => { setSpaceActionTarget(null); setRenamingSpace(null); setConfirmAction(null); }}>
         {spaceActionTarget && (
           <>
             <div className="flex items-center gap-3 mb-5">
@@ -290,28 +287,49 @@ export default function SettingsView({
             )}
 
             {/* Clear data */}
-            <ActionRow
-              icon="🗑️"
-              label="Clear All Transactions"
-              sublabel="Removes all entries, keeps the space"
-              onClick={() => {
-                if (confirm(`Clear all transactions in "${spaceActionTarget.name}"? This cannot be undone.`)) {
+            {confirmAction === "clear" ? (
+              <ConfirmBox
+                message={`Clear all transactions in "${spaceActionTarget.name}"? This cannot be undone.`}
+                confirmLabel="Yes, Clear"
+                onConfirm={() => {
                   onDeleteSpaceData(spaceActionTarget.id);
+                  setConfirmAction(null);
                   setSpaceActionTarget(null);
                   onToast(`"${spaceActionTarget.name}" cleared`);
-                }
-              }}
-            />
-
-            {/* Delete space — only non-Personal, and not the only space */}
-            {spaces.length > 1 && spaceActionTarget.name !== "Personal" && (
-              <ActionRow
-                icon="❌"
-                label="Delete Space"
-                sublabel="Permanently removes this space and all its data"
-                danger
-                onClick={() => confirmDeleteSpace(spaceActionTarget)}
+                }}
+                onCancel={() => setConfirmAction(null)}
               />
+            ) : confirmAction === "delete" ? (
+              <ConfirmBox
+                message={`Delete "${spaceActionTarget.name}"? All transactions will be permanently lost.`}
+                confirmLabel="Yes, Delete"
+                danger
+                onConfirm={() => {
+                  onDeleteSpace(spaceActionTarget.id);
+                  setConfirmAction(null);
+                  setSpaceActionTarget(null);
+                  onToast(`"${spaceActionTarget.name}" deleted`);
+                }}
+                onCancel={() => setConfirmAction(null)}
+              />
+            ) : (
+              <>
+                <ActionRow
+                  icon="🗑️"
+                  label="Clear All Transactions"
+                  sublabel="Removes all entries, keeps the space"
+                  onClick={() => setConfirmAction("clear")}
+                />
+                {spaces.length > 1 && spaceActionTarget.name !== "Personal" && (
+                  <ActionRow
+                    icon="❌"
+                    label="Delete Space"
+                    sublabel="Permanently removes this space and all its data"
+                    danger
+                    onClick={() => setConfirmAction("delete")}
+                  />
+                )}
+              </>
             )}
           </>
         )}
@@ -335,6 +353,22 @@ export default function SettingsView({
         </div>
       </Sheet>
 
+    </div>
+  );
+}
+
+function ConfirmBox({ message, confirmLabel, danger, onConfirm, onCancel }: { message: string; confirmLabel: string; danger?: boolean; onConfirm: () => void; onCancel: () => void }) {
+  return (
+    <div className="rounded-2xl p-4 mb-2" style={{ background: danger ? "#FFF5F5" : "var(--md-surface-container-low)" }}>
+      <p className="text-sm mb-4 leading-relaxed" style={{ color: "var(--md-on-surface)" }}>{message}</p>
+      <div className="flex gap-2">
+        <button onClick={onCancel} className="flex-1 py-3 rounded-xl text-sm font-medium" style={{ background: "var(--md-surface-container-highest)", color: "var(--md-on-surface)" }}>
+          Cancel
+        </button>
+        <button onClick={onConfirm} className="flex-1 py-3 rounded-xl text-sm font-semibold" style={{ background: danger ? "var(--md-error)" : "var(--md-on-surface)", color: "#fff" }}>
+          {confirmLabel}
+        </button>
+      </div>
     </div>
   );
 }
