@@ -4,6 +4,13 @@ import { useRef, useState } from "react";
 import type { Transaction, Space } from "@/types";
 import TxItem from "@/components/TxItem";
 import { apiUrl } from "@/lib/api";
+import { localParse } from "@/lib/localParse";
+
+function isAndroid() {
+  if (typeof window === "undefined") return false;
+  const cap = (window as unknown as { Capacitor?: { getPlatform?: () => string } }).Capacitor;
+  return cap?.getPlatform?.() === "android";
+}
 import AiBubble from "@/components/AiBubble";
 import BottomInput from "@/components/BottomInput";
 import { fmtCompact, fmtFull, getGreeting } from "@/lib/format";
@@ -69,14 +76,20 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
     }
 
     try {
-      const res = await fetch(apiUrl("/api/log"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
-      });
-      if (!res.ok) throw new Error(`API error ${res.status}`);
-      const data = await res.json();
-      const parsed: Array<{ amount: number; type: "income" | "expense"; category: string; description: string }> = data.transactions;
+      let parsed: Array<{ amount: number; type: "income" | "expense"; category: string; description: string }>;
+      if (isAndroid()) {
+        parsed = localParse(text);
+        if (parsed.length === 0) throw new Error("Could not parse");
+      } else {
+        const res = await fetch(apiUrl("/api/log"), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
+        });
+        if (!res.ok) throw new Error(`API error ${res.status}`);
+        const data = await res.json();
+        parsed = data.transactions;
+      }
 
       const created: Transaction[] = parsed.map((tx) => ({
         id: crypto.randomUUID(),
