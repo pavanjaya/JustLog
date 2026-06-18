@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import type { Transaction, View, Space } from "@/types";
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
@@ -17,6 +18,7 @@ import PaywallView from "@/components/PaywallView";
 type SubStatus = "loading" | "active" | "trialing" | "none";
 
 export default function AppShell() {
+  const router = useRouter();
   const [view, setView] = useState<View>("home");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [spaceSwitcherOpen, setSpaceSwitcherOpen] = useState(false);
@@ -149,9 +151,7 @@ export default function AppShell() {
         await loadSubscription(user.id);
       } else {
         setSubStatus("none");
-        if (!window.location.pathname.startsWith("/login") && !window.location.pathname.startsWith("/auth")) {
-          window.location.href = "/login";
-        }
+        router.replace("/login");
       }
     });
 
@@ -167,9 +167,7 @@ export default function AppShell() {
         await loadSubscription(session.user.id);
       } else {
         setSubStatus("none");
-        if (!window.location.pathname.startsWith("/login") && !window.location.pathname.startsWith("/auth")) {
-          window.location.href = "/login";
-        }
+        router.replace("/login");
       }
     });
 
@@ -281,7 +279,7 @@ export default function AppShell() {
             <div className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "var(--md-primary)", borderTopColor: "transparent" }} />
           </div>
         )}
-        {subStatus === "none" && <PaywallView onSubscribe={handleSubscribe} />}
+        {subStatus === "none" && null}
 
         {spaceLoading && (
           <div className="flex-1 flex items-center justify-center">
