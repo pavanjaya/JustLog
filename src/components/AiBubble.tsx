@@ -43,12 +43,10 @@ export default function AiBubble({ state, newTxs = [] }: AiBubbleProps) {
           )}
 
           {state === "success" && newTxs.length === 1 && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 h-7">
               <span className="text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>{newTxs[0].description}</span>
-              <span className="text-sm font-semibold" style={{ color: newTxs[0].type === "income" ? "#1B7A3E" : "#C62828" }}>
-                {newTxs[0].type === "income" ? "+" : "−"}{fmtFull(newTxs[0].amount)}
-              </span>
-              <span className="text-xs font-medium" style={{ color: "#2E7D32" }}>logged</span>
+              <span className="text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>{newTxs[0].type === "income" ? "+" : "−"}{fmtFull(newTxs[0].amount)}</span>
+              <span className="text-sm" style={{ color: "var(--md-on-surface-variant)" }}>logged</span>
             </div>
           )}
 
