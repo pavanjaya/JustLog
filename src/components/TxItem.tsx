@@ -25,6 +25,8 @@ export default function TxItem({ tx, index = 0, showDate = false, onDelete, onEd
   const date = new Date(tx.created_at);
   const [showDelete, setShowDelete] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [sheetClosing, setSheetClosing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [editAmount, setEditAmount] = useState(String(tx.amount));
   const [editDesc, setEditDesc] = useState(tx.description);
   const [editCategory, setEditCategory] = useState<Category>(tx.category);
@@ -58,8 +60,9 @@ export default function TxItem({ tx, index = 0, showDate = false, onDelete, onEd
 
   function handleDelete(e: React.MouseEvent) {
     e.stopPropagation();
-    onDelete?.(tx.id);
     setShowDelete(false);
+    setDeleting(true);
+    setTimeout(() => onDelete?.(tx.id), 240);
   }
 
   function openEdit(e: React.MouseEvent) {
@@ -70,18 +73,24 @@ export default function TxItem({ tx, index = 0, showDate = false, onDelete, onEd
     setEditType(tx.type);
     setShowDelete(false);
     setEditOpen(true);
+    setSheetClosing(false);
+  }
+
+  function closeEdit() {
+    setSheetClosing(true);
+    setTimeout(() => { setEditOpen(false); setSheetClosing(false); }, 280);
   }
 
   function saveEdit() {
     const amount = parseFloat(editAmount);
     if (!amount || amount <= 0 || !editDesc.trim()) return;
     onEdit?.(tx.id, { amount, description: editDesc.trim(), category: editCategory, type: editType });
-    setEditOpen(false);
+    closeEdit();
   }
 
   return (
     <>
-      <div className="animate-fade-up" style={{ animationDelay: `${index * 0.04}s` }}>
+      <div className={deleting ? "animate-delete" : "animate-fade-up"} style={{ animationDelay: deleting ? "0s" : `${index * 0.04}s` }}>
         <div
           className="flex items-center gap-3 px-3 py-3 select-none transition-all duration-200"
           style={{
@@ -139,8 +148,8 @@ export default function TxItem({ tx, index = 0, showDate = false, onDelete, onEd
 
       {/* Edit bottom sheet */}
       {editOpen && (
-        <div className="fixed inset-0 z-50 flex flex-col justify-end" style={{ background: "rgba(0,0,0,0.4)" }} onClick={() => setEditOpen(false)}>
-          <div className="rounded-t-3xl p-6 pb-10 flex flex-col gap-4" style={{ background: "#fff", maxHeight: "85dvh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
+        <div className={`fixed inset-0 z-50 flex flex-col justify-end ${sheetClosing ? "animate-fade-out" : "animate-fade-in"}`} style={{ background: "rgba(0,0,0,0.4)" }} onClick={closeEdit}>
+          <div className={`rounded-t-3xl p-6 pb-10 flex flex-col gap-4 ${sheetClosing ? "animate-slide-down" : "animate-slide-up"}`} style={{ background: "#fff", maxHeight: "85dvh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
             <div className="w-10 h-1 rounded-full mx-auto" style={{ background: "var(--md-outline-variant)" }} />
             <div className="text-base font-semibold" style={{ color: "var(--md-on-surface)" }}>Edit Entry</div>
 
