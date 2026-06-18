@@ -56,7 +56,7 @@ export default function Drawer({ open, view, onClose, onNavigate, onDeleteAll, u
         }}
       >
         {/* Profile */}
-        <div className="px-6 pt-16 pb-6" style={{ borderBottom: "1px solid var(--md-outline-variant)" }}>
+        <div className="px-6 pt-16 pb-6">
           <div className="flex items-center gap-4">
             {avatar ? (
               <img src={avatar} alt={name} className="w-14 h-14 rounded-full object-cover flex-shrink-0" />
@@ -79,7 +79,7 @@ export default function Drawer({ open, view, onClose, onNavigate, onDeleteAll, u
         </div>
 
         {/* Sign out pinned to bottom */}
-        <div className="px-3 pb-8 pt-2" style={{ borderTop: "1px solid var(--md-outline-variant)" }}>
+        <div className="px-3 pb-8 pt-2">
           {confirmSignOut ? (
             <div className="px-2 py-3 animate-fade-up">
               <div className="text-sm font-medium mb-3" style={{ color: "var(--md-on-surface)" }}>Sign out of JustLog?</div>
