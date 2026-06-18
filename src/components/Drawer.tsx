@@ -1,5 +1,8 @@
 "use client";
 
+"use client";
+
+import { useState } from "react";
 import type { View } from "@/types";
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
@@ -22,6 +25,7 @@ function IconLogOut()   { return <svg {...ic}><path d="M9 21H5a2 2 0 01-2-2V5a2 
 
 export default function Drawer({ open, view, onClose, onNavigate, onDeleteAll, user }: DrawerProps) {
   const router = useRouter();
+  const [confirmSignOut, setConfirmSignOut] = useState(false);
   const name = user?.user_metadata?.full_name ?? user?.email?.split("@")[0] ?? "You";
   const email = user?.email ?? "";
   const avatar = user?.user_metadata?.avatar_url as string | undefined;
@@ -38,7 +42,7 @@ export default function Drawer({ open, view, onClose, onNavigate, onDeleteAll, u
   return (
     <>
       <div
-        onClick={onClose}
+        onClick={() => { setConfirmSignOut(false); onClose(); }}
         className={`fixed inset-0 z-[200] transition-opacity duration-300 ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
         style={{ background: "rgba(0,0,0,0.28)" }}
       />
@@ -78,7 +82,29 @@ export default function Drawer({ open, view, onClose, onNavigate, onDeleteAll, u
 
         {/* Sign out pinned to bottom */}
         <div className="px-3 pb-8 pt-2" style={{ borderTop: "1px solid var(--md-outline-variant)" }}>
-          <DrawerItem icon={<IconLogOut />} label="Sign Out" danger onClick={handleSignOut} />
+          {confirmSignOut ? (
+            <div className="px-2 py-3 animate-fade-up">
+              <div className="text-sm font-medium mb-3" style={{ color: "var(--md-on-surface)" }}>Sign out of JustLog?</div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setConfirmSignOut(false)}
+                  className="flex-1 py-2.5 rounded-2xl text-sm font-semibold"
+                  style={{ background: "var(--md-surface-container)", color: "var(--md-on-surface)" }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSignOut}
+                  className="flex-1 py-2.5 rounded-2xl text-sm font-semibold"
+                  style={{ background: "var(--md-error)", color: "#fff" }}
+                >
+                  Sign Out
+                </button>
+              </div>
+            </div>
+          ) : (
+            <DrawerItem icon={<IconLogOut />} label="Sign Out" danger onClick={() => setConfirmSignOut(true)} />
+          )}
         </div>
       </div>
     </>
