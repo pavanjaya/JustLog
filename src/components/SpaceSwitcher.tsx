@@ -1,15 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Space } from "@/types";
 
 const SPACE_ICONS = [
-  { key: "home", label: "Personal" },
-  { key: "briefcase", label: "Business" },
-  { key: "heart", label: "Family" },
-  { key: "star", label: "Savings" },
-  { key: "car", label: "Vehicle" },
-  { key: "globe", label: "Travel" },
+  { key: "home" }, { key: "briefcase" }, { key: "heart" },
+  { key: "star" }, { key: "car" }, { key: "globe" },
 ];
 
 function SpaceIcon({ icon, size = 20, color = "currentColor" }: { icon: string; size?: number; color?: string }) {
@@ -39,6 +35,15 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
   const [newIcon, setNewIcon] = useState("home");
   const [saving, setSaving] = useState(false);
 
+  // Reset create form whenever sheet closes
+  useEffect(() => {
+    if (!open) {
+      setCreating(false);
+      setNewName("");
+      setNewIcon("home");
+    }
+  }, [open]);
+
   async function handleCreate() {
     if (!newName.trim()) return;
     setSaving(true);
@@ -49,9 +54,14 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
     setCreating(false);
   }
 
+  function handleBackdropClick() {
+    // Tap outside always closes the entire sheet
+    onClose();
+  }
+
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop — tap outside closes sheet */}
       <div
         className="absolute inset-0 z-20"
         style={{
@@ -60,7 +70,7 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
           pointerEvents: open ? "auto" : "none",
           transition: "opacity 250ms ease",
         }}
-        onClick={onClose}
+        onClick={handleBackdropClick}
       />
 
       {/* Sheet */}
@@ -78,62 +88,32 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
           <div className="w-10 h-1 rounded-full" style={{ background: "var(--md-outline-variant)" }} />
         </div>
 
-        <div className="px-5 pb-2 pt-1 flex items-center justify-between">
-          <span className="text-base font-semibold" style={{ color: "var(--md-on-surface)" }}>Your Spaces</span>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full" style={{ color: "var(--md-on-surface-variant)" }}>
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-        </div>
-
-        {/* Space list */}
-        <div className="px-4 pb-2 flex flex-col gap-1">
-          {spaces.map((space) => {
-            const isActive = space.id === activeSpaceId;
-            return (
-              <button
-                key={space.id}
-                onClick={() => { onSwitch(space); onClose(); }}
-                className="flex items-center gap-3 px-3 py-3 rounded-2xl w-full text-left transition-all"
-                style={{
-                  background: isActive ? "rgba(200,49,255,0.05)" : "transparent",
-                }}
-              >
-                <div
-                  className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: isActive ? "var(--md-primary)" : "var(--md-surface-container-low)" }}
-                >
-                  <SpaceIcon icon={space.icon} size={18} color={isActive ? "#fff" : "var(--md-on-surface-variant)"} />
-                </div>
-                <div className="flex-1">
-                  <div className="text-sm font-medium" style={{ color: isActive ? "var(--md-on-primary-container)" : "var(--md-on-surface)" }}>{space.name}</div>
-                </div>
-                {isActive && (
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-primary)", flexShrink: 0 }}>
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                )}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Create new space */}
         {creating ? (
-          <div className="px-5 pb-6 pt-2 border-t" style={{ borderColor: "var(--md-outline-variant)" }}>
-            <div className="text-sm font-medium mb-3" style={{ color: "var(--md-on-surface)" }}>New Space</div>
+          /* ── Create mode: form only, no list ── */
+          <div className="px-5 pt-2 pb-8">
+            <div className="flex items-center gap-3 mb-5">
+              <button
+                onClick={() => setCreating(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-full flex-shrink-0"
+                style={{ background: "var(--md-surface-container-low)" }}
+              >
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-on-surface-variant)" }}>
+                  <path d="M19 12H5M12 5l-7 7 7 7"/>
+                </svg>
+              </button>
+              <span className="text-base font-semibold" style={{ color: "var(--md-on-surface)" }}>New Space</span>
+            </div>
 
             {/* Icon picker */}
-            <div className="flex gap-2 mb-3">
+            <div className="flex gap-2 mb-4">
               {SPACE_ICONS.map(({ key }) => (
                 <button
                   key={key}
                   onClick={() => setNewIcon(key)}
-                  className="w-10 h-10 rounded-xl flex items-center justify-center transition-all"
-                  style={{
-                    background: newIcon === key ? "var(--md-primary)" : "var(--md-surface-container-low)",
-                  }}
+                  className="flex-1 aspect-square rounded-2xl flex items-center justify-center transition-all"
+                  style={{ background: newIcon === key ? "var(--md-primary)" : "var(--md-surface-container-low)" }}
                 >
-                  <SpaceIcon icon={key} size={16} color={newIcon === key ? "#fff" : "var(--md-on-surface-variant)"} />
+                  <SpaceIcon icon={key} size={18} color={newIcon === key ? "#fff" : "var(--md-on-surface-variant)"} />
                 </button>
               ))}
             </div>
@@ -145,47 +125,73 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
               onKeyDown={(e) => e.key === "Enter" && handleCreate()}
               placeholder="Space name (e.g. Business)"
               autoFocus
-              className="w-full px-4 py-3 rounded-2xl text-sm outline-none border"
+              className="w-full px-4 py-3 rounded-2xl text-sm outline-none mb-3"
               style={{
                 background: "var(--md-surface-container-low)",
-                borderColor: "var(--md-outline-variant)",
+                border: "1.5px solid var(--md-outline-variant)",
                 color: "var(--md-on-surface)",
               }}
             />
 
-            <div className="flex gap-2 mt-3">
-              <button
-                onClick={() => setCreating(false)}
-                className="flex-1 py-2.5 rounded-2xl text-sm font-medium"
-                style={{ background: "var(--md-surface-container-low)", color: "var(--md-on-surface-variant)" }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleCreate}
-                disabled={!newName.trim() || saving}
-                className="flex-1 py-2.5 rounded-2xl text-sm font-medium disabled:opacity-40"
-                style={{ background: "var(--md-primary)", color: "#fff" }}
-              >
-                {saving ? "Creating…" : "Create"}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="px-4 pb-8 pt-2">
             <button
-              onClick={() => setCreating(true)}
-              className="flex items-center gap-3 px-3 py-3 rounded-2xl w-full"
-              style={{ background: "var(--md-surface-container-low)" }}
+              onClick={handleCreate}
+              disabled={!newName.trim() || saving}
+              className="w-full py-3.5 rounded-2xl text-sm font-semibold disabled:opacity-40"
+              style={{ background: "var(--md-primary)", color: "#fff" }}
             >
-              <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: "var(--md-outline-variant)" }}>
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--md-on-surface-variant)" strokeWidth={2} strokeLinecap="round">
-                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                </svg>
-              </div>
-              <span className="text-sm font-medium" style={{ color: "var(--md-on-surface-variant)" }}>Create New Space</span>
+              {saving ? "Creating…" : "Create Space"}
             </button>
           </div>
+        ) : (
+          /* ── Browse mode: list + CTA ── */
+          <>
+            <div className="px-5 pb-2 pt-1">
+              <span className="text-base font-semibold" style={{ color: "var(--md-on-surface)" }}>Your Spaces</span>
+            </div>
+
+            <div className="px-4 pb-3 flex flex-col gap-1">
+              {spaces.map((space) => {
+                const isActive = space.id === activeSpaceId;
+                return (
+                  <button
+                    key={space.id}
+                    onClick={() => { onSwitch(space); onClose(); }}
+                    className="flex items-center gap-3 px-3 py-3 rounded-2xl w-full text-left transition-all"
+                    style={{ background: isActive ? "rgba(200,49,255,0.05)" : "transparent" }}
+                  >
+                    <div
+                      className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0"
+                      style={{ background: isActive ? "var(--md-primary)" : "var(--md-surface-container-low)" }}
+                    >
+                      <SpaceIcon icon={space.icon} size={18} color={isActive ? "#fff" : "var(--md-on-surface-variant)"} />
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium" style={{ color: isActive ? "var(--md-primary)" : "var(--md-on-surface)" }}>{space.name}</div>
+                    </div>
+                    {isActive && (
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-primary)" }}>
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Create CTA — clear purple button */}
+            <div className="px-4 pb-8 pt-1">
+              <button
+                onClick={() => setCreating(true)}
+                className="w-full py-3.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2"
+                style={{ background: "rgba(200,49,255,0.08)", color: "var(--md-primary)" }}
+              >
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round">
+                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                New Space
+              </button>
+            </div>
+          </>
         )}
       </div>
     </>
