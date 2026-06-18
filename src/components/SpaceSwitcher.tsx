@@ -61,7 +61,7 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
     <>
       {/* Backdrop — tap outside closes sheet */}
       <div
-        className="absolute inset-0 z-20"
+        className="fixed inset-0 z-[200]"
         style={{
           background: "rgba(0,0,0,0.3)",
           opacity: open ? 1 : 0,
@@ -73,7 +73,7 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
 
       {/* Sheet */}
       <div
-        className="absolute bottom-0 left-0 right-0 z-30 rounded-t-3xl overflow-hidden"
+        className="fixed bottom-0 left-0 right-0 z-[300] rounded-t-3xl overflow-hidden max-w-[430px] mx-auto"
         style={{
           background: "#fff",
           boxShadow: "0 -4px 32px rgba(0,0,0,0.12)",
