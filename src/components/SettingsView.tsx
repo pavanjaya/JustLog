@@ -40,6 +40,7 @@ export default function SettingsView({
   const [darkMode, setDarkMode] = useState(false);
   const [renamingSpace, setRenamingSpace] = useState<Space | null>(null);
   const [renameVal, setRenameVal] = useState("");
+  const [spaceActionTarget, setSpaceActionTarget] = useState<Space | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const initials = nameVal.charAt(0).toUpperCase();
@@ -114,6 +115,7 @@ export default function SettingsView({
     if (spaces.length <= 1) { onToast("Can't delete your only space"); return; }
     if (confirm(`Delete "${space.name}"? All transactions in this space will be lost.`)) {
       onDeleteSpace(space.id);
+      setSpaceActionTarget(null);
       onToast(`"${space.name}" deleted`);
     }
   }
@@ -230,64 +232,89 @@ export default function SettingsView({
         <div className="text-base font-semibold mb-4" style={{ color: "var(--md-on-surface)" }}>Manage Spaces</div>
         <div className="flex flex-col gap-2">
           {spaces.map((sp) => (
-            <div key={sp.id} className="rounded-2xl overflow-hidden" style={{ background: "var(--md-surface-container-low)" }}>
-              {renamingSpace?.id === sp.id ? (
-                <div className="flex items-center gap-2 px-4 py-3">
+            <button
+              key={sp.id}
+              onClick={() => setSpaceActionTarget(sp)}
+              className="rounded-2xl px-4 py-3.5 flex items-center gap-3 text-left w-full"
+              style={{ background: "var(--md-surface-container-low)" }}
+            >
+              <span className="text-xl">{sp.icon === "home" ? "🏠" : "📁"}</span>
+              <span className="flex-1 text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>{sp.name}</span>
+              {sp.id === activeSpace?.id && (
+                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: "#E8F5E9", color: "#2E7D32" }}>Active</span>
+              )}
+              <Chevron />
+            </button>
+          ))}
+        </div>
+      </Sheet>
+
+      {/* Space action sheet */}
+      <Sheet open={!!spaceActionTarget} onClose={() => { setSpaceActionTarget(null); setRenamingSpace(null); }}>
+        {spaceActionTarget && (
+          <>
+            <div className="flex items-center gap-3 mb-5">
+              <span className="text-2xl">{spaceActionTarget.icon === "home" ? "🏠" : "📁"}</span>
+              <div>
+                <div className="text-base font-semibold" style={{ color: "var(--md-on-surface)" }}>{spaceActionTarget.name}</div>
+                <div className="text-xs" style={{ color: "var(--md-on-surface-variant)" }}>
+                  {spaceActionTarget.id === activeSpace?.id ? "Active space" : "Space"}
+                </div>
+              </div>
+            </div>
+
+            {/* Rename — only for non-Personal */}
+            {spaceActionTarget.name !== "Personal" && (
+              renamingSpace?.id === spaceActionTarget.id ? (
+                <div className="mb-3">
+                  <div className="text-xs font-medium mb-2" style={{ color: "var(--md-on-surface-variant)" }}>New Name</div>
                   <input
                     autoFocus
                     value={renameVal}
                     onChange={(e) => setRenameVal(e.target.value)}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter") { onRenameSpace(sp.id, renameVal); setRenamingSpace(null); onToast("Space renamed"); }
+                      if (e.key === "Enter") { onRenameSpace(spaceActionTarget.id, renameVal); setRenamingSpace(null); setSpaceActionTarget(null); onToast("Space renamed"); }
                       if (e.key === "Escape") setRenamingSpace(null);
                     }}
-                    className="flex-1 text-sm outline-none border-none bg-transparent"
-                    style={{ color: "var(--md-on-surface)" }}
+                    className="w-full px-4 py-3 rounded-2xl text-sm outline-none border-none mb-2"
+                    style={{ background: "var(--md-surface-container-low)", color: "var(--md-on-surface)" }}
                   />
-                  <button onClick={() => { onRenameSpace(sp.id, renameVal); setRenamingSpace(null); onToast("Space renamed"); }} className="text-xs font-semibold" style={{ color: "var(--md-primary)" }}>Save</button>
-                  <button onClick={() => setRenamingSpace(null)} className="text-xs" style={{ color: "var(--md-outline)" }}>Cancel</button>
+                  <div className="flex gap-2">
+                    <button onClick={() => { onRenameSpace(spaceActionTarget.id, renameVal); setRenamingSpace(null); setSpaceActionTarget(null); onToast("Space renamed"); }} className="flex-1 py-3 rounded-2xl text-sm font-semibold" style={{ background: "var(--md-on-surface)", color: "#fff" }}>Save</button>
+                    <button onClick={() => setRenamingSpace(null)} className="px-5 py-3 rounded-2xl text-sm font-medium" style={{ background: "var(--md-surface-container-low)", color: "var(--md-on-surface)" }}>Cancel</button>
+                  </div>
                 </div>
               ) : (
-                <div className="flex items-center gap-3 px-4 py-3">
-                  <span className="text-lg">{sp.icon === "home" ? "🏠" : "📁"}</span>
-                  <span className="flex-1 text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>{sp.name}</span>
-                  {sp.id === activeSpace?.id && (
-                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: "#E8F5E9", color: "#2E7D32" }}>Active</span>
-                  )}
-                  {sp.name !== "Personal" && (
-                    <button onClick={() => { setRenamingSpace(sp); setRenameVal(sp.name); }} className="p-1.5 rounded-full" style={{ color: "var(--md-outline)" }}>
-                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                      </svg>
-                    </button>
-                  )}
-                  <button
-                    onClick={() => {
-                      if (confirm(`Clear all transactions in "${sp.name}"? This cannot be undone.`)) {
-                        onDeleteSpaceData(sp.id);
-                        onToast(`"${sp.name}" cleared`);
-                      }
-                    }}
-                    className="p-1.5 rounded-full"
-                    style={{ color: "var(--md-outline)" }}
-                    title="Clear all data"
-                  >
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/>
-                    </svg>
-                  </button>
-                  {spaces.length > 1 && sp.name !== "Personal" && (
-                    <button onClick={() => confirmDeleteSpace(sp)} className="p-1.5 rounded-full" style={{ color: "var(--md-error)" }}>
-                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/><path d="M10 11v6"/><path d="M14 11v6"/>
-                      </svg>
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+                <ActionRow icon="✏️" label="Rename Space" onClick={() => { setRenamingSpace(spaceActionTarget); setRenameVal(spaceActionTarget.name); }} />
+              )
+            )}
+
+            {/* Clear data */}
+            <ActionRow
+              icon="🗑️"
+              label="Clear All Transactions"
+              sublabel="Removes all entries, keeps the space"
+              onClick={() => {
+                if (confirm(`Clear all transactions in "${spaceActionTarget.name}"? This cannot be undone.`)) {
+                  onDeleteSpaceData(spaceActionTarget.id);
+                  setSpaceActionTarget(null);
+                  onToast(`"${spaceActionTarget.name}" cleared`);
+                }
+              }}
+            />
+
+            {/* Delete space — only non-Personal, and not the only space */}
+            {spaces.length > 1 && spaceActionTarget.name !== "Personal" && (
+              <ActionRow
+                icon="❌"
+                label="Delete Space"
+                sublabel="Permanently removes this space and all its data"
+                danger
+                onClick={() => confirmDeleteSpace(spaceActionTarget)}
+              />
+            )}
+          </>
+        )}
       </Sheet>
 
       {/* About sheet */}
@@ -309,6 +336,18 @@ export default function SettingsView({
       </Sheet>
 
     </div>
+  );
+}
+
+function ActionRow({ icon, label, sublabel, danger, onClick }: { icon: string; label: string; sublabel?: string; danger?: boolean; onClick: () => void }) {
+  return (
+    <button onClick={onClick} className="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl mb-2 text-left" style={{ background: danger ? "#FFF5F5" : "var(--md-surface-container-low)" }}>
+      <span className="text-xl w-8 text-center flex-shrink-0">{icon}</span>
+      <div className="flex-1 min-w-0">
+        <div className="text-sm font-medium" style={{ color: danger ? "var(--md-error)" : "var(--md-on-surface)" }}>{label}</div>
+        {sublabel && <div className="text-xs mt-0.5" style={{ color: danger ? "#E57373" : "var(--md-outline)" }}>{sublabel}</div>}
+      </div>
+    </button>
   );
 }
 
