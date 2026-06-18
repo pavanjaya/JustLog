@@ -37,6 +37,7 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
   const [includeInPersonal, setIncludeInPersonal] = useState(false);
   const [sharedExpense, setSharedExpense] = useState(false);
   const [peopleCount, setPeopleCount] = useState(2);
+  const [showMore, setShowMore] = useState(false);
 
   // Reset create form whenever sheet closes
   useEffect(() => {
@@ -48,6 +49,7 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
       setIncludeInPersonal(false);
       setSharedExpense(false);
       setPeopleCount(2);
+      setShowMore(false);
     }
   }, [open]);
 
@@ -149,75 +151,10 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
               <div className="text-xs px-1 mb-2" style={{ color: "var(--md-error)" }}>{nameError}</div>
             )}
 
-            {/* Include in Personal toggle */}
-            <button
-              type="button"
-              onClick={() => setIncludeInPersonal((v) => !v)}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl mb-3 text-left"
-              style={{ background: includeInPersonal ? "rgba(200,49,255,0.06)" : "var(--md-surface-container-low)", border: `1.5px solid ${includeInPersonal ? "var(--md-primary)" : "transparent"}` }}
-            >
-              <div
-                className="flex items-center justify-center flex-shrink-0"
-                style={{ width: 18, height: 18, borderRadius: 4, background: includeInPersonal ? "var(--md-primary)" : "transparent", border: `2px solid ${includeInPersonal ? "var(--md-primary)" : "var(--md-outline-variant)"}` }}
-              >
-                {includeInPersonal && (
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>Include in Personal</div>
-                <div className="text-[11px] mt-0.5" style={{ color: "var(--md-on-surface-variant)" }}>Entries also appear in your Personal space</div>
-              </div>
-            </button>
-
-            {/* Shared Expense toggle */}
-            <button
-              type="button"
-              onClick={() => setSharedExpense((v) => !v)}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl mb-2 text-left"
-              style={{ background: sharedExpense ? "rgba(200,49,255,0.06)" : "var(--md-surface-container-low)", border: `1.5px solid ${sharedExpense ? "var(--md-primary)" : "transparent"}` }}
-            >
-              <div
-                className="flex items-center justify-center flex-shrink-0"
-                style={{ width: 18, height: 18, borderRadius: 4, background: sharedExpense ? "var(--md-primary)" : "transparent", border: `2px solid ${sharedExpense ? "var(--md-primary)" : "var(--md-outline-variant)"}` }}
-              >
-                {sharedExpense && (
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>Shared Expense</div>
-                <div className="text-[11px] mt-0.5" style={{ color: "var(--md-on-surface-variant)" }}>Split total by number of people</div>
-              </div>
-            </button>
-
-            {/* People stepper — only when Shared Expense is on */}
-            {sharedExpense && (
-              <div className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl mb-3 animate-fade-up" style={{ background: "rgba(200,49,255,0.06)", border: "1.5px solid rgba(200,49,255,0.15)" }}>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>People</div>
-                  <div className="text-[11px] mt-0.5" style={{ color: "var(--md-primary)" }}>Total ÷ {peopleCount} per head</div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <button type="button" onClick={() => setPeopleCount((n) => Math.max(2, n - 1))} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "var(--md-surface-container)", color: "var(--md-on-surface)" }}>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                  </button>
-                  <span className="text-base font-bold w-5 text-center" style={{ color: "var(--md-on-surface)" }}>{peopleCount}</span>
-                  <button type="button" onClick={() => setPeopleCount((n) => Math.min(20, n + 1))} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "var(--md-primary)", color: "#fff" }}>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                  </button>
-                </div>
-              </div>
-            )}
-
             <button
               onClick={handleCreate}
               disabled={!newName.trim() || saving}
-              className="w-full py-3.5 rounded-2xl text-sm font-semibold mt-1"
+              className="w-full py-3.5 rounded-2xl text-sm font-semibold"
               style={{
                 background: !newName.trim() || saving ? "var(--md-surface-container-high)" : "var(--md-primary)",
                 color: !newName.trim() || saving ? "var(--md-outline)" : "#fff",
@@ -225,6 +162,65 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
             >
               {saving ? "Creating…" : "Create Space"}
             </button>
+
+            {/* More options — progressive disclosure */}
+            <button
+              type="button"
+              onClick={() => setShowMore((v) => !v)}
+              className="w-full flex items-center justify-center gap-1 py-2 mt-1"
+            >
+              <span className="text-xs font-medium" style={{ color: "var(--md-outline)" }}>
+                {showMore ? "Less options" : "More options"}
+              </span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-outline)", transform: showMore ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 200ms ease" }}>
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+
+            {showMore && (
+              <div className="flex flex-col gap-2 mt-1 animate-fade-up">
+                {/* Include in Personal */}
+                <button type="button" onClick={() => setIncludeInPersonal((v) => !v)} className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left" style={{ background: includeInPersonal ? "rgba(200,49,255,0.06)" : "var(--md-surface-container-low)", border: `1.5px solid ${includeInPersonal ? "var(--md-primary)" : "transparent"}` }}>
+                  <div className="flex items-center justify-center flex-shrink-0" style={{ width: 18, height: 18, borderRadius: 4, background: includeInPersonal ? "var(--md-primary)" : "transparent", border: `2px solid ${includeInPersonal ? "var(--md-primary)" : "var(--md-outline-variant)"}` }}>
+                    {includeInPersonal && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>Include in Personal</div>
+                    <div className="text-[11px] mt-0.5" style={{ color: "var(--md-on-surface-variant)" }}>Entries also appear in your Personal space</div>
+                  </div>
+                </button>
+
+                {/* Shared Expense */}
+                <button type="button" onClick={() => setSharedExpense((v) => !v)} className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left" style={{ background: sharedExpense ? "rgba(200,49,255,0.06)" : "var(--md-surface-container-low)", border: `1.5px solid ${sharedExpense ? "var(--md-primary)" : "transparent"}` }}>
+                  <div className="flex items-center justify-center flex-shrink-0" style={{ width: 18, height: 18, borderRadius: 4, background: sharedExpense ? "var(--md-primary)" : "transparent", border: `2px solid ${sharedExpense ? "var(--md-primary)" : "var(--md-outline-variant)"}` }}>
+                    {sharedExpense && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>Shared Expense</div>
+                    <div className="text-[11px] mt-0.5" style={{ color: "var(--md-on-surface-variant)" }}>Split total by number of people</div>
+                  </div>
+                </button>
+
+                {/* People stepper */}
+                {sharedExpense && (
+                  <div className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl animate-fade-up" style={{ background: "rgba(200,49,255,0.06)", border: "1.5px solid rgba(200,49,255,0.15)" }}>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>People</div>
+                      <div className="text-[11px] mt-0.5" style={{ color: "var(--md-primary)" }}>Total ÷ {peopleCount} per head</div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button type="button" onClick={() => setPeopleCount((n) => Math.max(2, n - 1))} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "var(--md-surface-container)", color: "var(--md-on-surface)" }}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      </button>
+                      <span className="text-base font-bold w-5 text-center" style={{ color: "var(--md-on-surface)" }}>{peopleCount}</span>
+                      <button type="button" onClick={() => setPeopleCount((n) => Math.min(20, n + 1))} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "var(--md-primary)", color: "#fff" }}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         ) : (
           /* ── Browse mode: list + CTA ── */
