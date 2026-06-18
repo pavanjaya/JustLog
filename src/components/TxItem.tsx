@@ -94,7 +94,7 @@ export default function TxItem({ tx, index = 0, showDate = false, onDelete, onEd
         <div
           className="flex items-center gap-3 px-3 py-3 select-none"
           style={{
-            background: showDelete ? "var(--md-error-container)" : "transparent",
+            background: showDelete ? "var(--md-surface-container-high)" : "transparent",
             borderRadius: showDelete ? "14px" : "0",
             transform: showDelete ? "scale(0.975)" : "scale(1)",
             transition: "background 180ms ease, border-radius 220ms ease, transform 350ms cubic-bezier(0.34, 1.56, 0.64, 1)",
@@ -110,17 +110,17 @@ export default function TxItem({ tx, index = 0, showDate = false, onDelete, onEd
           {/* Category icon */}
           <div
             className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-            style={{ background: showDelete ? "rgba(255,255,255,0.5)" : meta.bg }}
+            style={{ background: showDelete ? "var(--md-surface-container-lowest)" : meta.bg }}
           >
-            <CategoryIcon icon={meta.icon} size={17} color={showDelete ? "var(--md-error)" : "#5a4e6e"} />
+            <CategoryIcon icon={meta.icon} size={17} color="#5a4e6e" />
           </div>
 
           {/* Description + meta */}
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium leading-tight whitespace-nowrap overflow-hidden text-ellipsis" style={{ color: showDelete ? "var(--md-on-error-container)" : "var(--md-on-surface)" }}>
+            <div className="text-sm font-medium leading-tight whitespace-nowrap overflow-hidden text-ellipsis" style={{ color: "var(--md-on-surface)" }}>
               {tx.description}
             </div>
-            <div className="text-xs mt-0.5" style={{ color: showDelete ? "var(--md-on-error-container)" : "var(--md-outline)", opacity: showDelete ? 0.75 : 1 }}>
+            <div className="text-xs mt-0.5" style={{ color: "var(--md-outline)" }}>
               {showDelete ? "Edit or delete this entry" : metaText}
             </div>
           </div>
