@@ -12,7 +12,7 @@ function SpaceIcon({ icon, size = 20, color = "currentColor" }: { icon: string; 
   const p = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: color, strokeWidth: 1.8, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
   switch (icon) {
     case "briefcase": return <svg {...p}><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>;
-    case "plane": return <svg {...p}><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>;
+    case "plane": return <svg {...p}><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21 4 19 4s-2 1-3.5 2.5L8 10 .8 8.2c-.4-.1-.7.2-.8.5l-.1.5c-.1.4.1.8.4 1l5.4 3.4-1.5 4.5-.5.5-.5.5c-.3.3-.3.8 0 1.1l.5.5.5.5c.3.3.8.3 1.1 0l.5-.5.5-.5 4.5-1.5 3.4 5.4c.2.3.6.5 1 .4l.5-.1c.3-.1.6-.4.5-.8z"/></svg>;
     case "heart": return <svg {...p}><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>;
     case "graduation": return <svg {...p}><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>;
     default: return <svg {...p}><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
