@@ -116,29 +116,42 @@ export default function AppShell() {
     setSubStatus("active");
   }, []);
 
-  // Handle deep link auth callback from Capacitor (com.justlog.app://auth/callback#...)
+  // Handle deep link auth callback from Capacitor
   useEffect(() => {
     async function handleDeepLink(url: string) {
-      const hashPart = url.split("#")[1] ?? url.split("?")[1] ?? "";
+      // PKCE flow: code in query params
+      const urlObj = new URL(url);
+      const code = urlObj.searchParams.get("code");
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(url);
+        if (!error) router.replace("/");
+        return;
+      }
+      // Implicit flow: tokens in hash
+      const hashPart = url.split("#")[1] ?? "";
       const params = new URLSearchParams(hashPart);
       const accessToken = params.get("access_token");
       const refreshToken = params.get("refresh_token");
       if (accessToken && refreshToken) {
         await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+        router.replace("/");
       }
     }
 
-    if (typeof window !== "undefined") {
-      import("@capacitor/app").then(({ App }) => {
-        // Fired when Android deep link opens/resumes the app
-        App.addListener("appUrlOpen", ({ url }) => { handleDeepLink(url); });
-        // Also check launch URL (app opened cold from deep link)
-        App.getLaunchUrl().then((result) => {
-          if (result?.url) handleDeepLink(result.url);
-        });
-      }).catch(() => {/* not in Capacitor context */});
-    }
-  }, [supabase]);
+    import("@capacitor/app").then(({ App }) => {
+      App.addListener("appUrlOpen", ({ url }) => { handleDeepLink(url); });
+      App.getLaunchUrl().then((result) => {
+        if (result?.url) handleDeepLink(result.url);
+      });
+    }).catch(() => {});
+
+    import("@capacitor/browser").then(({ Browser }) => {
+      Browser.addListener("browserFinished", async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) router.replace("/");
+      });
+    }).catch(() => {});
+  }, [supabase, router]);
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
