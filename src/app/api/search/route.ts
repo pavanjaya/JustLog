@@ -6,22 +6,32 @@ const SYSTEM_PROMPT = `You are JustLog's search assistant. The user has logged t
 
 Answer the user's question in 1-3 natural sentences. Be specific with amounts using the ₹ symbol and Indian number formatting (e.g. ₹1,25,000). If no matching data is found, say so kindly. Keep it conversational and brief.`;
 
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
+export async function OPTIONS() {
+  return new Response(null, { status: 204, headers: CORS_HEADERS });
+}
+
 export async function POST(req: NextRequest) {
   let body: { query?: string; transactions?: Transaction[] };
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400, headers: CORS_HEADERS });
   }
 
   const query = body.query?.trim();
   const transactions = body.transactions;
 
   if (!query) {
-    return NextResponse.json({ error: "Missing query" }, { status: 400 });
+    return NextResponse.json({ error: "Missing query" }, { status: 400, headers: CORS_HEADERS });
   }
   if (!Array.isArray(transactions)) {
-    return NextResponse.json({ error: "Missing transactions" }, { status: 400 });
+    return NextResponse.json({ error: "Missing transactions" }, { status: 400, headers: CORS_HEADERS });
   }
 
   try {
@@ -42,9 +52,9 @@ export async function POST(req: NextRequest) {
     const textBlock = response.content.find((block) => block.type === "text");
     const answer = textBlock && "text" in textBlock ? textBlock.text : "No answer found.";
 
-    return NextResponse.json({ answer });
+    return NextResponse.json({ answer }, { headers: CORS_HEADERS });
   } catch (err) {
     console.error("AI search error:", err);
-    return NextResponse.json({ error: "Search failed" }, { status: 500 });
+    return NextResponse.json({ error: "Search failed" }, { status: 500, headers: CORS_HEADERS });
   }
 }

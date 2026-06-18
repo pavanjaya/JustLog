@@ -113,17 +113,27 @@ function mockParse(text: string): ParsedTx[] {
   return results;
 }
 
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
+export async function OPTIONS() {
+  return new Response(null, { status: 204, headers: CORS_HEADERS });
+}
+
 export async function POST(req: NextRequest) {
   let body: { text?: string };
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400, headers: CORS_HEADERS });
   }
 
   const text = body.text?.trim();
   if (!text) {
-    return NextResponse.json({ error: "Missing text" }, { status: 400 });
+    return NextResponse.json({ error: "Missing text" }, { status: 400, headers: CORS_HEADERS });
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY ?? "";
@@ -131,8 +141,8 @@ export async function POST(req: NextRequest) {
 
   if (isMock) {
     const transactions = mockParse(text);
-    if (transactions.length === 0) return NextResponse.json({ error: "Could not parse" }, { status: 422 });
-    return NextResponse.json({ transactions });
+    if (transactions.length === 0) return NextResponse.json({ error: "Could not parse" }, { status: 422, headers: CORS_HEADERS });
+    return NextResponse.json({ transactions }, { headers: CORS_HEADERS });
   }
 
   try {
@@ -153,19 +163,19 @@ export async function POST(req: NextRequest) {
     try {
       parsed = JSON.parse(cleaned);
     } catch {
-      return NextResponse.json({ error: "Could not parse AI response" }, { status: 422 });
+      return NextResponse.json({ error: "Could not parse AI response" }, { status: 422, headers: CORS_HEADERS });
     }
 
     const arr = Array.isArray(parsed) ? parsed : [parsed];
     const validTxs = arr.filter(isValidTx);
 
     if (validTxs.length === 0) {
-      return NextResponse.json({ error: "No valid transactions found" }, { status: 422 });
+      return NextResponse.json({ error: "No valid transactions found" }, { status: 422, headers: CORS_HEADERS });
     }
 
-    return NextResponse.json({ transactions: validTxs });
+    return NextResponse.json({ transactions: validTxs }, { headers: CORS_HEADERS });
   } catch (err) {
     console.error("AI log parsing error:", err);
-    return NextResponse.json({ error: "AI parsing failed" }, { status: 500 });
+    return NextResponse.json({ error: "AI parsing failed" }, { status: 500, headers: CORS_HEADERS });
   }
 }
