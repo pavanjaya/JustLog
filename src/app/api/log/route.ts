@@ -175,7 +175,7 @@ export async function POST(req: NextRequest) {
     const groq = new Groq({ apiKey });
 
     const response = await groq.chat.completions.create({
-      model: "llama-3.1-8b-instant",
+      model: "llama-3.3-70b-versatile",
       max_tokens: 1000,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
