@@ -29,8 +29,8 @@ export default function TopBar({ onNavigate, onAvatarClick, onSpaceClick, active
         {/* Space switcher */}
         <button
           onClick={onSpaceClick}
-          className="flex items-center gap-1.5 min-w-0 flex-1"
-          style={{ height: 36, paddingLeft: 14, paddingRight: 10, borderRadius: 18, border: "1.5px solid var(--md-outline-variant)", maxWidth: 200, overflow: "hidden" }}
+          className="flex items-center gap-1.5 min-w-0"
+          style={{ height: 36, paddingLeft: 14, paddingRight: 10, borderRadius: 18, border: "1.5px solid var(--md-outline-variant)", maxWidth: 180 }}
         >
           <span className="text-[13px] font-semibold truncate min-w-0 flex-1" style={{ color: "var(--md-on-surface)" }}>
             {activeSpace?.name ?? "Personal"}
