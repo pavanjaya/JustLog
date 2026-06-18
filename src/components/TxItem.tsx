@@ -33,10 +33,12 @@ export default function TxItem({ tx, index = 0, showDate = false, onDelete, onEd
 
   function smartTime(d: Date) {
     const now = new Date();
-    const diffMs = now.getTime() - d.getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
     const time = d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const txDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const diffDays = Math.round((today.getTime() - txDay.getTime()) / 86400000);
     if (diffDays === 0) return time;
+    if (diffDays === 1) return `Yesterday ${time}`;
     if (diffDays < 7) return `${d.toLocaleDateString("en-IN", { weekday: "short" })} ${time}`;
     return `${d.toLocaleDateString("en-IN", { day: "numeric", month: "short" })} ${time}`;
   }

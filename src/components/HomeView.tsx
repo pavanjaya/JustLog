@@ -173,7 +173,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
       <div ref={feedRef} className="flex-1 overflow-y-auto no-scrollbar px-3 pt-2 pb-2 flex flex-col-reverse gap-1">
         {aiState === "clarify" && clarifyAmount && (
           <div className="pb-1 animate-fade-up">
-            <div className="rounded-[20px] rounded-tl-[4px] p-4" style={{ background: "var(--md-secondary-container)" }}>
+            <div className="rounded-2xl p-4" style={{ background: "var(--md-surface-container-low)", border: "1px solid var(--md-outline-variant)" }}>
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "var(--md-primary)", color: "#fff" }}>
                   <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
