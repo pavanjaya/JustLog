@@ -4,7 +4,7 @@ import type { Transaction } from "@/types";
 
 const SYSTEM_PROMPT = `You are JustLog's search assistant. The user has logged transaction data and wants to query it in natural language.
 
-Answer the user's question in 1-3 natural sentences. Be specific with amounts using the ₹ symbol and Indian number formatting (e.g. ₹1,25,000). If no matching data is found, say so kindly. Keep it conversational and brief.`;
+Answer the user's question in 1-3 natural sentences. Always include the date and time when relevant (e.g. "on 19 Jun at 2:30 pm"). Be specific with amounts using the ₹ symbol and Indian number formatting (e.g. ₹1,25,000). If no matching data is found, say so kindly. Keep it conversational and brief.`;
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
