@@ -6,6 +6,17 @@ import type { Space, Transaction } from "@/types";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
+function SpaceIcon({ icon, size = 18, color = "currentColor" }: { icon: string; size?: number; color?: string }) {
+  const p = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: color, strokeWidth: 1.8, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+  switch (icon) {
+    case "briefcase": return <svg {...p}><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>;
+    case "plane": return <svg {...p}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>;
+    case "heart": return <svg {...p}><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>;
+    case "graduation": return <svg {...p}><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>;
+    default: return <svg {...p}><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
+  }
+}
+
 interface SettingsViewProps {
   user: User | null;
   spaces: Space[];
@@ -16,14 +27,15 @@ interface SettingsViewProps {
   onRenameSpace: (id: string, name: string) => void;
   onDeleteSpace: (id: string) => void;
   onDeleteSpaceData: (id: string) => void;
+  onUpdateSpace?: (id: string, updates: Partial<Space>) => void;
   subStatus?: "active" | "trialing" | "none" | "loading";
 }
 
-type Sheet = "none" | "profile" | "spaces" | "about" | "privacy" | "terms";
+type Sheet = "none" | "profile" | "spaces" | "about" | "privacy" | "terms" | "rename";
 
 export default function SettingsView({
   user, spaces, transactions, activeSpace,
-  onDeleteAll, onToast, onRenameSpace, onDeleteSpace, onDeleteSpaceData,
+  onDeleteAll, onToast, onRenameSpace, onDeleteSpace, onDeleteSpaceData, onUpdateSpace,
   subStatus = "active",
 }: SettingsViewProps) {
   const router = useRouter();
@@ -38,10 +50,13 @@ export default function SettingsView({
   const [sheet, setSheet] = useState<Sheet>("none");
   const [editNameDraft, setEditNameDraft] = useState(name);
   const [darkMode, setDarkMode] = useState(false);
-  const [renamingSpace, setRenamingSpace] = useState<Space | null>(null);
+  const [renameSheetTarget, setRenameSheetTarget] = useState<Space | null>(null);
+  const [renamingInSheet, setRenamingInSheet] = useState(false);
   const [renameVal, setRenameVal] = useState("");
   const [spaceActionTarget, setSpaceActionTarget] = useState<Space | null>(null);
   const [confirmAction, setConfirmAction] = useState<null | "clear" | "delete">(null);
+  const [spaceIncludePersonal, setSpaceIncludePersonal] = useState(false);
+  const [spacePeopleCount, setSpacePeopleCount] = useState(1);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const initials = nameVal.charAt(0).toUpperCase();
@@ -226,116 +241,127 @@ export default function SettingsView({
         </button>
       </Sheet>
 
-      {/* Manage spaces sheet */}
-      <Sheet open={sheet === "spaces"} onClose={() => { setSheet("none"); setRenamingSpace(null); }}>
-        <div className="text-base font-semibold mb-4" style={{ color: "var(--md-on-surface)" }}>Manage Spaces</div>
-        <div className="flex flex-col gap-2">
-          {spaces.map((sp) => (
-            <button
-              key={sp.id}
-              onClick={() => setSpaceActionTarget(sp)}
-              className="rounded-2xl px-4 py-3.5 flex items-center gap-3 text-left w-full"
-              style={{ background: "var(--md-surface-container-low)" }}
-            >
-              <span className="text-xl">{sp.icon === "home" ? "🏠" : "📁"}</span>
-              <span className="flex-1 text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>{sp.name}</span>
-              {sp.id === activeSpace?.id && (
-                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: "#E8F5E9", color: "#2E7D32" }}>Active</span>
-              )}
-              <Chevron />
-            </button>
-          ))}
-        </div>
-      </Sheet>
+      {/* Spaces sheet — single sheet, panel switches between list / action / rename */}
+      <Sheet open={sheet === "spaces"} onClose={() => { setSheet("none"); setSpaceActionTarget(null); setRenamingInSheet(false); setConfirmAction(null); }}>
+        {/* Panel: space list */}
+        {!spaceActionTarget && (
+          <>
+            <div className="text-base font-semibold mb-4" style={{ color: "var(--md-on-surface)" }}>Manage Spaces</div>
+            <div className="flex flex-col gap-2">
+              {spaces.map((sp) => (
+                <button
+                  key={sp.id}
+                  onClick={() => { setSpaceActionTarget(sp); setSpaceIncludePersonal(sp.include_in_personal); setSpacePeopleCount(sp.people_count ?? 1); setRenamingInSheet(false); }}
+                  className="rounded-2xl px-4 py-3.5 flex items-center gap-3 text-left w-full"
+                  style={{ background: "var(--md-surface-container-low)" }}
+                >
+                  <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: sp.id === activeSpace?.id ? "var(--md-primary)" : "var(--md-surface-container)" }}>
+                    <SpaceIcon icon={sp.icon} size={16} color={sp.id === activeSpace?.id ? "#fff" : "var(--md-on-surface-variant)"} />
+                  </div>
+                  <span className="flex-1 text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>{sp.name}</span>
+                  {sp.id === activeSpace?.id && (
+                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: "#E8F5E9", color: "#2E7D32" }}>Active</span>
+                  )}
+                  <Chevron />
+                </button>
+              ))}
+            </div>
+          </>
+        )}
 
-      {/* Space action sheet */}
-      <Sheet open={!!spaceActionTarget} onClose={() => { setSpaceActionTarget(null); setRenamingSpace(null); setConfirmAction(null); }}>
+        {/* Panel: space actions / rename — shown when a space is selected */}
         {spaceActionTarget && (
           <>
-            <div className="flex items-center gap-3 mb-5">
-              <span className="text-2xl">{spaceActionTarget.icon === "home" ? "🏠" : "📁"}</span>
-              <div>
-                <div className="text-base font-semibold" style={{ color: "var(--md-on-surface)" }}>{spaceActionTarget.name}</div>
-                <div className="text-xs" style={{ color: "var(--md-on-surface-variant)" }}>
-                  {spaceActionTarget.id === activeSpace?.id ? "Active space" : "Space"}
+            {/* Back to list */}
+            <button onClick={() => { setSpaceActionTarget(null); setRenamingInSheet(false); setConfirmAction(null); }} className="flex items-center gap-1.5 mb-4" style={{ color: "var(--md-on-surface-variant)" }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+              <span className="text-sm">Spaces</span>
+            </button>
+
+            {renamingInSheet ? (
+              /* Rename form */
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-3 mb-1">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "var(--md-primary)" }}>
+                    <SpaceIcon icon={spaceActionTarget.icon} size={17} color="#fff" />
+                  </div>
+                  <span className="text-base font-semibold" style={{ color: "var(--md-on-surface)" }}>Rename</span>
+                </div>
+                <input
+                  autoFocus
+                  value={renameVal}
+                  onChange={(e) => setRenameVal(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter" && renameVal.trim()) { onRenameSpace(spaceActionTarget.id, renameVal.trim()); setSheet("none"); setSpaceActionTarget(null); setRenamingInSheet(false); onToast("Space renamed"); } }}
+                  maxLength={30}
+                  className="w-full px-4 py-3.5 rounded-2xl text-sm outline-none"
+                  style={{ background: "var(--md-surface-container-low)", color: "var(--md-on-surface)", border: "none" }}
+                  placeholder="Space name"
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => { if (renameVal.trim()) { onRenameSpace(spaceActionTarget.id, renameVal.trim()); setSheet("none"); setSpaceActionTarget(null); setRenamingInSheet(false); onToast("Space renamed"); } }}
+                    disabled={!renameVal.trim()}
+                    className="flex-1 py-3.5 rounded-2xl text-sm font-semibold"
+                    style={{ background: renameVal.trim() ? "var(--md-on-surface)" : "var(--md-surface-container)", color: renameVal.trim() ? "#fff" : "var(--md-outline)" }}
+                  >Save</button>
+                  <button onClick={() => setRenamingInSheet(false)} className="px-6 py-3.5 rounded-2xl text-sm font-medium" style={{ background: "var(--md-surface-container-low)", color: "var(--md-on-surface)" }}>Cancel</button>
                 </div>
               </div>
-            </div>
-
-            {/* Rename — only for non-Personal */}
-            {spaceActionTarget.name !== "Personal" && (
-              renamingSpace?.id === spaceActionTarget.id ? (
-                <div className="mb-3">
-                  <div className="text-xs font-medium mb-2" style={{ color: "var(--md-on-surface-variant)" }}>New Name</div>
-                  <input
-                    autoFocus
-                    value={renameVal}
-                    onChange={(e) => setRenameVal(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") { onRenameSpace(spaceActionTarget.id, renameVal); setRenamingSpace(null); setSpaceActionTarget(null); onToast("Space renamed"); }
-                      if (e.key === "Escape") setRenamingSpace(null);
-                    }}
-                    className="w-full px-4 py-3 rounded-2xl text-sm outline-none border-none mb-2"
-                    style={{ background: "var(--md-surface-container-low)", color: "var(--md-on-surface)" }}
-                  />
-                  <div className="flex gap-2">
-                    <button onClick={() => { onRenameSpace(spaceActionTarget.id, renameVal); setRenamingSpace(null); setSpaceActionTarget(null); onToast("Space renamed"); }} className="flex-1 py-3 rounded-2xl text-sm font-semibold" style={{ background: "var(--md-on-surface)", color: "#fff" }}>Save</button>
-                    <button onClick={() => setRenamingSpace(null)} className="px-5 py-3 rounded-2xl text-sm font-medium" style={{ background: "var(--md-surface-container-low)", color: "var(--md-on-surface)" }}>Cancel</button>
+            ) : (
+              /* Action list */
+              <>
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: "var(--md-primary)" }}>
+                    <SpaceIcon icon={spaceActionTarget.icon} size={20} color="#fff" />
+                  </div>
+                  <div>
+                    <div className="text-base font-semibold" style={{ color: "var(--md-on-surface)" }}>{spaceActionTarget.name}</div>
+                    <div className="text-xs" style={{ color: "var(--md-on-surface-variant)" }}>{spaceActionTarget.id === activeSpace?.id ? "Active space" : "Space"}</div>
                   </div>
                 </div>
-              ) : (
-                <ActionRow icon="✏️" label="Rename Space" onClick={() => { setRenamingSpace(spaceActionTarget); setRenameVal(spaceActionTarget.name); }} />
-              )
-            )}
-
-            {/* Clear data */}
-            {confirmAction === "clear" ? (
-              <ConfirmBox
-                message={`Clear all transactions in "${spaceActionTarget.name}"? This cannot be undone.`}
-                confirmLabel="Yes, Clear"
-                onConfirm={() => {
-                  onDeleteSpaceData(spaceActionTarget.id);
-                  setConfirmAction(null);
-                  setSpaceActionTarget(null);
-                  onToast(`"${spaceActionTarget.name}" cleared`);
-                }}
-                onCancel={() => setConfirmAction(null)}
-              />
-            ) : confirmAction === "delete" ? (
-              <ConfirmBox
-                message={`Delete "${spaceActionTarget.name}"? All transactions will be permanently lost.`}
-                confirmLabel="Yes, Delete"
-                danger
-                onConfirm={() => {
-                  onDeleteSpace(spaceActionTarget.id);
-                  setConfirmAction(null);
-                  setSpaceActionTarget(null);
-                  onToast(`"${spaceActionTarget.name}" deleted`);
-                }}
-                onCancel={() => setConfirmAction(null)}
-              />
-            ) : (
-              <>
-                <ActionRow
-                  icon="🗑️"
-                  label="Clear All Transactions"
-                  sublabel="Removes all entries, keeps the space"
-                  onClick={() => setConfirmAction("clear")}
-                />
-                {spaces.length > 1 && spaceActionTarget.name !== "Personal" && (
-                  <ActionRow
-                    icon="❌"
-                    label="Delete Space"
-                    sublabel="Permanently removes this space and all its data"
-                    danger
-                    onClick={() => setConfirmAction("delete")}
-                  />
-                )}
+                <div className="flex flex-col">
+                  {spaceActionTarget.name !== "Personal" && (
+                    <ListRow icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>} label="Rename" onClick={() => { setRenameVal(spaceActionTarget.name); setRenamingInSheet(true); }} />
+                  )}
+                  {spaceActionTarget.name !== "Personal" && (
+                    <ListRow icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>} label="+ Personal" sublabel="Show entries in Personal space too" right={<Toggle on={spaceIncludePersonal} />}
+                      onClick={() => { const next = !spaceIncludePersonal; setSpaceIncludePersonal(next); onUpdateSpace?.(spaceActionTarget.id, { include_in_personal: next }); onToast(next ? "Linked to Personal" : "Unlinked from Personal"); }}
+                    />
+                  )}
+                  {spaceActionTarget.name !== "Personal" && (
+                    <>
+                      <ListRow icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>} label="Split expense" sublabel="Show per-head amount on home" right={<Toggle on={spacePeopleCount > 1} />}
+                        onClick={() => { const next = spacePeopleCount > 1 ? 1 : 2; setSpacePeopleCount(next); onUpdateSpace?.(spaceActionTarget.id, { people_count: next }); onToast(next > 1 ? `Split for ${next} people` : "Split removed"); }}
+                      />
+                      {spacePeopleCount > 1 && (
+                        <div className="flex items-center gap-4 px-4 py-3">
+                          <span className="text-xs flex-1" style={{ color: "var(--md-on-surface-variant)" }}>People</span>
+                          <div className="flex items-center gap-3">
+                            <button onClick={() => { const n = Math.max(2, spacePeopleCount - 1); setSpacePeopleCount(n); onUpdateSpace?.(spaceActionTarget.id, { people_count: n }); }} className="w-7 h-7 rounded-full flex items-center justify-center text-base font-semibold" style={{ background: "var(--md-surface-container)", color: "var(--md-on-surface)" }}>−</button>
+                            <span className="text-sm font-semibold w-5 text-center" style={{ color: "var(--md-on-surface)" }}>{spacePeopleCount}</span>
+                            <button onClick={() => { const n = Math.min(20, spacePeopleCount + 1); setSpacePeopleCount(n); onUpdateSpace?.(spaceActionTarget.id, { people_count: n }); }} className="w-7 h-7 rounded-full flex items-center justify-center text-base font-semibold" style={{ background: "var(--md-surface-container)", color: "var(--md-on-surface)" }}>+</button>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                  {confirmAction === "clear" ? (
+                    <div className="px-4 py-4"><ConfirmBox message={`Clear all transactions in "${spaceActionTarget.name}"?`} confirmLabel="Yes, Clear" onConfirm={() => { onDeleteSpaceData(spaceActionTarget.id); setConfirmAction(null); setSpaceActionTarget(null); onToast(`"${spaceActionTarget.name}" cleared`); }} onCancel={() => setConfirmAction(null)} /></div>
+                  ) : (
+                    <ListRow icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>} label="Clear All Transactions" sublabel="Removes all entries, keeps the space" onClick={() => setConfirmAction("clear")} />
+                  )}
+                  {confirmAction === "delete" ? (
+                    <div className="px-4 py-4"><ConfirmBox message={`Delete "${spaceActionTarget.name}"? All data will be lost.`} confirmLabel="Yes, Delete" danger onConfirm={() => { onDeleteSpace(spaceActionTarget.id); setConfirmAction(null); setSpaceActionTarget(null); onToast(`"${spaceActionTarget.name}" deleted`); }} onCancel={() => setConfirmAction(null)} /></div>
+                  ) : spaces.length > 1 && spaceActionTarget.name !== "Personal" ? (
+                    <ListRow icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>} label="Delete Space" danger onClick={() => setConfirmAction("delete")} />
+                  ) : null}
+                </div>
               </>
             )}
           </>
         )}
       </Sheet>
+
 
       {/* About sheet */}
       <Sheet open={sheet === "about"} onClose={() => setSheet("none")}>
@@ -429,14 +455,15 @@ function ConfirmBox({ message, confirmLabel, danger, onConfirm, onCancel }: { me
   );
 }
 
-function ActionRow({ icon, label, sublabel, danger, onClick }: { icon: string; label: string; sublabel?: string; danger?: boolean; onClick: () => void }) {
+function ListRow({ icon, label, sublabel, danger, onClick, right }: { icon: React.ReactNode; label: string; sublabel?: string; danger?: boolean; onClick: () => void; right?: React.ReactNode }) {
   return (
-    <button onClick={onClick} className="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl mb-2 text-left" style={{ background: danger ? "#FFF5F5" : "var(--md-surface-container-low)" }}>
-      <span className="text-xl w-8 text-center flex-shrink-0">{icon}</span>
+    <button onClick={onClick} className="w-full flex items-center gap-3 px-4 py-3.5 text-left" style={{}}>
+      <span className="flex-shrink-0 flex items-center justify-center" style={{ color: danger ? "var(--md-error)" : "var(--md-on-surface-variant)" }}>{icon}</span>
       <div className="flex-1 min-w-0">
         <div className="text-sm font-medium" style={{ color: danger ? "var(--md-error)" : "var(--md-on-surface)" }}>{label}</div>
-        {sublabel && <div className="text-xs mt-0.5" style={{ color: danger ? "#E57373" : "var(--md-outline)" }}>{sublabel}</div>}
+        {sublabel && <div className="text-xs mt-0.5" style={{ color: "var(--md-outline)" }}>{sublabel}</div>}
       </div>
+      {right}
     </button>
   );
 }
@@ -472,8 +499,8 @@ function SettingsGroup({ children }: { children: React.ReactNode }) {
 
 function Toggle({ on }: { on: boolean }) {
   return (
-    <div className="w-11 h-6 rounded-full flex-shrink-0 relative transition-colors" style={{ background: on ? "var(--md-primary)" : "var(--md-surface-container-highest)", border: on ? "none" : "2px solid var(--md-outline)" }}>
-      <div className="w-4 h-4 rounded-full absolute top-1 transition-all" style={{ background: on ? "#fff" : "var(--md-outline)", left: on ? "calc(100% - 20px)" : "2px", top: on ? "4px" : "2px" }} />
+    <div className="w-11 h-6 rounded-full flex-shrink-0 relative transition-colors" style={{ background: on ? "var(--md-primary)" : "var(--md-surface-container-highest)" }}>
+      <div className="w-4 h-4 rounded-full absolute transition-all" style={{ background: on ? "#fff" : "#9E9E9E", left: on ? "calc(100% - 20px)" : "4px", top: "4px" }} />
     </div>
   );
 }

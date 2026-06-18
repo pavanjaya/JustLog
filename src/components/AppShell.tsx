@@ -301,6 +301,11 @@ export default function AppShell() {
                   await supabase.from("transactions").delete().eq("space_id", id);
                   if (activeSpace?.id === id) setTransactions([]);
                 }}
+                onUpdateSpace={async (id, updates) => {
+                  await supabase.from("spaces").update(updates).eq("id", id);
+                  setSpaces((prev) => prev.map((s) => s.id === id ? { ...s, ...updates } : s));
+                  if (activeSpace?.id === id) setActiveSpace((prev) => prev ? { ...prev, ...updates } : prev);
+                }}
               />
             )}
           </div>
