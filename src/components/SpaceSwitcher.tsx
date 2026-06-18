@@ -34,6 +34,7 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
   const [newName, setNewName] = useState("");
   const [newIcon, setNewIcon] = useState("home");
   const [saving, setSaving] = useState(false);
+  const [nameError, setNameError] = useState("");
 
   // Reset create form whenever sheet closes
   useEffect(() => {
@@ -41,14 +42,19 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
       setCreating(false);
       setNewName("");
       setNewIcon("home");
+      setNameError("");
     }
   }, [open]);
 
   async function handleCreate() {
-    if (!newName.trim()) return;
+    const trimmed = newName.trim();
+    if (!trimmed) return;
+    const isDuplicate = spaces.some((s) => s.name.toLowerCase() === trimmed.toLowerCase());
+    if (isDuplicate) { setNameError("A space with this name already exists"); return; }
     setSaving(true);
+    setNameError("");
     onClose();
-    await onCreate(newName.trim(), newIcon);
+    await onCreate(trimmed, newIcon);
     setSaving(false);
   }
 
@@ -122,18 +128,21 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
             {/* Name input */}
             <input
               value={newName}
-              onChange={(e) => setNewName(e.target.value)}
+              onChange={(e) => { setNewName(e.target.value); setNameError(""); }}
               onKeyDown={(e) => e.key === "Enter" && handleCreate()}
               placeholder="Space name (e.g. Business)"
               maxLength={30}
               autoFocus
-              className="w-full px-4 py-3 rounded-2xl text-sm outline-none mb-3"
+              className="w-full px-4 py-3 rounded-2xl text-sm outline-none mb-1"
               style={{
                 background: "var(--md-surface-container-low)",
-                border: "1.5px solid var(--md-outline-variant)",
+                border: `1.5px solid ${nameError ? "var(--md-error)" : "var(--md-outline-variant)"}`,
                 color: "var(--md-on-surface)",
               }}
             />
+            {nameError && (
+              <div className="text-xs px-1 mb-2" style={{ color: "var(--md-error)" }}>{nameError}</div>
+            )}
 
             <button
               onClick={handleCreate}
