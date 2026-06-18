@@ -177,8 +177,10 @@ export default function SettingsView({
         <SettingsItem icon={<IconBell />} label="Notifications" onClick={() => onToast("Notifications coming soon")} rightSlot={<Toggle on={false} />} last />
       </SettingsGroup>
 
-      {/* Group 3 — info */}
+      {/* Group 3 — legal + info */}
       <SettingsGroup>
+        <SettingsItem icon={<IconShield />} label="Privacy Policy" onClick={() => window.open("/privacy", "_blank")} />
+        <SettingsItem icon={<IconScroll />} label="Terms of Service" onClick={() => window.open("/terms", "_blank")} />
         <SettingsItem icon={<IconInfo />} label="About JustLog" onClick={() => setSheet("about")} last />
       </SettingsGroup>
 
@@ -187,14 +189,7 @@ export default function SettingsView({
         <SettingsItem icon={<IconLogOut />} label="Sign Out" danger onClick={handleSignOut} last />
       </SettingsGroup>
 
-      <div className="flex flex-col items-center gap-2 py-6">
-        <div className="text-xs" style={{ color: "var(--md-outline)" }}>JustLog V1.0 · Just type.</div>
-        <div className="flex items-center gap-3 text-xs font-medium" style={{ color: "var(--md-primary)" }}>
-          <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>
-          <span style={{ color: "var(--md-outline-variant)" }}>·</span>
-          <a href="/terms" target="_blank" rel="noopener">Terms of Service</a>
-        </div>
-      </div>
+      <div className="text-center py-5 text-xs" style={{ color: "var(--md-outline)" }}>JustLog V1.0 · Just type.</div>
 
       {/* ── Sheets ── */}
 
@@ -443,6 +438,8 @@ function IconFolders() { return <svg {...ip}><path d="M22 19a2 2 0 01-2 2H4a2 2 
 function IconMoon()    { return <svg {...ip}><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>; }
 function IconBell()    { return <svg {...ip}><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>; }
 function IconInfo()    { return <svg {...ip}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>; }
+function IconShield()  { return <svg {...ip}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>; }
+function IconScroll()  { return <svg {...ip}><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>; }
 function IconLogOut()  { return <svg {...ip}><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>; }
 
 interface SettingsItemProps {
