@@ -4,12 +4,32 @@ import { useRef, useState } from "react";
 import type { Transaction, Space } from "@/types";
 import TxItem from "@/components/TxItem";
 import { apiUrl } from "@/lib/api";
-import { localParse } from "@/lib/localParse";
 
 function isAndroid() {
   if (typeof window === "undefined") return false;
   const cap = (window as unknown as { Capacitor?: { getPlatform?: () => string } }).Capacitor;
   return cap?.getPlatform?.() === "android";
+}
+
+async function fetchApi(path: string, body: unknown) {
+  const url = apiUrl(path);
+  if (isAndroid()) {
+    const { CapacitorHttp } = await import("@capacitor/core");
+    const res = await CapacitorHttp.post({
+      url,
+      headers: { "Content-Type": "application/json" },
+      data: body,
+    });
+    if (res.status < 200 || res.status >= 300) throw new Error(`API error ${res.status}`);
+    return res.data;
+  }
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`API error ${res.status}`);
+  return res.json();
 }
 import AiBubble from "@/components/AiBubble";
 import BottomInput from "@/components/BottomInput";
@@ -76,21 +96,8 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
     }
 
     try {
-      let parsed: Array<{ amount: number; type: "income" | "expense"; category: string; description: string }>;
-
-      if (isAndroid()) {
-        parsed = localParse(text);
-        if (parsed.length === 0) throw new Error("Could not parse");
-      } else {
-        const res = await fetch(apiUrl("/api/log"), {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text }),
-        });
-        if (!res.ok) throw new Error(`API error ${res.status}`);
-        const data = await res.json();
-        parsed = data.transactions;
-      }
+      const data = await fetchApi("/api/log", { text });
+      const parsed: Array<{ amount: number; type: "income" | "expense"; category: string; description: string }> = data.transactions;
 
       const created: Transaction[] = parsed.map((tx) => ({
         id: crypto.randomUUID(),
