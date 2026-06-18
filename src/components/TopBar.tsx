@@ -29,13 +29,13 @@ export default function TopBar({ onNavigate, onAvatarClick, onSpaceClick, active
         {/* Space switcher */}
         <button
           onClick={onSpaceClick}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full min-w-0"
-          style={{ background: "transparent", border: "1px solid var(--md-outline-variant)" }}
+          className="flex items-center gap-1.5 min-w-0 flex-shrink-0"
+          style={{ height: 36, paddingLeft: 14, paddingRight: 10, borderRadius: 18, border: "1.5px solid var(--md-outline-variant)" }}
         >
-          <span className="text-xs font-semibold truncate" style={{ color: "var(--md-on-surface)" }}>
+          <span className="text-[13px] font-semibold" style={{ color: "var(--md-on-surface)" }}>
             {activeSpace?.name ?? "Personal"}
           </span>
-          <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-on-surface-variant)", flexShrink: 0 }}>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-on-surface-variant)", flexShrink: 0 }}>
             <polyline points="6 9 12 15 18 9"/>
           </svg>
         </button>
@@ -44,11 +44,12 @@ export default function TopBar({ onNavigate, onAvatarClick, onSpaceClick, active
       {/* Avatar */}
       <button
         onClick={onAvatarClick}
-        className="w-10 h-10 flex items-center justify-center rounded-full md-ripple flex-shrink-0"
+        className="flex items-center justify-center rounded-full md-ripple flex-shrink-0"
+        style={{ width: 36, height: 36 }}
       >
         <div
-          className="w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-medium overflow-hidden flex-shrink-0"
-          style={{ background: "var(--md-primary-container)", color: "var(--md-on-primary-container)" }}
+          className="rounded-full flex items-center justify-center text-[13px] font-semibold overflow-hidden flex-shrink-0"
+          style={{ width: 36, height: 36, background: "var(--md-primary-container)", color: "var(--md-on-primary-container)" }}
         >
           {avatarUrl ? (
             <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
