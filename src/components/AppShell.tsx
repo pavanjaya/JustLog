@@ -119,15 +119,7 @@ export default function AppShell() {
   // Handle deep link auth callback from Capacitor
   useEffect(() => {
     async function handleDeepLink(url: string) {
-      // PKCE flow: code in query params
-      const urlObj = new URL(url);
-      const code = urlObj.searchParams.get("code");
-      if (code) {
-        const { error } = await supabase.auth.exchangeCodeForSession(url);
-        if (!error) router.replace("/");
-        return;
-      }
-      // Implicit flow: tokens in hash
+      // Implicit flow: tokens arrive in URL hash
       const hashPart = url.split("#")[1] ?? "";
       const params = new URLSearchParams(hashPart);
       const accessToken = params.get("access_token");
