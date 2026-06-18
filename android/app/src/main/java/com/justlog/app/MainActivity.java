@@ -2,9 +2,19 @@ package com.justlog.app;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
+import android.view.WindowManager;
+import androidx.core.view.WindowCompat;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // Draw edge-to-edge behind status bar
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+    }
 
     @Override
     protected void onNewIntent(Intent intent) {
