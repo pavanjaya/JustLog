@@ -13,13 +13,26 @@ export default function LoginPage() {
   async function handleGoogleLogin() {
     setLoading(true);
     const supabase = createClient();
-    const redirectTo = isCapacitor()
-      ? "com.justlog.app://auth/callback"
-      : `${window.location.origin}/auth/callback`;
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo },
-    });
+
+    if (isCapacitor()) {
+      const { data } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: "com.justlog.app://auth/callback",
+          skipBrowserRedirect: true,
+        },
+      });
+      if (data?.url) {
+        const { Browser } = await import("@capacitor/browser");
+        await Browser.open({ url: data.url });
+      }
+      setLoading(false);
+    } else {
+      await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: `${window.location.origin}/auth/callback` },
+      });
+    }
   }
 
   return (

@@ -130,15 +130,12 @@ export default function AppShell() {
       const cap = (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor;
       if (cap?.isNativePlatform?.()) {
         import("@capacitor/app").then(({ App }) => {
-          // Catch deep link when app is already open
           App.addListener("appUrlOpen", ({ url }) => { handleDeepLink(url); });
-          // Catch deep link when app resumes from background
-          App.addListener("appStateChange", ({ isActive }) => {
-            if (isActive) {
-              supabase.auth.getSession().then(({ data: { session } }) => {
-                if (session?.user) window.location.reload();
-              });
-            }
+        });
+        import("@capacitor/browser").then(({ Browser }) => {
+          Browser.addListener("browserFinished", async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.user) window.location.reload();
           });
         });
       }
