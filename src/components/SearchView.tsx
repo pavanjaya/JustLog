@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import type { Transaction } from "@/types";
 import TxItem from "@/components/TxItem";
 import { apiUrl } from "@/lib/api";
@@ -67,6 +67,7 @@ export default function SearchView({ transactions, onDeleteTransaction, onEditTr
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
+  const queryRef = useRef("");
   const [typeFilter, setTypeFilter] = useState<"all" | "income" | "expense">("all");
   const [timeFilter, setTimeFilter] = useState<"all" | "this_month" | "last_month">("all");
 
@@ -91,6 +92,7 @@ export default function SearchView({ transactions, onDeleteTransaction, onEditTr
   async function runSearch(q: string) {
     if (!q.trim()) return;
     setQuery(q);
+    queryRef.current = q;
     setSearchFocused(true);
     setLoading(true);
     setResult("");
@@ -123,10 +125,10 @@ export default function SearchView({ transactions, onDeleteTransaction, onEditTr
           </svg>
           <input
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => { setQuery(e.target.value); queryRef.current = e.target.value; }}
             onKeyDown={(e) => e.key === "Enter" && runSearch(query)}
             onFocus={() => setSearchFocused(true)}
-            onBlur={() => { if (!query) setSearchFocused(false); }}
+            onBlur={() => { if (!queryRef.current) setSearchFocused(false); }}
             type="text"
             placeholder="Ask about your money..."
             autoComplete="off"
@@ -134,7 +136,7 @@ export default function SearchView({ transactions, onDeleteTransaction, onEditTr
             style={{ color: "var(--md-on-surface)" }}
           />
           {query && (
-            <button onClick={() => { setQuery(""); setResult(null); setSearchFocused(false); }} className="flex-shrink-0">
+            <button onClick={() => { setQuery(""); queryRef.current = ""; setResult(null); setSearchFocused(false); }} className="flex-shrink-0">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" style={{ color: "var(--md-outline)" }}>
                 <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
               </svg>
