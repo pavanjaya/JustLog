@@ -62,7 +62,7 @@ export default function SubscriptionPage({
   const isPro = subStatus === "active";
   const isTrial = subStatus === "trialing";
   const isFree = subStatus === "free";
-  const isMonthly = subPlan === "monthly" || subPlan === "trial" || !subPlan;
+  const isMonthly = subPlan !== "yearly";
   const days = validUntil ? daysLeft(validUntil) : 0;
   const trialPct = validUntil && isTrial
     ? Math.min(1, Math.max(0, (validUntil.getTime() - Date.now()) / (7 * 24 * 60 * 60 * 1000)))
@@ -183,7 +183,6 @@ export default function SubscriptionPage({
           <div className="rounded-[16px] overflow-hidden" style={{ background: "var(--md-surface-container-low)" }}>
             {[
               { label: "Plan", value: isPro ? (subPlan === "yearly" ? "Pro Annual" : "Pro Monthly") : isTrial ? "Pro Trial" : "Free" },
-              { label: "debug:subPlan", value: subPlan ?? "(null/undefined)" },
               { label: "Status", value: isPro ? "Active" : isTrial ? "In Trial" : isFree ? "Free" : "Expired", valueColor: isPro ? "#2E7D32" : isTrial ? "#7c3aed" : undefined },
               ...(validUntil && isPro ? [{ label: "Access until", value: fmt(validUntil) }] : []),
               ...(validUntil && isTrial ? [{ label: "Trial ends", value: fmt(validUntil) }] : []),
