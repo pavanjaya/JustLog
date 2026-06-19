@@ -415,11 +415,11 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
         )}
       </div>
 
-      {selectMode && (
+      {selectMode && selectedIds.size > 0 && (
         <div className="flex-shrink-0 px-4 pb-4 pt-2" style={{ background: "#fff" }}>
           <button
             onClick={handleBulkDelete}
-            disabled={selectedIds.size === 0 || bulkDeleting}
+            disabled={bulkDeleting}
             className="w-full py-3.5 rounded-2xl text-sm font-semibold disabled:opacity-40 flex items-center justify-center gap-2"
             style={{ background: "var(--md-error)", color: "#fff" }}
           >
