@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 function getNavBarHeight(): number {
   if (typeof window === "undefined") return 0;
@@ -47,6 +47,7 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [popping, setPopping] = useState(false);
   const [navBarHeight, setNavBarHeight] = useState(0);
+  const suggestions = useMemo(() => getSmartSuggestions(transactions), [transactions]);
 
   useEffect(() => {
     setNavBarHeight(getNavBarHeight());
@@ -91,9 +92,9 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
       style={{ background: "#fff", paddingBottom: `${navBarHeight + 16}px` }}
     >
       {/* Smart suggestion chips — scrollable row */}
-      {value.trim().length < 4 && getSmartSuggestions(transactions).length > 0 && (
+      {value.trim().length < 4 && suggestions.length > 0 && (
         <div className="flex gap-1.5 overflow-x-auto pb-2 no-scrollbar">
-          {getSmartSuggestions(transactions).map((s, i) => (
+          {suggestions.map((s, i) => (
             <button
               key={s}
               onClick={() => fillSuggestion(s)}

@@ -25,7 +25,7 @@ export function getCategoryMeta(category: string): CategoryMeta {
 
 /** Compact format: ₹500, ₹1.2K, ₹2.5L */
 export function fmtCompact(n: number): string {
-  if (n >= 100000) return `₹${(n / 100000).toFixed(1)}L`;
+  if (n >= 100000) return `₹${(n / 100000).toFixed(1).replace(/\.0$/, "")}L`;
   if (n >= 1000) return `₹${(n / 1000).toFixed(1).replace(/\.0$/, "")}K`;
   return `₹${n.toLocaleString("en-IN")}`;
 }

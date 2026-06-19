@@ -26,9 +26,11 @@ export function localParse(text: string): Array<{ amount: number; type: "income"
 
   const results = [];
   for (const seg of segments) {
-    const amountMatch = seg.match(/\d+(\.\d+)?/);
+    const amountMatch = seg.match(/(\d+(?:\.\d+)?)\s*([kKlL])\b/) || seg.match(/(\d+(?:\.\d+)?)/);
     if (!amountMatch) continue;
-    const amount = parseFloat(amountMatch[0]);
+    const raw = parseFloat(amountMatch[1]);
+    const suffix = amountMatch[2]?.toLowerCase();
+    const amount = suffix === "k" ? raw * 1000 : suffix === "l" ? raw * 100000 : raw;
     if (amount <= 0) continue;
 
     const lower = seg.toLowerCase();
@@ -39,7 +41,7 @@ export function localParse(text: string): Array<{ amount: number; type: "income"
     }
     if (isIncome && category === "Other") category = "Salary";
 
-    const description = seg.replace(/\d+(\.\d+)?/g, "").replace(/[₹$]/g, "").trim()
+    const description = seg.replace(/\d+(?:\.\d+)?[kKlL]?\b/g, "").replace(/[₹$]/g, "").trim()
       .split(" ").filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") || "Transaction";
 
     results.push({ amount, type: isIncome ? "income" : "expense" as "income" | "expense", category, description });

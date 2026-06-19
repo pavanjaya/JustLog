@@ -95,6 +95,8 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
     setIsLoading(true);
     setInput("");
     setAiState("loading");
+    setClarifyAmount(null);
+    setClarifyPerson(null);
     scrollToBottom();
 
     // Bare number — ask income or expense
