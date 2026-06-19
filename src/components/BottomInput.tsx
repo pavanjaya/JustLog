@@ -96,24 +96,20 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
     if (!SR) { alert("Voice input not supported on this browser."); return; }
 
     const rec = new SR();
-    rec.continuous = true;
+    rec.continuous = false;
     rec.interimResults = true;
     rec.lang = "en-IN";
 
-    const finalRef = { text: "" };
+    const prevText = value.trim();
 
     rec.onresult = (e) => {
-      let full = "";
-      let interim = "";
       const results = e.results as unknown as { [k: number]: { isFinal?: boolean; [k: number]: { transcript: string } }; length?: number };
       const len = results.length ?? Object.keys(results).length;
-      for (let i = 0; i < len; i++) {
-        const transcript = results[i][0].transcript;
-        if (results[i].isFinal) { full += transcript + " "; }
-        else { interim = transcript; }
-      }
-      finalRef.text = full.trim();
-      onChange((full + interim).trim());
+      // Take only the last result to avoid duplicates
+      const last = results[len - 1];
+      const transcript = last[0].transcript.trim();
+      const combined = prevText ? `${prevText}, ${transcript}` : transcript;
+      onChange(combined);
       const el = textareaRef.current;
       if (el) requestAnimationFrame(() => autoGrow(el));
     };
@@ -125,14 +121,6 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
 
     rec.onend = () => {
       setListening(false);
-      if (finalRef.text.trim()) {
-        setTimeout(() => {
-          setPopping(true);
-          setTimeout(() => setPopping(false), 300);
-          onSend();
-          if (textareaRef.current) textareaRef.current.style.height = "auto";
-        }, 400);
-      }
     };
 
     recognitionRef.current = rec;
