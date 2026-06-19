@@ -302,7 +302,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
             <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>Recent</span>
             {all.length > 0 && (
               <button onClick={onSeeAll} className="text-xs font-semibold" style={{ color: "var(--md-on-surface)" }}>
-                See all →
+                See all
               </button>
             )}
           </>
