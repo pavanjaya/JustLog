@@ -34,41 +34,48 @@ const FEATURES = [
   { label: "Full history, insights & CSV export" },
 ];
 
+const TRIAL_UNLOCKS = [
+  "AI-powered search is on",
+  "All spaces unlocked",
+  "Export & full history enabled",
+];
+
+type Screen = "main" | "trial-success" | "subscribe";
+
 export default function PaywallView({ userId, onSuccess, onContinueFree, trialExpired }: PaywallViewProps) {
-  const [loading, setLoading] = useState(false);
-  const [loadingType, setLoadingType] = useState<"trial" | "pay" | null>(null);
+  const [screen, setScreen] = useState<Screen>("main");
   const [plan, setPlan] = useState<"monthly" | "yearly">("monthly");
-  const [showPlanPicker, setShowPlanPicker] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   async function handleStartTrial() {
-    setLoading(true); setLoadingType("trial");
+    setLoading(true);
     try {
       const res = await fetch("/api/subscription/trial", { method: "POST" });
       const result = await res.json();
-      if (result.success) onSuccess();
+      if (result.success) setScreen("trial-success");
       else alert("Could not start trial. Please try again.");
     } catch { alert("Something went wrong. Try again."); }
-    finally { setLoading(false); setLoadingType(null); }
+    finally { setLoading(false); }
   }
 
-  async function handleSubscribe(selectedPlan: "monthly" | "yearly") {
-    setLoading(true); setLoadingType("pay");
+  async function handleSubscribe() {
+    setLoading(true);
     try {
       const loaded = await loadRazorpayScript();
-      if (!loaded) { alert("Could not load payment."); setLoading(false); setLoadingType(null); return; }
+      if (!loaded) { alert("Could not load payment."); setLoading(false); return; }
 
       const res = await fetch("/api/razorpay/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: selectedPlan }),
+        body: JSON.stringify({ plan }),
       });
       const { orderId, amount, currency, keyId, error } = await res.json();
-      if (error || !orderId) { alert("Could not create order. Try again."); setLoading(false); setLoadingType(null); return; }
+      if (error || !orderId) { alert("Could not create order. Try again."); setLoading(false); return; }
 
       new window.Razorpay({
         key: keyId, amount, currency,
         name: "JustLog",
-        description: selectedPlan === "yearly" ? "Pro Annual — ₹499/year" : "Pro Monthly — ₹49/month",
+        description: plan === "yearly" ? "Pro Annual — ₹499/year" : "Pro Monthly — ₹49/month",
         image: "/logo.svg",
         order_id: orderId,
         handler: async (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
@@ -79,7 +86,7 @@ export default function PaywallView({ userId, onSuccess, onContinueFree, trialEx
               orderId: response.razorpay_order_id,
               paymentId: response.razorpay_payment_id,
               signature: response.razorpay_signature,
-              userId, plan: selectedPlan,
+              userId, plan,
             }),
           });
           const result = await verify.json();
@@ -88,26 +95,185 @@ export default function PaywallView({ userId, onSuccess, onContinueFree, trialEx
         },
         prefill: {},
         theme: { color: "#C831FF" },
-        modal: { ondismiss: () => { setLoading(false); setLoadingType(null); } },
+        modal: { ondismiss: () => setLoading(false) },
       }).open();
-    } catch { alert("Something went wrong. Try again."); setLoading(false); setLoadingType(null); }
+    } catch { alert("Something went wrong. Try again."); setLoading(false); }
   }
 
+  const safeTop = "calc(env(safe-area-inset-top, 0px) + 16px)";
+  const safeBottom = "calc(env(safe-area-inset-bottom, 0px) + 28px)";
+
+  /* ── Trial success / filler screen ── */
+  if (screen === "trial-success") {
+    return (
+      <div
+        className="flex flex-col h-full overflow-y-auto no-scrollbar px-6"
+        style={{ background: "var(--md-surface)", paddingTop: safeTop, paddingBottom: safeBottom }}
+      >
+        <div className="flex-1 flex flex-col items-center justify-center text-center gap-0">
+          {/* Icon */}
+          <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6"
+            style={{ background: "rgba(200,49,255,0.08)" }}>
+            <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="var(--md-primary)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+          </div>
+
+          <h1 className="text-[26px] font-bold tracking-tight mb-2" style={{ color: "var(--md-on-surface)" }}>
+            Pro trial started!
+          </h1>
+          <p className="text-[14px] mb-2" style={{ color: "var(--md-on-surface-variant)" }}>
+            7 days free · No card needed · Cancel anytime
+          </p>
+
+          {/* Divider */}
+          <div className="w-8 h-px my-6" style={{ background: "var(--md-outline-variant)" }} />
+
+          {/* Unlocks */}
+          <p className="text-[12px] font-semibold uppercase tracking-wider mb-4" style={{ color: "var(--md-on-surface-variant)" }}>
+            What&apos;s unlocked for you
+          </p>
+          <div className="flex flex-col gap-3 w-full text-left">
+            {TRIAL_UNLOCKS.map((item) => (
+              <div key={item} className="flex items-center gap-3">
+                <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ background: "rgba(200,49,255,0.1)" }}>
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--md-primary)" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </div>
+                <span className="text-[14px]" style={{ color: "var(--md-on-surface)" }}>{item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* CTA */}
+        <div className="flex flex-col gap-3 pt-8">
+          <button
+            onClick={onSuccess}
+            className="w-full py-4 rounded-[16px] text-[15px] font-semibold active:opacity-80"
+            style={{ background: "var(--md-primary)", color: "#fff" }}
+          >
+            Start exploring →
+          </button>
+          <p className="text-[11px] text-center" style={{ color: "var(--md-outline)" }}>
+            Trial ends in 7 days. We&apos;ll remind you before it expires.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── Subscribe screen ── */
+  if (screen === "subscribe") {
+    return (
+      <div
+        className="flex flex-col h-full overflow-y-auto no-scrollbar"
+        style={{ background: "var(--md-surface)", paddingTop: safeTop, paddingBottom: safeBottom }}
+      >
+        {/* Back */}
+        <button
+          onClick={() => setScreen("main")}
+          className="flex items-center gap-2 px-4 mb-6 active:opacity-60"
+          style={{ color: "var(--md-on-surface-variant)" }}
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 12H5M12 5l-7 7 7 7"/>
+          </svg>
+          <span className="text-[14px]">Back</span>
+        </button>
+
+        <div className="px-5 flex-1">
+          <h2 className="text-[22px] font-bold tracking-tight mb-1" style={{ color: "var(--md-on-surface)" }}>
+            Subscribe to Pro
+          </h2>
+          <p className="text-[13px] mb-6" style={{ color: "var(--md-on-surface-variant)" }}>
+            Full access, forever. No trials, no limits.
+          </p>
+
+          {/* Plan toggle */}
+          <div className="rounded-[14px] p-1 flex mb-6" style={{ background: "var(--md-surface-container-low)" }}>
+            <button
+              onClick={() => setPlan("monthly")}
+              className="flex-1 py-3 rounded-[10px] text-[13px] font-medium transition-colors"
+              style={{
+                background: plan === "monthly" ? "var(--md-surface)" : "transparent",
+                color: plan === "monthly" ? "var(--md-on-surface)" : "var(--md-on-surface-variant)",
+                boxShadow: plan === "monthly" ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
+              }}
+            >
+              <div className="font-semibold">₹49 / month</div>
+              <div className="text-[11px] opacity-60">billed monthly</div>
+            </button>
+            <button
+              onClick={() => setPlan("yearly")}
+              className="flex-1 py-3 rounded-[10px] text-[13px] font-medium transition-colors relative"
+              style={{
+                background: plan === "yearly" ? "var(--md-surface)" : "transparent",
+                color: plan === "yearly" ? "var(--md-on-surface)" : "var(--md-on-surface-variant)",
+                boxShadow: plan === "yearly" ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
+              }}
+            >
+              <span className="absolute -top-2.5 right-3 text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "#FF6B35", color: "#fff" }}>
+                Save 15%
+              </span>
+              <div className="font-semibold">₹499 / year</div>
+              <div className="text-[11px] opacity-60">₹41.6 / month</div>
+            </button>
+          </div>
+
+          {/* Features */}
+          <div className="flex flex-col gap-3 mb-8">
+            {FEATURES.map((f) => (
+              <div key={f.label} className="flex items-center gap-3">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--md-primary)" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span className="text-[14px]" style={{ color: "var(--md-on-surface)" }}>{f.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* CTA */}
+        <div className="px-5 flex flex-col gap-3">
+          <button
+            onClick={handleSubscribe}
+            disabled={loading}
+            className="w-full py-4 rounded-[16px] text-[15px] font-semibold flex items-center justify-center gap-2 active:opacity-80"
+            style={{ background: "var(--md-primary)", color: "#fff", opacity: loading ? 0.7 : 1 }}
+          >
+            {loading ? (
+              <>
+                <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                  <circle cx="12" cy="12" r="10" strokeOpacity={0.25}/><path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round"/>
+                </svg>
+                Opening checkout…
+              </>
+            ) : `Pay ${plan === "yearly" ? "₹499 / year" : "₹49 / month"}`}
+          </button>
+          <p className="text-[11px] text-center" style={{ color: "var(--md-outline)" }}>
+            Secured by Razorpay · One-time payment · No auto-renewal
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── Main paywall screen ── */
   return (
     <div
       className="flex flex-col h-full overflow-y-auto no-scrollbar"
-      style={{
-        background: "var(--md-surface)",
-        paddingTop: "calc(env(safe-area-inset-top, 0px) + 16px)",
-        paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 28px)",
-      }}
+      style={{ background: "var(--md-surface)", paddingTop: safeTop, paddingBottom: safeBottom }}
     >
       {/* Logo */}
       <div className="px-5 mb-7">
         <img src="/logo.svg" alt="JustLog" className="h-8" />
       </div>
 
-      {/* Hero text */}
+      {/* Hero */}
       <div className="px-5 mb-8">
         {trialExpired ? (
           <>
@@ -149,103 +315,64 @@ export default function PaywallView({ userId, onSuccess, onContinueFree, trialEx
       </div>
 
       {/* CTAs */}
-      <div className="px-5 flex flex-col gap-3 mt-auto">
+      <div className="px-5 flex flex-col gap-4 mt-auto">
 
-        {/* Primary — Pro trial (new users only) */}
-        {!trialExpired && (
+        {/* Primary — trial (new users) or subscribe (trial expired) */}
+        {!trialExpired ? (
           <button
             onClick={handleStartTrial}
             disabled={loading}
-            className="w-full py-4 rounded-[16px] text-[15px] font-semibold flex items-center justify-center gap-2 active:opacity-80"
-            style={{ background: "var(--md-primary)", color: "#fff", opacity: loading && loadingType === "trial" ? 0.7 : 1 }}
+            className="w-full rounded-[16px] flex flex-col items-center justify-center active:opacity-80"
+            style={{ background: "var(--md-primary)", color: "#fff", opacity: loading ? 0.7 : 1, padding: "14px 16px 12px" }}
           >
-            {loading && loadingType === "trial" ? (
-              <>
+            {loading ? (
+              <div className="flex items-center gap-2 py-1">
                 <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
                   <circle cx="12" cy="12" r="10" strokeOpacity={0.25}/><path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round"/>
                 </svg>
-                Starting…
+                <span className="text-[15px] font-semibold">Starting…</span>
+              </div>
+            ) : (
+              <>
+                <span className="text-[15px] font-semibold">Try Pro free — 7 days</span>
+                <span className="text-[12px] mt-0.5" style={{ opacity: 0.8 }}>No card needed · Cancel anytime</span>
               </>
-            ) : "Try Pro free — 7 days"}
-          </button>
-        )}
-
-        {/* Secondary — Subscribe */}
-        {!showPlanPicker ? (
-          <button
-            onClick={() => { if (trialExpired) setShowPlanPicker(true); else setShowPlanPicker(true); }}
-            disabled={loading}
-            className="w-full py-3.5 rounded-[16px] text-[14px] font-semibold active:opacity-80"
-            style={{
-              background: trialExpired ? "var(--md-primary)" : "transparent",
-              color: trialExpired ? "#fff" : "var(--md-on-surface)",
-              border: trialExpired ? "none" : "1.5px solid var(--md-outline-variant)",
-            }}
-          >
-            {trialExpired ? "Subscribe to Pro" : "Subscribe now · ₹49/month"}
+            )}
           </button>
         ) : (
-          /* Inline plan picker */
-          <div className="rounded-[16px] overflow-hidden" style={{ border: "1.5px solid var(--md-outline-variant)" }}>
-            <div className="p-1 flex" style={{ background: "var(--md-surface-container-low)" }}>
-              <button
-                onClick={() => setPlan("monthly")}
-                className="flex-1 py-2.5 rounded-[10px] text-[13px] font-medium transition-colors"
-                style={{
-                  background: plan === "monthly" ? "var(--md-surface)" : "transparent",
-                  color: plan === "monthly" ? "var(--md-on-surface)" : "var(--md-on-surface-variant)",
-                  boxShadow: plan === "monthly" ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
-                }}
-              >
-                ₹49 / month
-              </button>
-              <button
-                onClick={() => setPlan("yearly")}
-                className="flex-1 py-2.5 rounded-[10px] text-[13px] font-medium transition-colors relative"
-                style={{
-                  background: plan === "yearly" ? "var(--md-surface)" : "transparent",
-                  color: plan === "yearly" ? "var(--md-on-surface)" : "var(--md-on-surface-variant)",
-                  boxShadow: plan === "yearly" ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
-                }}
-              >
-                ₹499 / year
-                <span className="absolute -top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "#FF6B35", color: "#fff" }}>
-                  -15%
-                </span>
-              </button>
-            </div>
-            <button
-              onClick={() => handleSubscribe(plan)}
-              disabled={loading}
-              className="w-full py-3.5 text-[14px] font-semibold flex items-center justify-center gap-2 active:opacity-80"
-              style={{ background: trialExpired ? "var(--md-primary)" : "var(--md-surface-container-low)", color: trialExpired ? "#fff" : "var(--md-on-surface)", opacity: loading && loadingType === "pay" ? 0.7 : 1 }}
-            >
-              {loading && loadingType === "pay" ? (
-                <>
-                  <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-                    <circle cx="12" cy="12" r="10" strokeOpacity={0.25}/><path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round"/>
-                  </svg>
-                  Opening checkout…
-                </>
-              ) : `Pay ${plan === "yearly" ? "₹499 / year" : "₹49 / month"}`}
-            </button>
-          </div>
+          <button
+            onClick={() => setScreen("subscribe")}
+            className="w-full py-4 rounded-[16px] text-[15px] font-semibold active:opacity-80"
+            style={{ background: "var(--md-primary)", color: "#fff" }}
+          >
+            Subscribe to Pro
+          </button>
         )}
 
-        {/* Tertiary — Free plan */}
+        {/* Secondary — subscribe (new users) */}
+        {!trialExpired && (
+          <button
+            onClick={() => setScreen("subscribe")}
+            className="w-full py-1 flex items-center justify-center gap-1.5 active:opacity-60"
+            style={{ color: "var(--md-on-surface-variant)" }}
+          >
+            <span className="text-[13px]">Or subscribe directly · ₹49/month</span>
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </button>
+        )}
+
+        {/* Tertiary — free plan */}
         {onContinueFree && (
           <button
             onClick={onContinueFree}
-            className="w-full py-2.5 text-[13px] text-center active:opacity-60"
-            style={{ color: "var(--md-on-surface-variant)" }}
+            className="w-full py-1 text-[13px] text-center active:opacity-60"
+            style={{ color: "var(--md-outline)" }}
           >
             Continue with Free plan
           </button>
         )}
-
-        <p className="text-[11px] text-center" style={{ color: "var(--md-outline)" }}>
-          {trialExpired ? "Secured by Razorpay · Hueness Design Pvt. Ltd." : "No card required for trial · Cancel anytime"}
-        </p>
       </div>
     </div>
   );
