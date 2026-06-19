@@ -314,26 +314,30 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
         {aiState === "clarify" && clarifyPerson && (
           <div className="pb-1 animate-fade-up">
             <div className="rounded-2xl p-4" style={{ background: "var(--md-surface-container-low)", border: "1px solid var(--md-outline-variant)" }}>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "var(--md-primary)", color: "#fff" }}>
-                  <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "var(--md-primary)", color: "#fff" }}>
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                  </div>
+                  <span className="text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>
+                    ₹{clarifyPerson.amount.toLocaleString("en-IN")} with {clarifyPerson.name}
+                  </span>
                 </div>
-                <span className="text-sm font-medium" style={{ color: "var(--md-on-secondary-container)" }}>
-                  ₹{clarifyPerson.amount.toLocaleString("en-IN")} with {clarifyPerson.name} — paid or received?
-                </span>
+                <button onClick={() => { setClarifyPerson(null); setAiState("idle"); }} style={{ color: "var(--md-on-surface-variant)", padding: "2px 6px", fontSize: 13 }}>✕</button>
               </div>
+              <p className="text-xs mb-3" style={{ color: "var(--md-on-surface-variant)" }}>Paid or received?</p>
               <div className="flex gap-2">
                 <button
                   onClick={() => logClarifiedPerson("income")}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold"
-                  style={{ background: "#E8F5E9", color: "#2E7D32" }}
+                  style={{ background: "#1B8A3E", color: "#fff" }}
                 >
                   + Received
                 </button>
                 <button
                   onClick={() => logClarifiedPerson("expense")}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold"
-                  style={{ background: "#FFF5F5", color: "#C62828" }}
+                  style={{ background: "#C62828", color: "#fff" }}
                 >
                   − Paid
                 </button>
@@ -345,26 +349,30 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
         {aiState === "clarify" && clarifyAmount && (
           <div className="pb-1 animate-fade-up">
             <div className="rounded-2xl p-4" style={{ background: "var(--md-surface-container-low)", border: "1px solid var(--md-outline-variant)" }}>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "var(--md-primary)", color: "#fff" }}>
-                  <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "var(--md-primary)", color: "#fff" }}>
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                  </div>
+                  <span className="text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>
+                    ₹{clarifyAmount.toLocaleString("en-IN")}
+                  </span>
                 </div>
-                <span className="text-sm font-medium" style={{ color: "var(--md-on-secondary-container)" }}>
-                  ₹{clarifyAmount} — income or expense?
-                </span>
+                <button onClick={() => { setClarifyAmount(null); setAiState("idle"); }} style={{ color: "var(--md-on-surface-variant)", padding: "2px 6px", fontSize: 13 }}>✕</button>
               </div>
+              <p className="text-xs mb-3" style={{ color: "var(--md-on-surface-variant)" }}>Income or expense?</p>
               <div className="flex gap-2">
                 <button
                   onClick={() => logClarified("income")}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold"
-                  style={{ background: "#E8F5E9", color: "#2E7D32" }}
+                  style={{ background: "#1B8A3E", color: "#fff" }}
                 >
                   + Income
                 </button>
                 <button
                   onClick={() => logClarified("expense")}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold"
-                  style={{ background: "#FFF5F5", color: "#C62828" }}
+                  style={{ background: "#C62828", color: "#fff" }}
                 >
                   − Expense
                 </button>
