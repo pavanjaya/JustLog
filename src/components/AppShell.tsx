@@ -118,10 +118,21 @@ export default function AppShell() {
     }
   }, [supabase, loadSpaces]);
 
-  const loadSubscription = useCallback(async (_userId: string) => {
-    // Stripe not yet configured — grant access to everyone
-    setSubStatus("active");
-  }, []);
+  const loadSubscription = useCallback(async (userId: string) => {
+    const { data } = await supabase
+      .from("subscriptions")
+      .select("status, valid_until")
+      .eq("user_id", userId)
+      .single();
+    if (data && (data.status === "active" || data.status === "trialing")) {
+      const validUntil = new Date(data.valid_until);
+      if (validUntil > new Date()) {
+        setSubStatus("active");
+        return;
+      }
+    }
+    setSubStatus("none");
+  }, [supabase]);
 
   // Handle deep link auth callback from Capacitor
   useEffect(() => {
@@ -265,10 +276,8 @@ export default function AppShell() {
     if (data) setTransactions((prev) => [...prev, ...(data as Transaction[])]);
   }
 
-  async function handleSubscribe() {
-    const res = await fetch("/api/stripe/checkout", { method: "POST" });
-    const { url } = await res.json();
-    if (url) window.location.href = url;
+  async function handleSubscribeSuccess() {
+    if (user) await loadSubscription(user.id);
   }
 
   const userName = user?.user_metadata?.full_name?.split(" ")[0] ?? user?.email?.split("@")[0];
@@ -321,7 +330,9 @@ export default function AppShell() {
             <div className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "var(--md-primary)", borderTopColor: "transparent" }} />
           </div>
         )}
-        {subStatus === "none" && null}
+        {subStatus === "none" && user && (
+          <PaywallView userId={user.id} onSuccess={handleSubscribeSuccess} />
+        )}
 
         {spaceLoading && (
           <div className="flex-1 flex items-center justify-center">
