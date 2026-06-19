@@ -17,6 +17,7 @@ import PaywallView from "@/components/PaywallView";
 import SplashScreen from "@/components/SplashScreen";
 import OnboardingScreen from "@/components/OnboardingScreen";
 import SubscriptionPage from "@/components/SubscriptionPage";
+import SwitchPlanSheet from "@/components/SwitchPlanSheet";
 
 type SubStatus = "loading" | "active" | "trialing" | "none" | "free";
 
@@ -31,6 +32,7 @@ export default function AppShell() {
   const [user, setUser] = useState<User | null>(null);
   const [subStatus, setSubStatus] = useState<SubStatus>("active");
   const [showSubPage, setShowSubPage] = useState(false);
+  const [showSwitchSheet, setShowSwitchSheet] = useState(false);
   const [subValidUntil, setSubValidUntil] = useState<Date | null>(null);
   const [subPlan, setSubPlan] = useState<string>("monthly");
   const [splashDone, setSplashDone] = useState(false);
@@ -443,6 +445,14 @@ export default function AppShell() {
 
       <Toast message={toast.message} visible={toast.visible} />
 
+      {showSwitchSheet && user && (
+        <SwitchPlanSheet
+          userId={user.id}
+          onSuccess={() => { setShowSwitchSheet(false); setShowSubPage(false); handleSubscribeSuccess(); }}
+          onClose={() => setShowSwitchSheet(false)}
+        />
+      )}
+
       {showSubPage && (
         <SubscriptionPage
           subStatus={subStatus}
@@ -450,7 +460,7 @@ export default function AppShell() {
           subPlan={subPlan}
           onBack={() => setShowSubPage(false)}
           onUpgrade={() => { setShowSubPage(false); setSubStatus("none"); }}
-          onSwitchToAnnual={() => { setShowSubPage(false); setSubStatus("none"); }}
+          onSwitchToAnnual={() => { setShowSwitchSheet(true); }}
           onCancelled={() => { setShowSubPage(false); setSubStatus("none"); }}
         />
       )}
