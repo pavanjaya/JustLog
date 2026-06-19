@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Transaction, Space } from "@/types";
 import TxItem from "@/components/TxItem";
 import { apiUrl } from "@/lib/api";
@@ -40,6 +40,8 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [clarifyPerson, setClarifyPerson] = useState<{ amount: number; name: string } | null>(null);
   const feedRef = useRef<HTMLDivElement>(null);
+  const mountedRef = useRef(true);
+  useEffect(() => { return () => { mountedRef.current = false; }; }, []);
 
   function enterSelectMode(id: string) {
     setSelectMode(true);
@@ -63,8 +65,10 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
     if (selectedIds.size === 0) return;
     setBulkDeleting(true);
     await onBulkDelete([...selectedIds]);
-    setBulkDeleting(false);
-    exitSelectMode();
+    if (mountedRef.current) {
+      setBulkDeleting(false);
+      exitSelectMode();
+    }
   }
 
   const today = new Date().toDateString();
@@ -99,9 +103,12 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
     setClarifyPerson(null);
     scrollToBottom();
 
-    // Bare number — ask income or expense
-    if (/^\d+(\.\d+)?$/.test(text)) {
-      setClarifyAmount(parseFloat(text));
+    // Bare number (or bare k/L amount) — ask income or expense
+    if (/^\d+(\.\d+)?([kKlL])?$/.test(text)) {
+      const raw = parseFloat(text);
+      const suffix = text.slice(-1).toLowerCase();
+      const amount = suffix === "k" ? raw * 1000 : suffix === "l" ? raw * 100000 : raw;
+      setClarifyAmount(amount);
       setAiState("clarify");
       setIsLoading(false);
       scrollToBottom();

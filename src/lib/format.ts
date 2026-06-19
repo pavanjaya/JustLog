@@ -32,6 +32,7 @@ export function fmtCompact(n: number): string {
 
 /** Full format: ₹1,25,000 */
 export function fmtFull(n: number): string {
+  if (!n || isNaN(n)) return "₹0";
   return `₹${n.toLocaleString("en-IN")}`;
 }
 
