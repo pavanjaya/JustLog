@@ -153,15 +153,14 @@ export default function SearchView({ transactions, onDeleteTransaction, onEditTr
         )}
       </div>
 
-      {/* Filters — hidden when search is active */}
-      {!searchFocused && !result && <div className="flex-shrink-0 px-4 pb-3 flex flex-col gap-2">
-        {/* Type filter */}
-        <div className="flex gap-2">
+      {/* Filters — single scrollable row, hidden when search is active */}
+      {!searchFocused && !result && (
+        <div className="flex-shrink-0 px-4 pb-3 flex items-center gap-2 overflow-x-auto no-scrollbar">
           {(["all", "income", "expense"] as const).map(t => (
             <button
               key={t}
               onClick={() => setTypeFilter(t)}
-              className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
+              className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex-shrink-0"
               style={{
                 background: typeFilter === t ? "var(--md-on-surface)" : "var(--md-surface-container-low)",
                 color: typeFilter === t ? "#fff" : "var(--md-on-surface-variant)",
@@ -170,24 +169,23 @@ export default function SearchView({ transactions, onDeleteTransaction, onEditTr
               {t === "all" ? "All" : t === "income" ? "Income" : "Expense"}
             </button>
           ))}
-        </div>
-        {/* Time filter */}
-        <div className="flex gap-2">
-          {(["all", "this_month", "last_month"] as const).map(t => (
+          {/* Divider */}
+          <div className="w-px h-4 flex-shrink-0" style={{ background: "var(--md-outline-variant)" }} />
+          {(["this_month", "last_month"] as const).map(t => (
             <button
               key={t}
-              onClick={() => setTimeFilter(t)}
-              className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
+              onClick={() => setTimeFilter(prev => prev === t ? "all" : t)}
+              className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex-shrink-0"
               style={{
                 background: timeFilter === t ? "var(--md-primary)" : "var(--md-surface-container-low)",
                 color: timeFilter === t ? "#fff" : "var(--md-on-surface-variant)",
               }}
             >
-              {t === "all" ? "All time" : t === "this_month" ? "This month" : "Last month"}
+              {t === "this_month" ? "This month" : "Last month"}
             </button>
           ))}
         </div>
-      </div>}
+      )}
 
       <div className="flex-1 overflow-y-auto no-scrollbar pb-6">
         {/* AI result */}
