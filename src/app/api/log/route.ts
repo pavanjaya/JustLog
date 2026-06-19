@@ -202,7 +202,17 @@ export async function POST(req: NextRequest) {
     }
 
     const arr = Array.isArray(parsed) ? parsed : [parsed];
-    const validTxs = arr.filter(isValidTx);
+    const validTxs = arr.filter(isValidTx).map((tx) => {
+      // Post-process: "From [Name]" descriptions are always person transfers
+      if (/^From\s+[A-Z]/.test(tx.description)) {
+        return { ...tx, category: "Transfer" };
+      }
+      // Post-process: "Lent to", "Given to", "Paid to" are always Transfer expenses
+      if (/^(Lent|Given|Paid)\s+[Tt]o\s+[A-Z]/.test(tx.description)) {
+        return { ...tx, category: "Transfer", type: "expense" as const };
+      }
+      return tx;
+    });
 
     if (validTxs.length === 0) {
       return NextResponse.json({ error: "No valid transactions found" }, { status: 422, headers: CORS_HEADERS });
