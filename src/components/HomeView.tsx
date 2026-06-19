@@ -108,10 +108,13 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
 
     // Ambiguous: "3000 sameer" or "sameer 3000" — amount + single name, no direction keywords
     const DIRECTION_KEYWORDS = ["from", "to", "for", "paid", "received", "got", "lend", "lent", "loan", "sent", "give", "gave", "salary", "income", "spend", "spent", "bought", "buy"];
+    const KNOWN_WORDS = ["coffee", "tea", "chai", "food", "lunch", "dinner", "breakfast", "snack", "petrol", "fuel", "uber", "ola", "auto", "bus", "metro", "rent", "grocery", "groceries", "milk", "vegetables", "fruits", "medicine", "doctor", "hospital", "movie", "netflix", "amazon", "shopping", "clothes", "electricity", "wifi", "internet", "phone", "recharge", "school", "fees", "tuition", "college", "travel", "salary", "business", "investment", "ice", "cream", "swiggy", "zomato", "bill", "bills", "transport", "housing", "entertainment", "education", "healthcare", "transfer", "refund", "other"];
     const ambiguousMatch = text.match(/^(\d+(?:\.\d+)?(?:k|K|l|L)?)\s+([a-zA-Z]+)$/) || text.match(/^([a-zA-Z]+)\s+(\d+(?:\.\d+)?(?:k|K|l|L)?)$/);
     if (ambiguousMatch) {
       const hasDirection = DIRECTION_KEYWORDS.some(kw => text.toLowerCase().includes(kw));
-      if (!hasDirection) {
+      const word = (ambiguousMatch[1].match(/\d/) ? ambiguousMatch[2] : ambiguousMatch[1]).toLowerCase();
+      const isKnownWord = KNOWN_WORDS.includes(word);
+      if (!hasDirection && !isKnownWord) {
         const numStr = ambiguousMatch[1].match(/\d/) ? ambiguousMatch[1] : ambiguousMatch[2];
         const name = ambiguousMatch[1].match(/\d/) ? ambiguousMatch[2] : ambiguousMatch[1];
         const raw = numStr.toLowerCase();
