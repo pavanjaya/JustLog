@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Remove default button focus outlines — we use custom focus styles */
+button { outline: none; -webkit-tap-highlight-color: transparent; }
+
 /* Safe area insets for Android/iOS notch and nav bar */
 :root {
   --safe-bottom: env(safe-area-inset-bottom, 0px);

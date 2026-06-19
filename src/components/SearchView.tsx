@@ -244,7 +244,7 @@ export default function SearchView({ transactions, onDeleteTransaction, onBulkDe
               </svg>
             </button>
           )}
-          <button onClick={startVoiceSearch} className="flex-shrink-0" style={{ color: voiceListening ? "var(--md-primary)" : "var(--md-outline)", position: "relative" }}>
+          <button onClick={startVoiceSearch} className="flex-shrink-0 outline-none" style={{ color: voiceListening ? "var(--md-primary)" : "var(--md-outline)", position: "relative", WebkitAppearance: "none", background: "none", border: "none" }}>
             {voiceListening && (
               <span className="absolute inset-0 rounded-full" style={{
                 background: "var(--md-primary)",
