@@ -241,7 +241,6 @@ export default function SettingsView({
           paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)",
           paddingBottom: "12px",
           background: "var(--md-surface)",
-          borderBottom: "1px solid var(--md-outline-variant)",
         }}
       >
         <button

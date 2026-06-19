@@ -71,7 +71,6 @@ export default function SubscriptionPage({ subStatus, validUntil, subPlan, onBac
           paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)",
           paddingBottom: "12px",
           background: "var(--md-surface)",
-          borderBottom: "1px solid var(--md-outline-variant)",
         }}
       >
         <button
@@ -218,7 +217,7 @@ export default function SubscriptionPage({ subStatus, validUntil, subPlan, onBac
           <div className="text-[11px] font-bold tracking-widest mb-2 px-1" style={{ color: "var(--md-on-surface-variant)" }}>
             PLAN DETAILS
           </div>
-          <div className="rounded-[16px] overflow-hidden" style={{ border: "1px solid var(--md-outline-variant)" }}>
+          <div className="rounded-[16px] overflow-hidden" style={{ background: "var(--md-surface-container-low)" }}>
             {[
               {
                 label: "Plan",
@@ -250,8 +249,7 @@ export default function SubscriptionPage({ subStatus, validUntil, subPlan, onBac
                 key={row.label}
                 className="flex items-center justify-between px-4 py-3.5"
                 style={{
-                  borderTop: i > 0 ? "1px solid var(--md-outline-variant)" : "none",
-                  background: "var(--md-surface)",
+                  borderTop: "none",
                 }}
               >
                 <span className="text-[13px]" style={{ color: "var(--md-on-surface-variant)" }}>{row.label}</span>
@@ -271,14 +269,13 @@ export default function SubscriptionPage({ subStatus, validUntil, subPlan, onBac
           <div className="text-[11px] font-bold tracking-widest mb-2 px-1" style={{ color: "var(--md-on-surface-variant)" }}>
             WHAT&apos;S INCLUDED
           </div>
-          <div className="rounded-[16px] overflow-hidden" style={{ border: "1px solid var(--md-outline-variant)" }}>
+          <div className="rounded-[16px] overflow-hidden" style={{ background: "var(--md-surface-container-low)" }}>
             {FEATURES.map((f, i) => (
               <div
                 key={f.label}
                 className="flex items-center gap-3 px-4 py-3.5"
                 style={{
-                  borderTop: i > 0 ? "1px solid var(--md-outline-variant)" : "none",
-                  background: "var(--md-surface)",
+                  borderTop: "none",
                 }}
               >
                 <CheckIcon active={isPro || isTrial} />
