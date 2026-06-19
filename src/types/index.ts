@@ -27,6 +27,7 @@ export interface Space {
   include_in_personal: boolean;
   people_count: number;
   created_at: string;
+  pin_hash?: string | null;
 }
 
 export interface Transaction {

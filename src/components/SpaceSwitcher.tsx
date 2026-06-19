@@ -24,7 +24,7 @@ interface SpaceSwitcherProps {
   spaces: Space[];
   activeSpaceId: string;
   onSwitch: (space: Space) => void;
-  onCreate: (name: string, icon: string, includeInPersonal: boolean, peopleCount: number) => Promise<void>;
+  onCreate: (name: string, icon: string, includeInPersonal: boolean, peopleCount: number, pinHash?: string) => Promise<void>;
   onClose: () => void;
   isPro?: boolean;
   onUpgrade?: () => void;
@@ -40,6 +40,9 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
   const [sharedExpense, setSharedExpense] = useState(false);
   const [peopleCount, setPeopleCount] = useState(2);
   const [showMore, setShowMore] = useState(false);
+  const [enablePin, setEnablePin] = useState(false);
+  const [pinValue, setPinValue] = useState("");
+  const [pinError, setPinError] = useState("");
 
   // Reset create form whenever sheet closes
   useEffect(() => {
@@ -52,6 +55,9 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
       setSharedExpense(false);
       setPeopleCount(2);
       setShowMore(false);
+      setEnablePin(false);
+      setPinValue("");
+      setPinError("");
     }
   }, [open]);
 
@@ -60,10 +66,17 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
     if (!trimmed) return;
     const isDuplicate = spaces.some((s) => s.name.toLowerCase() === trimmed.toLowerCase());
     if (isDuplicate) { setNameError("A space with this name already exists"); return; }
+    if (enablePin && pinValue.length !== 4) { setPinError("Enter a 4-digit PIN"); return; }
     setSaving(true);
     setNameError("");
+    let pinHash: string | undefined;
+    if (enablePin && pinValue.length === 4) {
+      const data = new TextEncoder().encode(pinValue + "jl-pin-salt");
+      const hash = await crypto.subtle.digest("SHA-256", data);
+      pinHash = Array.from(new Uint8Array(hash)).map((b) => b.toString(16).padStart(2, "0")).join("");
+    }
     onClose();
-    await onCreate(trimmed, newIcon, includeInPersonal, sharedExpense ? peopleCount : 1);
+    await onCreate(trimmed, newIcon, includeInPersonal, sharedExpense ? peopleCount : 1, pinHash);
     setSaving(false);
   }
 
@@ -191,6 +204,34 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
                   </div>
                 </button>
 
+                {/* PIN Lock */}
+                <button type="button" onClick={() => { setEnablePin((v) => !v); setPinValue(""); setPinError(""); }} className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left" style={{ background: enablePin ? "rgba(200,49,255,0.06)" : "var(--md-surface-container-low)", border: `1.5px solid ${enablePin ? "var(--md-primary)" : "transparent"}` }}>
+                  <div className="flex items-center justify-center flex-shrink-0" style={{ width: 18, height: 18, borderRadius: 4, background: enablePin ? "var(--md-primary)" : "transparent", border: `2px solid ${enablePin ? "var(--md-primary)" : "var(--md-outline-variant)"}` }}>
+                    {enablePin && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>PIN Lock</div>
+                    <div className="text-[11px] mt-0.5" style={{ color: "var(--md-on-surface-variant)" }}>Require a 4-digit PIN to open this space</div>
+                  </div>
+                </button>
+
+                {/* PIN input */}
+                {enablePin && (
+                  <div className="animate-fade-up">
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      maxLength={4}
+                      placeholder="Enter 4-digit PIN"
+                      value={pinValue}
+                      onChange={(e) => { const v = e.target.value.replace(/\D/g, "").slice(0,4); setPinValue(v); setPinError(""); }}
+                      className="w-full px-4 py-3 rounded-2xl text-sm outline-none text-center tracking-[0.5em] font-bold"
+                      style={{ background: "var(--md-surface-container-low)", border: `1.5px solid ${pinError ? "var(--md-error)" : "var(--md-outline-variant)"}`, color: "var(--md-on-surface)", letterSpacing: "0.4em" }}
+                    />
+                    {pinError && <div className="text-xs px-1 mt-1" style={{ color: "var(--md-error)" }}>{pinError}</div>}
+                  </div>
+                )}
+
                 {/* People stepper */}
                 {sharedExpense && (
                   <div className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl animate-fade-up" style={{ background: "rgba(200,49,255,0.06)", border: "1.5px solid rgba(200,49,255,0.15)" }}>
@@ -258,6 +299,11 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
                         <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ background: "var(--md-surface-container)", color: "var(--md-on-surface-variant)" }}>
                           + personal
                         </span>
+                      )}
+                      {space.pin_hash && (
+                        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--md-on-surface-variant)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                          <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+                        </svg>
                       )}
                     </div>
                     {isActive && (

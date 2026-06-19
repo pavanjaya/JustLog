@@ -18,6 +18,7 @@ import SplashScreen from "@/components/SplashScreen";
 import OnboardingScreen from "@/components/OnboardingScreen";
 import SubscriptionPage from "@/components/SubscriptionPage";
 import SwitchPlanSheet from "@/components/SwitchPlanSheet";
+import PinPad from "@/components/PinPad";
 
 type SubStatus = "loading" | "active" | "trialing" | "none" | "free";
 
@@ -36,6 +37,8 @@ export default function AppShell() {
   const [subValidUntil, setSubValidUntil] = useState<Date | null>(null);
   const [subPlan, setSubPlan] = useState<string>("monthly");
   const [splashDone, setSplashDone] = useState(false);
+  const [pendingSpace, setPendingSpace] = useState<Space | null>(null);
+  const [unlockedSpaces, setUnlockedSpaces] = useState<Set<string>>(new Set());
   const [onboardingDone, setOnboardingDone] = useState(() => {
     if (typeof window === "undefined") return true;
     return localStorage.getItem("jl_onboarded") === "1";
@@ -229,6 +232,10 @@ export default function AppShell() {
   }, [ensureDefaultSpace, loadTransactions, loadSubscription, supabase]);
 
   async function handleSwitchSpace(space: Space, allSpaces?: Space[]) {
+    if (space.pin_hash && !unlockedSpaces.has(space.id)) {
+      setPendingSpace(space);
+      return;
+    }
     setActiveSpace(space);
     setTransactions([]);
     setSpaceLoading(true);
@@ -237,11 +244,11 @@ export default function AppShell() {
     setSpaceLoading(false);
   }
 
-  async function handleCreateSpace(name: string, icon: string, includeInPersonal: boolean, peopleCount: number) {
+  async function handleCreateSpace(name: string, icon: string, includeInPersonal: boolean, peopleCount: number, pinHash?: string) {
     if (!user) return;
     const { data, error } = await supabase
       .from("spaces")
-      .insert({ user_id: user.id, name, icon, color: "#C831FF", include_in_personal: includeInPersonal, people_count: peopleCount })
+      .insert({ user_id: user.id, name, icon, color: "#C831FF", include_in_personal: includeInPersonal, people_count: peopleCount, pin_hash: pinHash ?? null })
       .select()
       .single();
     if (error || !data) { showToast("Failed to create space"); return; }
@@ -431,6 +438,21 @@ export default function AppShell() {
       </div>
 
       <Toast message={toast.message} visible={toast.visible} />
+
+      {pendingSpace && (
+        <PinPad
+          mode="verify"
+          spaceName={pendingSpace.name}
+          storedHash={pendingSpace.pin_hash ?? undefined}
+          onConfirm={() => {
+            setUnlockedSpaces((prev) => new Set([...prev, pendingSpace.id]));
+            const space = pendingSpace;
+            setPendingSpace(null);
+            handleSwitchSpace(space);
+          }}
+          onClose={() => setPendingSpace(null)}
+        />
+      )}
 
       {showSwitchSheet && user && (
         <SwitchPlanSheet
