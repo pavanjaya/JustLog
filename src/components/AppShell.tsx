@@ -26,7 +26,7 @@ export default function AppShell() {
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [activeSpace, setActiveSpace] = useState<Space | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [subStatus, setSubStatus] = useState<SubStatus>("loading");
+  const [subStatus, setSubStatus] = useState<SubStatus>("active");
   const ensureDefaultSpaceRunning = useRef(false);
   const personalSpaceId = useRef<string | null>(null);
   const [spaceLoading, setSpaceLoading] = useState(false);
@@ -152,10 +152,12 @@ export default function AppShell() {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       setUser(user);
       if (user) {
+        setSpaceLoading(true);
         const space = await ensureDefaultSpace(user.id);
         setActiveSpace(space);
         const allSpaces = await loadSpaces(user.id);
         await loadTransactions(space.id, allSpaces);
+        setSpaceLoading(false);
         await loadSubscription(user.id);
       } else {
         setSubStatus("none");
