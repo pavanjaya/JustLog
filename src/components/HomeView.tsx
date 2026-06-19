@@ -38,6 +38,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [clarifyPerson, setClarifyPerson] = useState<{ amount: number; name: string } | null>(null);
   const feedRef = useRef<HTMLDivElement>(null);
   const mountedRef = useRef(true);
@@ -63,6 +64,11 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
 
   async function handleBulkDelete() {
     if (selectedIds.size === 0) return;
+    setConfirmDelete(true);
+  }
+
+  async function confirmAndDelete() {
+    setConfirmDelete(false);
     setBulkDeleting(true);
     await onBulkDelete([...selectedIds]);
     if (mountedRef.current) {
@@ -445,6 +451,43 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
       )}
 
       {!selectMode && <BottomInput value={input} onChange={setInput} onSend={handleSend} disabled={isLoading} transactions={transactions} />}
+
+      {/* Confirm delete bottom sheet */}
+      {confirmDelete && (
+        <>
+          <div className="absolute inset-0 z-40" style={{ background: "rgba(0,0,0,0.4)" }} onClick={() => setConfirmDelete(false)} />
+          <div className="absolute bottom-0 left-0 right-0 z-50 rounded-t-3xl p-6 flex flex-col gap-4" style={{ background: "#fff", paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)" }}>
+            <div className="w-10 h-1 rounded-full mx-auto mb-1" style={{ background: "var(--md-outline-variant)" }} />
+            <div className="flex flex-col items-center gap-2 py-2">
+              <div className="w-12 h-12 rounded-full flex items-center justify-center mb-1" style={{ background: "#FFDAD6" }}>
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#BA1A1A" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+                </svg>
+              </div>
+              <p className="text-base font-semibold text-center" style={{ color: "var(--md-on-surface)" }}>
+                Delete {selectedIds.size} {selectedIds.size === 1 ? "entry" : "entries"}?
+              </p>
+              <p className="text-sm text-center" style={{ color: "var(--md-on-surface-variant)" }}>
+                This cannot be undone.
+              </p>
+            </div>
+            <button
+              onClick={confirmAndDelete}
+              className="w-full py-3.5 rounded-2xl text-sm font-semibold"
+              style={{ background: "var(--md-error)", color: "#fff" }}
+            >
+              Yes, delete
+            </button>
+            <button
+              onClick={() => setConfirmDelete(false)}
+              className="w-full py-3.5 rounded-2xl text-sm font-semibold"
+              style={{ background: "var(--md-surface-container)", color: "var(--md-on-surface)" }}
+            >
+              Cancel
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
