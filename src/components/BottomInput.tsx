@@ -138,26 +138,13 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
           popup: false,
         });
 
-        const listener = await SpeechRecognition.addListener("partialResults", async (data: { matches?: string[] }) => {
+        const listener = await SpeechRecognition.addListener("partialResults", (data: { matches?: string[] }) => {
           if (data.matches?.length) {
-            const raw = data.matches[0].trim();
-            // Show raw text immediately for responsiveness
-            const combined = prevText ? `${prevText}, ${raw}` : raw;
+            const transcript = data.matches[0].trim();
+            const combined = prevText ? `${prevText}, ${transcript}` : transcript;
             onChange(combined);
             const el = textareaRef.current;
             if (el) requestAnimationFrame(() => autoGrow(el));
-            // Clean up in background, update silently
-            fetch("/api/voice-cleanup", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ text: raw }),
-            }).then(r => r.json()).then(json => {
-              if (json.text && json.text !== raw) {
-                const updated = prevText ? `${prevText}, ${json.text}` : json.text;
-                onChange(updated);
-                if (el) requestAnimationFrame(() => autoGrow(el));
-              }
-            }).catch(() => {});
           }
         });
 
@@ -184,23 +171,11 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
       rec.onresult = (e) => {
         const results = e.results;
         const len = results.length ?? Object.keys(results).length;
-        const raw = results[len - 1][0].transcript.trim();
-        const combined = prevText ? `${prevText}, ${raw}` : raw;
+        const transcript = results[len - 1][0].transcript.trim();
+        const combined = prevText ? `${prevText}, ${transcript}` : transcript;
         onChange(combined);
         const el = textareaRef.current;
         if (el) requestAnimationFrame(() => autoGrow(el));
-        // Clean up in background
-        fetch("/api/voice-cleanup", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: raw }),
-        }).then(r => r.json()).then(json => {
-          if (json.text && json.text !== raw) {
-            const updated = prevText ? `${prevText}, ${json.text}` : json.text;
-            onChange(updated);
-            if (el) requestAnimationFrame(() => autoGrow(el));
-          }
-        }).catch(() => {});
       };
       rec.onerror = () => setListening(false);
       rec.onend = () => setListening(false);
