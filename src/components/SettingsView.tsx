@@ -10,60 +10,34 @@ function daysLeft(date: Date) {
   return Math.max(0, Math.ceil((date.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
 }
 
-function SubscriptionCard({ subStatus, validUntil, onUpgrade }: { subStatus?: string; validUntil?: Date; onUpgrade?: () => void }) {
+function fmt(date: Date) {
+  return date.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+}
+
+function SubscriptionCard({ subStatus, validUntil, onUpgrade, onManage }: { subStatus?: string; validUntil?: Date; onUpgrade?: () => void; onManage?: () => void }) {
   const days = validUntil ? daysLeft(validUntil) : 0;
 
   if (subStatus === "trialing") {
-    const pct = validUntil ? Math.max(0, (validUntil.getTime() - Date.now()) / (7 * 24 * 60 * 60 * 1000)) : 0;
+    const pct = validUntil ? Math.min(1, Math.max(0, (validUntil.getTime() - Date.now()) / (7 * 24 * 60 * 60 * 1000))) : 0;
     return (
-      <div className="mx-4 mb-3 p-4 rounded-2xl" style={{ background: "rgba(200,49,255,0.06)", border: "1px solid rgba(200,49,255,0.15)" }}>
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>JustLog Pro</span>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(200,49,255,0.15)", color: "var(--md-primary)" }}>TRIAL</span>
+      <div className="mx-4 mb-3 rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(200,49,255,0.2)" }}>
+        <button onClick={onManage} className="w-full p-4 text-left">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>JustLog Pro</span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(200,49,255,0.15)", color: "var(--md-primary)" }}>TRIAL</span>
+            </div>
+            <div className="flex items-center gap-1" style={{ color: "var(--md-primary)" }}>
+              <span className="text-xs font-semibold">{days}d left</span>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+            </div>
           </div>
-          <span className="text-xs font-semibold" style={{ color: "var(--md-primary)" }}>{days} day{days !== 1 ? "s" : ""} left</span>
-        </div>
-        <div className="h-1.5 rounded-full overflow-hidden mb-3" style={{ background: "rgba(200,49,255,0.15)" }}>
-          <div className="h-full rounded-full transition-all" style={{ width: `${pct * 100}%`, background: "var(--md-primary)" }} />
-        </div>
-        <button onClick={onUpgrade} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
-          Upgrade to Pro · ₹49/month
+          <div className="h-1.5 rounded-full overflow-hidden mb-1" style={{ background: "rgba(200,49,255,0.15)" }}>
+            <div className="h-full rounded-full" style={{ width: `${pct * 100}%`, background: "var(--md-primary)" }} />
+          </div>
+          <div className="text-xs mt-2" style={{ color: "var(--md-on-surface-variant)" }}>Trial ends {validUntil ? fmt(validUntil) : ""} · Tap to manage</div>
         </button>
-      </div>
-    );
-  }
-
-  if (subStatus === "active") {
-    return (
-      <div className="mx-4 mb-3 p-4 rounded-2xl flex items-center gap-3" style={{ background: "rgba(46,125,50,0.05)", border: "1px solid rgba(46,125,50,0.15)" }}>
-        <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(46,125,50,0.1)" }}>
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#2E7D32" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
-        </div>
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>JustLog Pro</span>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(46,125,50,0.12)", color: "#2E7D32" }}>ACTIVE</span>
-          </div>
-          <div className="text-xs mt-0.5" style={{ color: "var(--md-on-surface-variant)" }}>
-            {validUntil ? `Renews ${validUntil.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}` : "Full access"}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (subStatus === "free") {
-    return (
-      <div className="mx-4 mb-3 rounded-2xl overflow-hidden" style={{ border: "1px solid var(--md-outline-variant)" }}>
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>Free Plan</span>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "var(--md-surface-container-highest)", color: "var(--md-on-surface-variant)" }}>FREE</span>
-          </div>
-          <div className="text-xs mb-3" style={{ color: "var(--md-on-surface-variant)" }}>1 space · 3 months history · No AI search</div>
+        <div className="px-4 pb-4">
           <button onClick={onUpgrade} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
             Upgrade to Pro · ₹49/month
           </button>
@@ -72,7 +46,50 @@ function SubscriptionCard({ subStatus, validUntil, onUpgrade }: { subStatus?: st
     );
   }
 
-  // none — show upgrade prompt
+  if (subStatus === "active") {
+    return (
+      <button onClick={onManage} className="mx-4 mb-3 w-[calc(100%-2rem)] p-4 rounded-2xl flex items-center gap-3 text-left" style={{ background: "rgba(46,125,50,0.05)", border: "1px solid rgba(46,125,50,0.15)" }}>
+        <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(46,125,50,0.1)" }}>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#2E7D32" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>JustLog Pro</span>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(46,125,50,0.12)", color: "#2E7D32" }}>ACTIVE</span>
+          </div>
+          <div className="text-xs mt-0.5" style={{ color: "var(--md-on-surface-variant)" }}>
+            {validUntil ? `Renews ${fmt(validUntil)}` : "Full access"} · Tap to manage
+          </div>
+        </div>
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-on-surface-variant)", flexShrink: 0 }}><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    );
+  }
+
+  if (subStatus === "free") {
+    return (
+      <div className="mx-4 mb-3 rounded-2xl overflow-hidden" style={{ border: "1px solid var(--md-outline-variant)" }}>
+        <button onClick={onManage} className="w-full p-4 flex items-center justify-between text-left">
+          <div>
+            <div className="flex items-center gap-2 mb-0.5">
+              <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>Free Plan</span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "var(--md-surface-container-highest)", color: "var(--md-on-surface-variant)" }}>FREE</span>
+            </div>
+            <div className="text-xs" style={{ color: "var(--md-on-surface-variant)" }}>1 space · 3 months · No AI search</div>
+          </div>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-on-surface-variant)" }}><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+        <div className="px-4 pb-4">
+          <button onClick={onUpgrade} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
+            Upgrade to Pro · ₹49/month
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-4 mb-3 p-4 rounded-2xl" style={{ background: "rgba(255,107,53,0.06)", border: "1px solid rgba(255,107,53,0.2)" }}>
       <div className="text-sm font-semibold mb-1" style={{ color: "var(--md-on-surface)" }}>No active plan</div>
@@ -111,7 +128,7 @@ interface SettingsViewProps {
   onUpgrade?: () => void;
 }
 
-type Sheet = "none" | "profile" | "spaces" | "about" | "privacy" | "terms" | "rename";
+type Sheet = "none" | "profile" | "spaces" | "about" | "privacy" | "terms" | "rename" | "subscription";
 
 export default function SettingsView({
   user, spaces, transactions, activeSpace,
@@ -236,7 +253,7 @@ export default function SettingsView({
       </div>
 
       {/* Subscription card */}
-      <SubscriptionCard subStatus={subStatus} validUntil={validUntil} onUpgrade={onUpgrade} />
+      <SubscriptionCard subStatus={subStatus} validUntil={validUntil} onUpgrade={onUpgrade} onManage={() => setSheet("subscription")} />
 
       {/* Group 1 — data */}
       <SettingsGroup>
@@ -420,6 +437,95 @@ export default function SettingsView({
         )}
       </Sheet>
 
+
+      {/* Subscription detail sheet */}
+      <Sheet open={sheet === "subscription"} onClose={() => setSheet("none")}>
+        <div className="flex flex-col gap-4">
+          <div className="text-base font-semibold" style={{ color: "var(--md-on-surface)" }}>Subscription</div>
+
+          {/* Status hero */}
+          <div className="rounded-2xl p-4" style={{
+            background: subStatus === "active" ? "rgba(46,125,50,0.05)" : subStatus === "trialing" ? "rgba(200,49,255,0.05)" : "var(--md-surface-container-low)",
+            border: subStatus === "active" ? "1px solid rgba(46,125,50,0.15)" : subStatus === "trialing" ? "1px solid rgba(200,49,255,0.15)" : "1px solid var(--md-outline-variant)",
+          }}>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{
+                background: subStatus === "active" ? "rgba(46,125,50,0.12)" : subStatus === "trialing" ? "rgba(200,49,255,0.12)" : "var(--md-surface-container)",
+              }}>
+                {subStatus === "active" ? (
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#2E7D32" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                ) : subStatus === "trialing" ? (
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--md-primary)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--md-on-surface-variant)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                )}
+              </div>
+              <div>
+                <div className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>
+                  {subStatus === "active" ? "JustLog Pro" : subStatus === "trialing" ? "Free Trial" : "Free Plan"}
+                </div>
+                <div className="text-xs" style={{ color: subStatus === "active" ? "#2E7D32" : subStatus === "trialing" ? "var(--md-primary)" : "var(--md-on-surface-variant)" }}>
+                  {subStatus === "active" ? "Active" : subStatus === "trialing" ? `${validUntil ? daysLeft(validUntil) : 0} days remaining` : "Limited access"}
+                </div>
+              </div>
+            </div>
+            {subStatus === "trialing" && validUntil && (
+              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(200,49,255,0.15)" }}>
+                <div className="h-full rounded-full" style={{ width: `${Math.min(100, Math.max(0, (validUntil.getTime() - Date.now()) / (7 * 24 * 60 * 60 * 1000) * 100))}%`, background: "var(--md-primary)" }} />
+              </div>
+            )}
+          </div>
+
+          {/* Details rows */}
+          <div className="rounded-2xl overflow-hidden" style={{ background: "var(--md-surface-container-low)" }}>
+            <AboutRow label="Plan" value={subStatus === "active" ? "Pro" : subStatus === "trialing" ? "Trial (Pro)" : "Free"} />
+            <AboutRow label="Status" value={subStatus === "active" ? "Active" : subStatus === "trialing" ? "In Trial" : "Inactive"} />
+            {validUntil && subStatus === "active" && <AboutRow label="Renews on" value={fmt(validUntil)} />}
+            {validUntil && subStatus === "trialing" && <AboutRow label="Trial ends" value={fmt(validUntil)} />}
+            <AboutRow label="Price" value={subStatus === "active" ? "₹49/month or ₹499/year" : subStatus === "trialing" ? "Free for 7 days" : "Free"} last />
+          </div>
+
+          {/* What's included */}
+          <div className="rounded-2xl overflow-hidden" style={{ background: "var(--md-surface-container-low)" }}>
+            <div className="px-4 pt-3 pb-2 text-xs font-semibold" style={{ color: "var(--md-on-surface-variant)" }}>WHAT&apos;S INCLUDED</div>
+            {[
+              { label: "Unlimited entries with AI parsing", pro: true },
+              { label: "Voice input (Hindi/Hinglish)", pro: true },
+              { label: "Multiple spaces", pro: true },
+              { label: "AI-powered search", pro: true },
+              { label: "Full transaction history", pro: true },
+              { label: "Export to CSV", pro: true },
+              { label: "Monthly insights", pro: true },
+            ].map((f, i, arr) => (
+              <div key={f.label} className="flex items-center gap-3 px-4 py-3" style={{ borderTop: i > 0 ? "1px solid var(--md-outline-variant)" : "none" }}>
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"
+                  stroke={(subStatus === "active" || subStatus === "trialing") ? "#2E7D32" : "var(--md-outline)"}>
+                  {(subStatus === "active" || subStatus === "trialing") ? <polyline points="20 6 9 17 4 12"/> : <line x1="18" y1="6" x2="6" y2="18"/>}
+                </svg>
+                <span className="text-xs flex-1" style={{ color: "var(--md-on-surface)" }}>{f.label}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Actions */}
+          {(subStatus === "none" || subStatus === "free" || subStatus === "trialing") && (
+            <button onClick={() => { setSheet("none"); onUpgrade?.(); }} className="w-full py-3.5 rounded-2xl text-sm font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
+              Upgrade to Pro · ₹49/month
+            </button>
+          )}
+          {subStatus === "active" && (
+            <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid var(--md-outline-variant)" }}>
+              <button onClick={() => { setSheet("none"); onToast("To cancel, contact support@justlog.in"); }} className="w-full py-3.5 text-sm font-medium" style={{ color: "var(--md-error)" }}>
+                Cancel Subscription
+              </button>
+            </div>
+          )}
+
+          <p className="text-[11px] text-center" style={{ color: "var(--md-outline)" }}>
+            Payments processed securely via Razorpay
+          </p>
+        </div>
+      </Sheet>
 
       {/* About sheet */}
       <Sheet open={sheet === "about"} onClose={() => setSheet("none")}>
