@@ -96,7 +96,7 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
     if (!SR) { alert("Voice input not supported on this browser."); return; }
 
     const rec = new SR();
-    rec.continuous = false;
+    rec.continuous = true;
     rec.interimResults = true;
     rec.lang = "en-IN";
 
