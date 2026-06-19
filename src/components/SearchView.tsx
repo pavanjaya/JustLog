@@ -244,9 +244,15 @@ export default function SearchView({ transactions, onDeleteTransaction, onBulkDe
               </svg>
             </button>
           )}
-          <button onClick={startVoiceSearch} className="flex-shrink-0" style={{ color: voiceListening ? "var(--md-primary)" : "var(--md-outline)" }}>
+          <button onClick={startVoiceSearch} className="flex-shrink-0" style={{ color: voiceListening ? "var(--md-primary)" : "var(--md-outline)", position: "relative" }}>
+            {voiceListening && (
+              <span className="absolute inset-0 rounded-full" style={{
+                background: "var(--md-primary)",
+                animation: "mic-pulse 1.5s ease-in-out infinite",
+              }} />
+            )}
             {voiceListening ? (
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style={{ position: "relative" }}>
                 <rect x="6" y="6" width="12" height="12" rx="2"/>
               </svg>
             ) : (
@@ -258,6 +264,7 @@ export default function SearchView({ transactions, onDeleteTransaction, onBulkDe
               </svg>
             )}
           </button>
+          <style>{`@keyframes mic-pulse { 0%, 100% { opacity: 0.15; transform: scale(1.8); } 50% { opacity: 0.3; transform: scale(2.4); } }`}</style>
         </div>
         {searchFocused && (
           <button
