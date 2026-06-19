@@ -127,6 +127,7 @@ interface SettingsViewProps {
   validUntil?: Date;
   subPlan?: string;
   onUpgrade?: () => void;
+  onBack?: () => void;
   onShowSubPage?: () => void;
 }
 
@@ -135,7 +136,7 @@ type Sheet = "none" | "profile" | "spaces" | "about" | "privacy" | "terms" | "re
 export default function SettingsView({
   user, spaces, transactions, activeSpace,
   onDeleteAll, onToast, onRenameSpace, onDeleteSpace, onDeleteSpaceData, onUpdateSpace,
-  subStatus = "active", validUntil, subPlan, onUpgrade, onShowSubPage,
+  subStatus = "active", validUntil, subPlan, onUpgrade, onBack, onShowSubPage,
 }: SettingsViewProps) {
   const router = useRouter();
   const supabase = createClient();
@@ -232,7 +233,30 @@ export default function SettingsView({
   }
 
   return (
-    <div className="flex-1 overflow-y-auto no-scrollbar pt-4" style={{ background: "#fff", paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)" }}>
+    <div className="flex-1 flex flex-col" style={{ background: "var(--md-surface)", overflow: "hidden" }}>
+      {/* Header */}
+      <div
+        className="flex items-center gap-2 px-3 flex-shrink-0"
+        style={{
+          paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)",
+          paddingBottom: "12px",
+          background: "var(--md-surface)",
+          borderBottom: "1px solid var(--md-outline-variant)",
+        }}
+      >
+        <button
+          onClick={onBack}
+          className="w-10 h-10 flex items-center justify-center rounded-full active:opacity-70"
+          style={{ color: "var(--md-on-surface)" }}
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 12H5M12 5l-7 7 7 7"/>
+          </svg>
+        </button>
+        <span className="text-[17px] font-semibold tracking-tight" style={{ color: "var(--md-on-surface)" }}>Settings</span>
+      </div>
+
+      <div className="flex-1 overflow-y-auto no-scrollbar pt-4" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)" }}>
 
       {/* Profile card */}
       <div className="mx-4 mb-3 rounded-2xl overflow-hidden" style={{ background: "var(--md-surface-container-low)" }}>
@@ -512,6 +536,7 @@ export default function SettingsView({
         </div>
       </Sheet>
 
+    </div>
     </div>
   );
 }

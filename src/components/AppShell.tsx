@@ -349,14 +349,16 @@ export default function AppShell() {
         onUpgrade={() => setSubStatus("none")}
       />
 
-      <TopBar
-        onNavigate={setView}
-        onAvatarClick={() => setDrawerOpen(true)}
-        onSpaceClick={() => setSpaceSwitcherOpen(true)}
-        activeSpace={activeSpace ?? undefined}
-        avatarUrl={avatarUrl}
-        userInitial={userInitial}
-      />
+      {view !== "settings" && (
+        <TopBar
+          onNavigate={setView}
+          onAvatarClick={() => setDrawerOpen(true)}
+          onSpaceClick={() => setSpaceSwitcherOpen(true)}
+          activeSpace={activeSpace ?? undefined}
+          avatarUrl={avatarUrl}
+          userInitial={userInitial}
+        />
+      )}
 
       <div className="flex-1 overflow-hidden flex">
         {/* Paywall */}
@@ -408,6 +410,7 @@ export default function AppShell() {
                 validUntil={subValidUntil ?? undefined}
                 subPlan={subPlan}
                 onUpgrade={() => setSubStatus("none")}
+                onBack={() => setView("home")}
                 onShowSubPage={() => setShowSubPage(true)}
                 onRenameSpace={async (id, name) => {
                   await supabase.from("spaces").update({ name }).eq("id", id);
