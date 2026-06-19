@@ -153,37 +153,41 @@ export default function SearchView({ transactions, onDeleteTransaction, onEditTr
         )}
       </div>
 
-      {/* Filters — single scrollable row, hidden when search is active */}
+      {/* Filters — hidden when search is active */}
       {!searchFocused && !result && (
-        <div className="flex-shrink-0 px-4 pb-3 flex items-center gap-2 overflow-x-auto no-scrollbar">
-          {(["all", "income", "expense"] as const).map(t => (
-            <button
-              key={t}
-              onClick={() => setTypeFilter(t)}
-              className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex-shrink-0"
-              style={{
-                background: typeFilter === t ? "var(--md-on-surface)" : "var(--md-surface-container-low)",
-                color: typeFilter === t ? "#fff" : "var(--md-on-surface-variant)",
-              }}
-            >
-              {t === "all" ? "All" : t === "income" ? "Income" : "Expense"}
-            </button>
-          ))}
-          {/* Divider */}
-          <div className="w-px h-4 flex-shrink-0" style={{ background: "var(--md-outline-variant)" }} />
-          {(["this_month", "last_month"] as const).map(t => (
-            <button
-              key={t}
-              onClick={() => setTimeFilter(prev => prev === t ? "all" : t)}
-              className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all flex-shrink-0"
-              style={{
-                background: timeFilter === t ? "var(--md-primary)" : "var(--md-surface-container-low)",
-                color: timeFilter === t ? "#fff" : "var(--md-on-surface-variant)",
-              }}
-            >
-              {t === "this_month" ? "This month" : "Last month"}
-            </button>
-          ))}
+        <div className="flex-shrink-0 px-4 pb-3 flex items-center justify-between gap-3">
+          {/* Segmented control — primary filter */}
+          <div className="flex rounded-xl p-0.5 flex-1" style={{ background: "var(--md-surface-container-low)" }}>
+            {(["all", "income", "expense"] as const).map(t => (
+              <button
+                key={t}
+                onClick={() => setTypeFilter(t)}
+                className="flex-1 py-1.5 rounded-[10px] text-xs font-semibold transition-all"
+                style={{
+                  background: typeFilter === t ? "#fff" : "transparent",
+                  color: typeFilter === t ? "var(--md-on-surface)" : "var(--md-on-surface-variant)",
+                  boxShadow: typeFilter === t ? "0 1px 3px rgba(0,0,0,0.12)" : "none",
+                }}
+              >
+                {t === "all" ? "All" : t === "income" ? "Income" : "Expense"}
+              </button>
+            ))}
+          </div>
+
+          {/* Time chip — secondary filter */}
+          <button
+            onClick={() => setTimeFilter(prev => prev === "all" ? "this_month" : prev === "this_month" ? "last_month" : "all")}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold flex-shrink-0 transition-all"
+            style={{
+              background: timeFilter !== "all" ? "var(--md-primary)" : "var(--md-surface-container-low)",
+              color: timeFilter !== "all" ? "#fff" : "var(--md-on-surface-variant)",
+            }}
+          >
+            {timeFilter === "all" ? "All time" : timeFilter === "this_month" ? "This month" : "Last month"}
+            <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
         </div>
       )}
 
