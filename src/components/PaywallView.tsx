@@ -367,8 +367,8 @@ export default function PaywallView({ userId, onSuccess, onContinueFree, trialEx
         {onContinueFree && (
           <button
             onClick={onContinueFree}
-            className="w-full py-1 text-[13px] text-center active:opacity-60"
-            style={{ color: "var(--md-outline)" }}
+            className="w-full py-3.5 rounded-[16px] text-[14px] font-medium text-center active:opacity-60"
+            style={{ border: "1.5px solid var(--md-outline-variant)", color: "var(--md-on-surface-variant)" }}
           >
             Continue with Free plan
           </button>
