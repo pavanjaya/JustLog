@@ -335,7 +335,7 @@ export default function AppShell() {
         onUpgrade={() => setSubStatus("none")}
       />
 
-      {view !== "settings" && (
+      {view !== "settings" && subStatus !== "none" && (
         <TopBar
           onNavigate={setView}
           onAvatarClick={() => setDrawerOpen(true)}
