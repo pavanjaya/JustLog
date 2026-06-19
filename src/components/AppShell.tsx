@@ -288,6 +288,9 @@ export default function AppShell() {
   }
 
   async function handleSubscribeSuccess() {
+    const trialEnd = new Date();
+    trialEnd.setDate(trialEnd.getDate() + 7);
+    setSubValidUntil(trialEnd);
     setSubStatus("trialing");
   }
 
