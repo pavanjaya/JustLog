@@ -15,6 +15,7 @@ import SpaceSwitcher from "@/components/SpaceSwitcher";
 import Toast from "@/components/Toast";
 import PaywallView from "@/components/PaywallView";
 import SplashScreen from "@/components/SplashScreen";
+import OnboardingScreen from "@/components/OnboardingScreen";
 
 type SubStatus = "loading" | "active" | "trialing" | "none";
 
@@ -29,6 +30,10 @@ export default function AppShell() {
   const [user, setUser] = useState<User | null>(null);
   const [subStatus, setSubStatus] = useState<SubStatus>("active");
   const [splashDone, setSplashDone] = useState(false);
+  const [onboardingDone, setOnboardingDone] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return localStorage.getItem("jl_onboarded") === "1";
+  });
   const ensureDefaultSpaceRunning = useRef(false);
   const personalSpaceId = useRef<string | null>(null);
   const [spaceLoading, setSpaceLoading] = useState(false);
@@ -264,6 +269,12 @@ export default function AppShell() {
       style={{ height: "100dvh", background: "var(--md-surface)" }}
     >
       {!splashDone && <SplashScreen onDone={() => setSplashDone(true)} />}
+      {splashDone && !onboardingDone && (
+        <OnboardingScreen onDone={() => {
+          localStorage.setItem("jl_onboarded", "1");
+          setOnboardingDone(true);
+        }} />
+      )}
       <Drawer
         open={drawerOpen}
         view={view}
