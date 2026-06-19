@@ -141,21 +141,23 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
         const listener = await SpeechRecognition.addListener("partialResults", async (data: { matches?: string[] }) => {
           if (data.matches?.length) {
             const raw = data.matches[0].trim();
-            // Clean up speech recognition errors via AI
-            let transcript = raw;
-            try {
-              const res = await fetch("/api/voice-cleanup", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ text: raw }),
-              });
-              const json = await res.json();
-              if (json.text) transcript = json.text;
-            } catch { /* fallback to raw */ }
-            const combined = prevText ? `${prevText}, ${transcript}` : transcript;
+            // Show raw text immediately for responsiveness
+            const combined = prevText ? `${prevText}, ${raw}` : raw;
             onChange(combined);
             const el = textareaRef.current;
             if (el) requestAnimationFrame(() => autoGrow(el));
+            // Clean up in background, update silently
+            fetch("/api/voice-cleanup", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ text: raw }),
+            }).then(r => r.json()).then(json => {
+              if (json.text && json.text !== raw) {
+                const updated = prevText ? `${prevText}, ${json.text}` : json.text;
+                onChange(updated);
+                if (el) requestAnimationFrame(() => autoGrow(el));
+              }
+            }).catch(() => {});
           }
         });
 
@@ -179,24 +181,26 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
       rec.continuous = false;
       rec.interimResults = false;
       rec.lang = "en-IN";
-      rec.onresult = async (e) => {
+      rec.onresult = (e) => {
         const results = e.results;
         const len = results.length ?? Object.keys(results).length;
         const raw = results[len - 1][0].transcript.trim();
-        let transcript = raw;
-        try {
-          const res = await fetch("/api/voice-cleanup", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text: raw }),
-          });
-          const json = await res.json();
-          if (json.text) transcript = json.text;
-        } catch { /* fallback to raw */ }
-        const combined = prevText ? `${prevText}, ${transcript}` : transcript;
+        const combined = prevText ? `${prevText}, ${raw}` : raw;
         onChange(combined);
         const el = textareaRef.current;
         if (el) requestAnimationFrame(() => autoGrow(el));
+        // Clean up in background
+        fetch("/api/voice-cleanup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: raw }),
+        }).then(r => r.json()).then(json => {
+          if (json.text && json.text !== raw) {
+            const updated = prevText ? `${prevText}, ${json.text}` : json.text;
+            onChange(updated);
+            if (el) requestAnimationFrame(() => autoGrow(el));
+          }
+        }).catch(() => {});
       };
       rec.onerror = () => setListening(false);
       rec.onend = () => setListening(false);
