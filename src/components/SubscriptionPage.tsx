@@ -39,9 +39,9 @@ export default function SubscriptionPage({ subStatus, validUntil, subPlan, onBac
   const trialPct = validUntil && isTrial ? Math.min(1, Math.max(0, (validUntil.getTime() - Date.now()) / (7 * 24 * 60 * 60 * 1000))) : 0;
 
   return (
-    <div className="fixed inset-0 z-[400] flex flex-col max-w-[430px] mx-auto" style={{ background: "#fff" }}>
+    <div className="fixed inset-0 z-[500] flex flex-col max-w-[430px] mx-auto" style={{ background: "#fff" }}>
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 pt-14 pb-4" style={{ borderBottom: "1px solid var(--md-outline-variant)" }}>
+      <div className="flex items-center gap-3 px-4 pb-4" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 56px)", borderBottom: "1px solid var(--md-outline-variant)" }}>
         <button onClick={onBack} className="w-9 h-9 flex items-center justify-center rounded-full flex-shrink-0" style={{ background: "var(--md-surface-container-low)" }}>
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-on-surface)" }}>
             <path d="M19 12H5M12 5l-7 7 7 7"/>
@@ -50,7 +50,7 @@ export default function SubscriptionPage({ subStatus, validUntil, subPlan, onBac
         <span className="text-base font-semibold" style={{ color: "var(--md-on-surface)" }}>Subscription</span>
       </div>
 
-      <div className="flex-1 overflow-y-auto no-scrollbar px-4 py-5 flex flex-col gap-4">
+      <div className="flex-1 overflow-y-auto no-scrollbar px-4 py-5 flex flex-col gap-4" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 32px)" }}>
 
         {/* Status hero card */}
         <div className="rounded-3xl p-5" style={{
