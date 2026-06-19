@@ -28,9 +28,8 @@ function loadRazorpayScript(): Promise<boolean> {
 }
 
 const FEATURES = [
-  { label: "Log in Hindi, Hinglish or English" },
   { label: "AI search — ask anything about your money" },
-  { label: "Multiple spaces — personal & business" },
+  { label: "Spaces with mirror-to-personal & shared splits" },
   { label: "Full history, insights & CSV export" },
 ];
 
