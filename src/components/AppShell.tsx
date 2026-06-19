@@ -36,7 +36,7 @@ export default function AppShell() {
   });
   const ensureDefaultSpaceRunning = useRef(false);
   const personalSpaceId = useRef<string | null>(null);
-  const [spaceLoading, setSpaceLoading] = useState(false);
+  const [spaceLoading, setSpaceLoading] = useState(true);
   const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: "", visible: false });
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const supabase = createClient();
@@ -178,6 +178,7 @@ export default function AppShell() {
         setSpaceLoading(false);
         await loadSubscription(user.id);
       } else {
+        setSpaceLoading(false);
         setSubStatus("none");
         router.replace("/login");
       }
