@@ -100,20 +100,20 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
     rec.interimResults = true;
     rec.lang = "en-IN";
 
-    let finalText = "";
+    const finalRef = { text: "" };
 
     rec.onresult = (e) => {
+      let full = "";
       let interim = "";
-      for (let i = 0; i < Object.keys(e.results).length; i++) {
-        const result = e.results[i][0].transcript;
-        if ((e.results as unknown as { [k: number]: { isFinal?: boolean } })[i].isFinal) {
-          finalText += result;
-        } else {
-          interim = result;
-        }
+      const results = e.results as unknown as { [k: number]: { isFinal?: boolean; [k: number]: { transcript: string } }; length?: number };
+      const len = results.length ?? Object.keys(results).length;
+      for (let i = 0; i < len; i++) {
+        const transcript = results[i][0].transcript;
+        if (results[i].isFinal) { full += transcript + " "; }
+        else { interim = transcript; }
       }
-      const display = (finalText + interim).trim();
-      onChange(display);
+      finalRef.text = full.trim();
+      onChange((full + interim).trim());
       const el = textareaRef.current;
       if (el) requestAnimationFrame(() => autoGrow(el));
     };
@@ -125,8 +125,7 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
 
     rec.onend = () => {
       setListening(false);
-      // Auto-send if we got something
-      if (finalText.trim()) {
+      if (finalRef.text.trim()) {
         setTimeout(() => {
           setPopping(true);
           setTimeout(() => setPopping(false), 300);
