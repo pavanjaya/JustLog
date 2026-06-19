@@ -64,6 +64,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
 
   async function handleBulkDelete() {
     if (selectedIds.size === 0) return;
+    if (selectedIds.size === 1) { await confirmAndDelete(); return; }
     setConfirmDelete(true);
   }
 
