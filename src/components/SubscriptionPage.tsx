@@ -152,21 +152,6 @@ export default function SubscriptionPage({
           </div>
         </div>
 
-        {/* Switch to Annual */}
-        {isPro && isMonthly && (
-          <div className="mx-4 mt-3 rounded-[16px] p-4" style={{ background: "rgba(255,107,53,0.07)", border: "1.5px solid rgba(255,107,53,0.22)" }}>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ background: "#FF6B35", color: "#fff" }}>SAVE 15%</span>
-              <span className="text-[14px] font-semibold" style={{ color: "var(--md-on-surface)" }}>Switch to Annual</span>
-            </div>
-            <div className="text-[12px] mb-3 leading-relaxed" style={{ color: "var(--md-on-surface-variant)" }}>
-              Pay ₹499/year instead of ₹588/year — save ₹89 every year.
-            </div>
-            <button onClick={onSwitchToAnnual} className="w-full py-3 rounded-xl text-[13px] font-semibold active:opacity-80" style={{ background: "#FF6B35", color: "#fff" }}>
-              Switch to ₹499 / year
-            </button>
-          </div>
-        )}
 
         {/* Upgrade CTA */}
         {(isTrial || isFree || subStatus === "none") && (
@@ -193,6 +178,21 @@ export default function SubscriptionPage({
                 <span className="text-[13px] font-semibold" style={{ color: (row as { valueColor?: string }).valueColor ?? "var(--md-on-surface)" }}>{row.value}</span>
               </div>
             ))}
+            {isPro && isMonthly && (
+              <button
+                onClick={onSwitchToAnnual}
+                className="w-full flex items-center justify-between px-4 py-3.5 active:opacity-70"
+                style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}
+              >
+                <span className="text-[13px]" style={{ color: "#FF6B35" }}>Switch to Annual</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[11px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "rgba(255,107,53,0.12)", color: "#FF6B35" }}>Save 15%</span>
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#FF6B35" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 18l6-6-6-6"/>
+                  </svg>
+                </div>
+              </button>
+            )}
           </div>
         </div>
 
