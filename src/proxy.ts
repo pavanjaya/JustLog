@@ -28,7 +28,7 @@ export async function proxy(request: Request) {
 
   const { pathname } = new URL(request.url);
 
-  if (!user && pathname !== "/login" && !pathname.startsWith("/auth")) {
+  if (!user && pathname !== "/login" && !pathname.startsWith("/auth") && !pathname.startsWith("/api")) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
