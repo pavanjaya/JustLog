@@ -194,8 +194,8 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
       className="flex-shrink-0 px-3 pt-2"
       style={{ background: "#fff", paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)" }}
     >
-      {/* Smart suggestion chips — hide when keyboard is open */}
-      {!focused && value.trim().length < 4 && suggestions.length > 0 && (
+      {/* Smart suggestion chips */}
+      {value.trim().length < 4 && suggestions.length > 0 && (
         <div className="flex gap-1.5 overflow-x-auto pb-2 no-scrollbar">
           {suggestions.map((s, i) => (
             <button
