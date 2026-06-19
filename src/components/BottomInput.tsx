@@ -87,7 +87,11 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
 
   function handleChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
     onChange(e.target.value);
-    autoGrow(e.target);
+    if (!e.target.value) {
+      e.target.style.height = "auto";
+    } else {
+      autoGrow(e.target);
+    }
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
