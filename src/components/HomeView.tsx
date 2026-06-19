@@ -218,8 +218,13 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
     setTimeout(() => setAiState("idle"), 2000);
   }
 
+  function dismissClarify() { setClarifyAmount(null); setClarifyPerson(null); setAiState("idle"); }
+
   return (
-    <div className="flex-1 flex flex-col overflow-hidden" style={{ background: "#fff" }}>
+    <div className="flex-1 flex flex-col overflow-hidden relative" style={{ background: "#fff" }}>
+      {aiState === "clarify" && (
+        <div className="absolute inset-0 z-10" onClick={dismissClarify} />
+      )}
       {/* Greeting + summary cards */}
       <div className="flex-shrink-0 px-4 pt-5 pb-3">
         <div className="mb-4">
@@ -312,7 +317,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
       {/* Chat feed */}
       <div ref={feedRef} className="flex-1 overflow-y-auto no-scrollbar px-3 pt-2 pb-2 flex flex-col-reverse gap-1" style={{ background: "#fff" }}>
         {aiState === "clarify" && clarifyPerson && (
-          <div className="pb-1 animate-fade-up">
+          <div className="pb-1 animate-fade-up relative z-20">
             <div className="rounded-2xl p-4" style={{ background: "var(--md-surface-container-low)", border: "1px solid var(--md-outline-variant)" }}>
               <div className="flex items-center justify-between gap-2 mb-3">
                 <div className="flex items-center gap-2">
@@ -347,7 +352,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
         )}
 
         {aiState === "clarify" && clarifyAmount && (
-          <div className="pb-1 animate-fade-up">
+          <div className="pb-1 animate-fade-up relative z-20">
             <div className="rounded-2xl p-4" style={{ background: "var(--md-surface-container-low)", border: "1px solid var(--md-outline-variant)" }}>
               <div className="flex items-center justify-between gap-2 mb-3">
                 <div className="flex items-center gap-2">
