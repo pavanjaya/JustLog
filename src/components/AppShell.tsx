@@ -451,6 +451,7 @@ export default function AppShell() {
           onBack={() => setShowSubPage(false)}
           onUpgrade={() => { setShowSubPage(false); setSubStatus("none"); }}
           onSwitchToAnnual={() => { setShowSubPage(false); setSubStatus("none"); }}
+          onCancelled={() => { setShowSubPage(false); setSubStatus("none"); }}
         />
       )}
     </div>
