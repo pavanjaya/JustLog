@@ -79,35 +79,66 @@ export default function SearchView({ transactions, onDeleteTransaction, onBulkDe
 
   useEffect(() => () => { recognitionRef.current?.stop(); }, []);
 
-  function startVoiceSearch() {
-    if (voiceListening) { recognitionRef.current?.stop(); setVoiceListening(false); return; }
-    const w = window as unknown as { SpeechRecognition?: new () => unknown; webkitSpeechRecognition?: new () => unknown };
-    const SR = w.SpeechRecognition ?? w.webkitSpeechRecognition;
-    if (!SR) return;
-    const rec = new (SR as new () => {
-      continuous: boolean; interimResults: boolean; lang: string;
-      start: () => void; stop: () => void;
-      onresult: ((e: { results: { [k: number]: { isFinal?: boolean; [k: number]: { transcript: string } }; length?: number } }) => void) | null;
-      onerror: ((e: { error: string }) => void) | null;
-      onend: (() => void) | null;
-    })();
-    rec.continuous = false;
-    rec.interimResults = false;
-    rec.lang = "en-IN";
-    rec.onresult = (e) => {
-      const results = e.results;
-      const len = results.length ?? Object.keys(results).length;
-      const transcript = results[len - 1][0].transcript.trim();
-      setQuery(transcript);
-      queryRef.current = transcript;
-      runSearch(transcript);
-    };
-    rec.onerror = () => setVoiceListening(false);
-    rec.onend = () => setVoiceListening(false);
-    recognitionRef.current = rec;
-    rec.start();
+  function isNative() {
+    if (typeof window === "undefined") return false;
+    return !!(window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.();
+  }
+
+  async function startVoiceSearch() {
+    if (voiceListening) {
+      if (isNative()) {
+        const { SpeechRecognition } = await import("@capacitor-community/speech-recognition");
+        await SpeechRecognition.stop();
+      } else {
+        recognitionRef.current?.stop();
+      }
+      setVoiceListening(false);
+      return;
+    }
+
     setVoiceListening(true);
     setSearchFocused(true);
+
+    if (isNative()) {
+      try {
+        const { SpeechRecognition } = await import("@capacitor-community/speech-recognition");
+        const perm = await SpeechRecognition.requestPermissions();
+        if (perm.speechRecognition !== "granted") { setVoiceListening(false); return; }
+        await SpeechRecognition.start({ language: "en-IN", maxResults: 1, partialResults: true, popup: false });
+        const listener = await SpeechRecognition.addListener("partialResults", (data: { matches?: string[] }) => {
+          if (data.matches?.length) {
+            const transcript = data.matches[0].trim();
+            setQuery(transcript);
+            queryRef.current = transcript;
+          }
+        });
+        setTimeout(async () => {
+          listener.remove();
+          await SpeechRecognition.stop();
+          setVoiceListening(false);
+          if (queryRef.current.trim()) runSearch(queryRef.current);
+        }, 5000);
+      } catch (e) {
+        console.error("Native speech error:", e);
+        setVoiceListening(false);
+      }
+    } else {
+      const w = window as unknown as { SpeechRecognition?: new () => unknown; webkitSpeechRecognition?: new () => unknown };
+      const SR = w.SpeechRecognition ?? w.webkitSpeechRecognition;
+      if (!SR) { setVoiceListening(false); return; }
+      const rec = new (SR as new () => { continuous: boolean; interimResults: boolean; lang: string; start: () => void; stop: () => void; onresult: ((e: { results: { [k: number]: { [k: number]: { transcript: string } }; length?: number } }) => void) | null; onerror: (() => void) | null; onend: (() => void) | null })();
+      rec.continuous = false; rec.interimResults = false; rec.lang = "en-IN";
+      rec.onresult = (e) => {
+        const results = e.results;
+        const len = results.length ?? Object.keys(results).length;
+        const transcript = results[len - 1][0].transcript.trim();
+        setQuery(transcript); queryRef.current = transcript; runSearch(transcript);
+      };
+      rec.onerror = () => setVoiceListening(false);
+      rec.onend = () => setVoiceListening(false);
+      recognitionRef.current = rec as { stop: () => void };
+      rec.start();
+    }
   }
 
   function enterSelectMode(id: string) {

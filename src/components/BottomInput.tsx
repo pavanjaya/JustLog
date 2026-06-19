@@ -28,21 +28,36 @@ function getSmartSuggestions(transactions: Transaction[]): string[] {
     .map(([desc, v]) => `${v.amount} ${desc}`);
 }
 
-type SpeechRecognitionType = {
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  start: () => void;
-  stop: () => void;
-  onresult: ((e: { results: { [k: number]: { [k: number]: { transcript: string } } } }) => void) | null;
-  onerror: ((e: { error: string }) => void) | null;
-  onend: (() => void) | null;
-};
+function isNative(): boolean {
+  if (typeof window === "undefined") return false;
+  return !!(window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.();
+}
 
-function getSpeechRecognition(): (new () => SpeechRecognitionType) | null {
-  if (typeof window === "undefined") return null;
-  const w = window as unknown as { SpeechRecognition?: new () => SpeechRecognitionType; webkitSpeechRecognition?: new () => SpeechRecognitionType };
-  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
+async function startNativeSpeech(onResult: (text: string) => void, onEnd: () => void) {
+  const { SpeechRecognition } = await import("@capacitor-community/speech-recognition");
+  await SpeechRecognition.requestPermissions();
+  await SpeechRecognition.start({
+    language: "en-IN",
+    maxResults: 1,
+    prompt: "Speak your entry...",
+    partialResults: false,
+    popup: false,
+  });
+  SpeechRecognition.addListener("partialResults", () => {});
+  // Listen for results via listenTo
+  const handler = await SpeechRecognition.addListener("listeningState", () => {});
+  handler.remove();
+
+  // Poll for result
+  const result = await new Promise<string>((resolve) => {
+    SpeechRecognition.addListener("partialResults", (data: { matches: string[] }) => {
+      if (data.matches?.length) resolve(data.matches[0]);
+    });
+    setTimeout(() => resolve(""), 10000);
+  });
+
+  onResult(result);
+  onEnd();
 }
 
 export default function BottomInput({ value, onChange, onSend, disabled, transactions = [] }: BottomInputProps) {
@@ -50,11 +65,18 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
   const [popping, setPopping] = useState(false);
   const [listening, setListening] = useState(false);
   const [ripple, setRipple] = useState(false);
-  const recognitionRef = useRef<SpeechRecognitionType | null>(null);
+  const recognitionRef = useRef<{ stop: () => void } | null>(null);
   const suggestions = useMemo(() => getSmartSuggestions(transactions), [transactions]);
 
   useEffect(() => {
-    return () => { recognitionRef.current?.stop(); };
+    return () => {
+      recognitionRef.current?.stop();
+      if (isNative()) {
+        import("@capacitor-community/speech-recognition").then(({ SpeechRecognition }) => {
+          SpeechRecognition.stop().catch(() => {});
+        });
+      }
+    };
   }, []);
 
   function autoGrow(el: HTMLTextAreaElement) {
@@ -85,49 +107,81 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
     if (el) { el.focus(); requestAnimationFrame(() => autoGrow(el)); }
   }
 
-  function toggleVoice() {
+  async function toggleVoice() {
     if (listening) {
-      recognitionRef.current?.stop();
+      if (isNative()) {
+        const { SpeechRecognition } = await import("@capacitor-community/speech-recognition");
+        await SpeechRecognition.stop();
+      } else {
+        recognitionRef.current?.stop();
+      }
       setListening(false);
       return;
     }
 
-    const SR = getSpeechRecognition();
-    if (!SR) { alert("Voice input not supported on this browser."); return; }
-
-    const rec = new SR();
-    rec.continuous = false;
-    rec.interimResults = true;
-    rec.lang = "en-IN";
-
-    const prevText = value.trim();
-
-    rec.onresult = (e) => {
-      const results = e.results as unknown as { [k: number]: { isFinal?: boolean; [k: number]: { transcript: string } }; length?: number };
-      const len = results.length ?? Object.keys(results).length;
-      // Take only the last result to avoid duplicates
-      const last = results[len - 1];
-      const transcript = last[0].transcript.trim();
-      const combined = prevText ? `${prevText}, ${transcript}` : transcript;
-      onChange(combined);
-      const el = textareaRef.current;
-      if (el) requestAnimationFrame(() => autoGrow(el));
-    };
-
-    rec.onerror = (e) => {
-      console.error("Speech error:", e.error);
-      setListening(false);
-    };
-
-    rec.onend = () => {
-      setListening(false);
-    };
-
-    recognitionRef.current = rec;
-    rec.start();
     setListening(true);
     setRipple(true);
     setTimeout(() => setRipple(false), 600);
+    const prevText = value.trim();
+
+    if (isNative()) {
+      try {
+        const { SpeechRecognition } = await import("@capacitor-community/speech-recognition");
+        const perm = await SpeechRecognition.requestPermissions();
+        if (perm.speechRecognition !== "granted") { setListening(false); return; }
+
+        await SpeechRecognition.start({
+          language: "en-IN",
+          maxResults: 1,
+          prompt: "Speak your entry...",
+          partialResults: true,
+          popup: false,
+        });
+
+        const listener = await SpeechRecognition.addListener("partialResults", (data: { matches?: string[] }) => {
+          if (data.matches?.length) {
+            const transcript = data.matches[0].trim();
+            const combined = prevText ? `${prevText}, ${transcript}` : transcript;
+            onChange(combined);
+            const el = textareaRef.current;
+            if (el) requestAnimationFrame(() => autoGrow(el));
+          }
+        });
+
+        // Stop after silence (plugin fires onend automatically)
+        setTimeout(async () => {
+          listener.remove();
+          await SpeechRecognition.stop();
+          setListening(false);
+        }, 8000);
+
+      } catch (e) {
+        console.error("Native speech error:", e);
+        setListening(false);
+      }
+    } else {
+      // Web fallback for browser
+      const w = window as unknown as { SpeechRecognition?: new () => { continuous: boolean; interimResults: boolean; lang: string; start: () => void; stop: () => void; onresult: ((e: { results: { [k: number]: { isFinal?: boolean; [k: number]: { transcript: string } }; length?: number } }) => void) | null; onerror: ((e: { error: string }) => void) | null; onend: (() => void) | null }; webkitSpeechRecognition?: new () => { continuous: boolean; interimResults: boolean; lang: string; start: () => void; stop: () => void; onresult: ((e: { results: { [k: number]: { isFinal?: boolean; [k: number]: { transcript: string } }; length?: number } }) => void) | null; onerror: ((e: { error: string }) => void) | null; onend: (() => void) | null } };
+      const SR = w.SpeechRecognition ?? w.webkitSpeechRecognition;
+      if (!SR) { setListening(false); return; }
+      const rec = new SR();
+      rec.continuous = false;
+      rec.interimResults = false;
+      rec.lang = "en-IN";
+      rec.onresult = (e) => {
+        const results = e.results;
+        const len = results.length ?? Object.keys(results).length;
+        const transcript = results[len - 1][0].transcript.trim();
+        const combined = prevText ? `${prevText}, ${transcript}` : transcript;
+        onChange(combined);
+        const el = textareaRef.current;
+        if (el) requestAnimationFrame(() => autoGrow(el));
+      };
+      rec.onerror = () => setListening(false);
+      rec.onend = () => setListening(false);
+      recognitionRef.current = rec;
+      rec.start();
+    }
   }
 
   return (
@@ -153,7 +207,6 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
 
       {/* Input row */}
       <div className="flex items-end gap-2">
-        {/* Pill input */}
         <div
           className="flex-1 flex items-end gap-2 px-4 py-2.5 rounded-[22px]"
           style={{ background: "var(--md-surface-container-low)", border: `1.5px solid ${listening ? "var(--md-primary)" : "var(--md-outline-variant)"}`, transition: "border-color 0.2s" }}
@@ -172,14 +225,12 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
             style={{ color: "var(--md-on-surface)" }}
           />
 
-          {/* Mic button — inside the pill */}
           <button
             onClick={toggleVoice}
             disabled={disabled}
             className="flex-shrink-0 mb-0.5"
             style={{ color: listening ? "var(--md-primary)" : "var(--md-on-surface-variant)", position: "relative" }}
           >
-            {/* Ripple ring when listening */}
             {listening && (
               <span
                 className="absolute inset-0 rounded-full"
@@ -193,12 +244,10 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
               />
             )}
             {listening ? (
-              /* Stop icon */
               <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                 <rect x="6" y="6" width="12" height="12" rx="2"/>
               </svg>
             ) : (
-              /* Mic icon */
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
                 <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
@@ -209,7 +258,6 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
           </button>
         </div>
 
-        {/* Send button */}
         <button
           onClick={handleSend}
           disabled={disabled || !value.trim()}
