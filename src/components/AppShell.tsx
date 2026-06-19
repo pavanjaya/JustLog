@@ -288,7 +288,8 @@ export default function AppShell() {
   }
 
   async function handleSubscribeSuccess() {
-    if (user) await loadSubscription(user.id);
+    setSubStatus("trialing");
+    if (user) loadSubscription(user.id);
   }
 
   const isPro = subStatus === "active" || subStatus === "trialing";

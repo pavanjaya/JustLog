@@ -127,26 +127,6 @@ export default function PaywallView({ userId, onSuccess, onContinueFree, trialEx
             7 days free · No card needed · Cancel anytime
           </p>
 
-          {/* Divider */}
-          <div className="w-8 h-px my-6" style={{ background: "var(--md-outline-variant)" }} />
-
-          {/* Unlocks */}
-          <p className="text-[12px] font-semibold uppercase tracking-wider mb-4" style={{ color: "var(--md-on-surface-variant)" }}>
-            What&apos;s unlocked for you
-          </p>
-          <div className="flex flex-col gap-3 w-full text-left">
-            {TRIAL_UNLOCKS.map((item) => (
-              <div key={item} className="flex items-center gap-3">
-                <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{ background: "rgba(200,49,255,0.1)" }}>
-                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--md-primary)" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                </div>
-                <span className="text-[14px]" style={{ color: "var(--md-on-surface)" }}>{item}</span>
-              </div>
-            ))}
-          </div>
         </div>
 
         {/* CTA */}
