@@ -85,20 +85,9 @@ export default function OnboardingScreen({ onDone }: Props) {
     >
       {/* Header */}
       <div className="flex flex-col items-center pt-16 pb-8 px-6">
-        <div
-          style={{
-            width: 48,
-            height: 48,
-            borderRadius: 16,
-            background: "var(--md-primary)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            marginBottom: 16,
-          }}
-        >
-          <span style={{ color: "#fff", fontSize: 24, fontWeight: 700 }}>J</span>
-        </div>
+        <svg width="48" height="48" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginBottom: 16 }}>
+          <path d="M25.2041 0C39.1236 0.000240543 50.408 11.2846 50.4082 25.2041C50.4081 29.7602 49.193 34.0366 47.0752 37.7275L52.4717 51.3945L38.6543 46.5176C34.7615 48.9792 30.1477 50.4081 25.2041 50.4082C11.2846 50.4079 0.000260373 39.1236 0 25.2041C0.000239379 11.2845 11.2847 0.000263298 25.2041 0ZM25.2041 4.33008C13.6759 4.33034 4.3303 13.6761 4.33008 25.2041C4.33034 36.7322 13.676 46.0779 25.2041 46.0781L26.0322 46.0625C30.1481 45.9019 33.9533 44.549 37.1211 42.3418L38.0322 41.707L44.9551 44.1494L42.251 37.3018L42.8418 36.3711C44.8905 33.1428 46.078 29.3152 46.0781 25.2041C46.0779 13.8564 37.0229 4.62329 25.7441 4.33691L25.2041 4.33008ZM38.4297 19.2061L21.4697 36.165L12.9902 27.6855L15.958 24.7178L21.4697 30.2295L35.4619 16.2383L38.4297 19.2061Z" fill="#B114EB"/>
+        </svg>
         <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--md-on-surface)", marginBottom: 6 }}>
           Just type it
         </h1>
