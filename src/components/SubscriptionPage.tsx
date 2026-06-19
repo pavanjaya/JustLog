@@ -183,6 +183,7 @@ export default function SubscriptionPage({
           <div className="rounded-[16px] overflow-hidden" style={{ background: "var(--md-surface-container-low)" }}>
             {[
               { label: "Plan", value: isPro ? (subPlan === "yearly" ? "Pro Annual" : "Pro Monthly") : isTrial ? "Pro Trial" : "Free" },
+              { label: "debug:subPlan", value: subPlan ?? "(null/undefined)" },
               { label: "Status", value: isPro ? "Active" : isTrial ? "In Trial" : isFree ? "Free" : "Expired", valueColor: isPro ? "#2E7D32" : isTrial ? "#7c3aed" : undefined },
               ...(validUntil && isPro ? [{ label: "Access until", value: fmt(validUntil) }] : []),
               ...(validUntil && isTrial ? [{ label: "Trial ends", value: fmt(validUntil) }] : []),
