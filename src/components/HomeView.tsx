@@ -121,9 +121,12 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
     const ambiguousMatch = text.match(/^(\d+(?:\.\d+)?(?:k|K|l|L)?)\s+([a-zA-Z]+)$/) || text.match(/^([a-zA-Z]+)\s+(\d+(?:\.\d+)?(?:k|K|l|L)?)$/);
     if (ambiguousMatch) {
       const hasDirection = DIRECTION_KEYWORDS.some(kw => text.toLowerCase().includes(kw));
-      const word = (ambiguousMatch[1].match(/\d/) ? ambiguousMatch[2] : ambiguousMatch[1]).toLowerCase();
+      const wordRaw = ambiguousMatch[1].match(/\d/) ? ambiguousMatch[2] : ambiguousMatch[1];
+      const word = wordRaw.toLowerCase();
       const isKnownWord = KNOWN_WORDS.includes(word);
-      if (!hasDirection && !isKnownWord) {
+      // Only clarify if the word starts with uppercase (likely a proper name) or matches a known name pattern
+      const looksLikeName = wordRaw[0] === wordRaw[0].toUpperCase() && wordRaw[0] !== wordRaw[0].toLowerCase();
+      if (!hasDirection && !isKnownWord && looksLikeName) {
         const numStr = ambiguousMatch[1].match(/\d/) ? ambiguousMatch[1] : ambiguousMatch[2];
         const name = ambiguousMatch[1].match(/\d/) ? ambiguousMatch[2] : ambiguousMatch[1];
         const raw = numStr.toLowerCase();
