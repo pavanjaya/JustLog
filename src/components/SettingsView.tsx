@@ -5,6 +5,7 @@ import type { User } from "@supabase/supabase-js";
 import type { Space, Transaction } from "@/types";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import SubscriptionPage from "@/components/SubscriptionPage";
 
 function daysLeft(date: Date) {
   return Math.max(0, Math.ceil((date.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
@@ -129,7 +130,7 @@ interface SettingsViewProps {
   onUpgrade?: () => void;
 }
 
-type Sheet = "none" | "profile" | "spaces" | "about" | "privacy" | "terms" | "rename" | "subscription";
+type Sheet = "none" | "profile" | "spaces" | "about" | "privacy" | "terms" | "rename";
 
 export default function SettingsView({
   user, spaces, transactions, activeSpace,
@@ -146,6 +147,7 @@ export default function SettingsView({
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>(avatar);
   const [saving, setSaving] = useState(false);
   const [sheet, setSheet] = useState<Sheet>("none");
+  const [showSubPage, setShowSubPage] = useState(false);
   const [editNameDraft, setEditNameDraft] = useState(name);
   const [darkMode, setDarkMode] = useState(false);
   const [renameSheetTarget, setRenameSheetTarget] = useState<Space | null>(null);
@@ -254,7 +256,7 @@ export default function SettingsView({
       </div>
 
       {/* Subscription card */}
-      <SubscriptionCard subStatus={subStatus} validUntil={validUntil} subPlan={subPlan} onUpgrade={onUpgrade} onManage={() => setSheet("subscription")} />
+      <SubscriptionCard subStatus={subStatus} validUntil={validUntil} subPlan={subPlan} onUpgrade={onUpgrade} onManage={() => setShowSubPage(true)} />
 
       {/* Group 1 — data */}
       <SettingsGroup>
@@ -439,94 +441,17 @@ export default function SettingsView({
       </Sheet>
 
 
-      {/* Subscription detail sheet */}
-      <Sheet open={sheet === "subscription"} onClose={() => setSheet("none")}>
-        <div className="flex flex-col gap-4">
-          <div className="text-base font-semibold" style={{ color: "var(--md-on-surface)" }}>Subscription</div>
-
-          {/* Status hero */}
-          <div className="rounded-2xl p-4" style={{
-            background: subStatus === "active" ? "rgba(46,125,50,0.05)" : subStatus === "trialing" ? "rgba(200,49,255,0.05)" : "var(--md-surface-container-low)",
-            border: subStatus === "active" ? "1px solid rgba(46,125,50,0.15)" : subStatus === "trialing" ? "1px solid rgba(200,49,255,0.15)" : "1px solid var(--md-outline-variant)",
-          }}>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{
-                background: subStatus === "active" ? "rgba(46,125,50,0.12)" : subStatus === "trialing" ? "rgba(200,49,255,0.12)" : "var(--md-surface-container)",
-              }}>
-                {subStatus === "active" ? (
-                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#2E7D32" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                ) : subStatus === "trialing" ? (
-                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--md-primary)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                ) : (
-                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--md-on-surface-variant)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                )}
-              </div>
-              <div>
-                <div className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>
-                  {subStatus === "active" ? "JustLog Pro" : subStatus === "trialing" ? "Free Trial" : "Free Plan"}
-                </div>
-                <div className="text-xs" style={{ color: subStatus === "active" ? "#2E7D32" : subStatus === "trialing" ? "var(--md-primary)" : "var(--md-on-surface-variant)" }}>
-                  {subStatus === "active" ? "Active" : subStatus === "trialing" ? `${validUntil ? daysLeft(validUntil) : 0} days remaining` : "Limited access"}
-                </div>
-              </div>
-            </div>
-            {subStatus === "trialing" && validUntil && (
-              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(200,49,255,0.15)" }}>
-                <div className="h-full rounded-full" style={{ width: `${Math.min(100, Math.max(0, (validUntil.getTime() - Date.now()) / (7 * 24 * 60 * 60 * 1000) * 100))}%`, background: "var(--md-primary)" }} />
-              </div>
-            )}
-          </div>
-
-          {/* Details rows */}
-          <div className="rounded-2xl overflow-hidden" style={{ background: "var(--md-surface-container-low)" }}>
-            <AboutRow label="Plan" value={subStatus === "active" ? "Pro" : subStatus === "trialing" ? "Trial (Pro)" : "Free"} />
-            <AboutRow label="Status" value={subStatus === "active" ? "Active" : subStatus === "trialing" ? "In Trial" : "Inactive"} />
-            {validUntil && subStatus === "active" && <AboutRow label="Renews on" value={fmt(validUntil)} />}
-            {validUntil && subStatus === "trialing" && <AboutRow label="Trial ends" value={fmt(validUntil)} />}
-            <AboutRow label="Price" value={subStatus === "active" ? (subPlan === "yearly" ? "₹499/year" : "₹49/month") : subStatus === "trialing" ? "Free for 7 days" : "Free"} last />
-          </div>
-
-          {/* What's included */}
-          <div className="rounded-2xl overflow-hidden" style={{ background: "var(--md-surface-container-low)" }}>
-            <div className="px-4 pt-3 pb-2 text-xs font-semibold" style={{ color: "var(--md-on-surface-variant)" }}>WHAT&apos;S INCLUDED</div>
-            {[
-              { label: "Unlimited entries with AI parsing", pro: true },
-              { label: "Voice input (Hindi/Hinglish)", pro: true },
-              { label: "Multiple spaces", pro: true },
-              { label: "AI-powered search", pro: true },
-              { label: "Full transaction history", pro: true },
-              { label: "Export to CSV", pro: true },
-              { label: "Monthly insights", pro: true },
-            ].map((f, i, arr) => (
-              <div key={f.label} className="flex items-center gap-3 px-4 py-3" style={{ borderTop: i > 0 ? "1px solid var(--md-outline-variant)" : "none" }}>
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"
-                  stroke={(subStatus === "active" || subStatus === "trialing") ? "#2E7D32" : "var(--md-outline)"}>
-                  {(subStatus === "active" || subStatus === "trialing") ? <polyline points="20 6 9 17 4 12"/> : <line x1="18" y1="6" x2="6" y2="18"/>}
-                </svg>
-                <span className="text-xs flex-1" style={{ color: "var(--md-on-surface)" }}>{f.label}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Actions */}
-          {(subStatus === "none" || subStatus === "free" || subStatus === "trialing") && (
-            <button onClick={() => { setSheet("none"); onUpgrade?.(); }} className="w-full py-3.5 rounded-2xl text-sm font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
-              Upgrade to Pro · ₹49/month
-            </button>
-          )}
-          {subStatus === "active" && (
-            <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid var(--md-outline-variant)" }}>
-              <button onClick={() => { setSheet("none"); onToast("To cancel, contact support@justlog.in"); }} className="w-full py-3.5 text-sm font-medium" style={{ color: "var(--md-error)" }}>
-                Cancel Subscription
-              </button>
-            </div>
-          )}
-
-          <p className="text-[11px] text-center" style={{ color: "var(--md-outline)" }}>
-            Payments processed securely via Razorpay
-          </p>
-        </div>
-      </Sheet>
+      {/* Subscription full page */}
+      {showSubPage && (
+        <SubscriptionPage
+          subStatus={subStatus}
+          validUntil={validUntil}
+          subPlan={subPlan}
+          onBack={() => setShowSubPage(false)}
+          onUpgrade={() => { setShowSubPage(false); onUpgrade?.(); }}
+          onSwitchToAnnual={() => { setShowSubPage(false); onUpgrade?.(); }}
+        />
+      )}
 
       {/* About sheet */}
       <Sheet open={sheet === "about"} onClose={() => setSheet("none")}>
