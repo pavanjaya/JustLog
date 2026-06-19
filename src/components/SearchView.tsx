@@ -8,6 +8,7 @@ import { apiUrl } from "@/lib/api";
 interface SearchViewProps {
   transactions: Transaction[];
   onDeleteTransaction: (id: string) => void;
+  onBulkDelete: (ids: string[]) => Promise<void>;
   onEditTransaction: (id: string, updates: Partial<Transaction>) => void;
 }
 
@@ -62,7 +63,7 @@ function groupByMonthAndDate(transactions: Transaction[]) {
   return months;
 }
 
-export default function SearchView({ transactions, onDeleteTransaction, onEditTransaction }: SearchViewProps) {
+export default function SearchView({ transactions, onDeleteTransaction, onBulkDelete, onEditTransaction }: SearchViewProps) {
   const [query, setQuery] = useState("");
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -70,6 +71,35 @@ export default function SearchView({ transactions, onDeleteTransaction, onEditTr
   const queryRef = useRef("");
   const [typeFilter, setTypeFilter] = useState<"all" | "income" | "expense">("all");
   const [timeFilter, setTimeFilter] = useState<"all" | "this_month" | "last_month">("all");
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+
+  function enterSelectMode(id: string) {
+    setSelectMode(true);
+    setSelectedIds(new Set([id]));
+  }
+
+  function toggleSelect(id: string) {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  function exitSelectMode() {
+    setSelectMode(false);
+    setSelectedIds(new Set());
+  }
+
+  async function handleBulkDelete() {
+    if (selectedIds.size === 0) return;
+    setBulkDeleting(true);
+    await onBulkDelete([...selectedIds]);
+    setBulkDeleting(false);
+    exitSelectMode();
+  }
 
   const now = new Date();
   const thisMonthKey = `${now.getFullYear()}-${now.getMonth()}`;
@@ -153,8 +183,19 @@ export default function SearchView({ transactions, onDeleteTransaction, onEditTr
         )}
       </div>
 
-      {/* Filters — hidden when search is active */}
-      {!searchFocused && !result && (
+      {/* Select mode header */}
+      {selectMode && (
+        <div className="flex-shrink-0 px-4 pb-3 flex items-center justify-between">
+          <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>{selectedIds.size} selected</span>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setSelectedIds(new Set(filtered.map(t => t.id)))} className="text-xs font-semibold" style={{ color: "var(--md-primary)" }}>Select all</button>
+            <button onClick={exitSelectMode} className="text-xs font-semibold" style={{ color: "var(--md-on-surface-variant)" }}>Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {/* Filters — hidden when search is active or in select mode */}
+      {!searchFocused && !result && !selectMode && (
         <div className="flex-shrink-0 px-4 pb-3 flex items-center justify-between gap-3">
           {/* Segmented control — primary filter */}
           <div className="flex rounded-xl p-0.5 flex-1" style={{ background: "var(--md-surface-container-low)" }}>
@@ -251,7 +292,7 @@ export default function SearchView({ transactions, onDeleteTransaction, onEditTr
                   {/* Transactions */}
                   <div className="px-3">
                     {txs.map((tx, i) => (
-                      <TxItem key={tx.id} tx={tx} index={i} onDelete={onDeleteTransaction} onEdit={onEditTransaction} />
+                      <TxItem key={tx.id} tx={tx} index={i} onDelete={onDeleteTransaction} onEdit={onEditTransaction} selectMode={selectMode} selected={selectedIds.has(tx.id)} onSelect={toggleSelect} onEnterSelectMode={enterSelectMode} />
                     ))}
                   </div>
                 </div>
@@ -260,6 +301,22 @@ export default function SearchView({ transactions, onDeleteTransaction, onEditTr
           ))
         )}
       </div>
+
+      {selectMode && selectedIds.size > 0 && (
+        <div className="flex-shrink-0 px-4 pb-4 pt-2" style={{ background: "#fff" }}>
+          <button
+            onClick={handleBulkDelete}
+            disabled={bulkDeleting}
+            className="w-full py-3.5 rounded-2xl text-sm font-semibold disabled:opacity-40 flex items-center justify-center gap-2"
+            style={{ background: "var(--md-error)", color: "#fff" }}
+          >
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+            </svg>
+            {bulkDeleting ? "Deleting…" : `Delete ${selectedIds.size} ${selectedIds.size === 1 ? "entry" : "entries"}`}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

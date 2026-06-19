@@ -316,7 +316,7 @@ export default function AppShell() {
               />
             )}
             {view === "story" && <StoryView transactions={transactions} />}
-            {view === "search" && <SearchView transactions={transactions} onDeleteTransaction={handleDeleteTransaction} onEditTransaction={handleEditTransaction} />}
+            {view === "search" && <SearchView transactions={transactions} onDeleteTransaction={handleDeleteTransaction} onBulkDelete={handleBulkDelete} onEditTransaction={handleEditTransaction} />}
             {view === "settings" && (
               <SettingsView
                 user={user}
