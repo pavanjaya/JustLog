@@ -310,7 +310,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
       </div>
 
       {/* Chat feed */}
-      <div ref={feedRef} className="flex-1 overflow-y-auto no-scrollbar px-3 pt-2 pb-2 flex flex-col-reverse gap-1">
+      <div ref={feedRef} className="flex-1 overflow-y-auto no-scrollbar px-3 pt-2 pb-2 flex flex-col-reverse gap-1" style={{ background: "#fff" }}>
         {aiState === "clarify" && clarifyPerson && (
           <div className="pb-1 animate-fade-up">
             <div className="rounded-2xl p-4" style={{ background: "var(--md-surface-container-low)", border: "1px solid var(--md-outline-variant)" }}>
@@ -391,7 +391,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
           </div>
         ) : (
           <>
-            {/* "caught up" only when there's enough history to scroll through */}
+            {/* In flex-col-reverse, last JSX item appears at top visually */}
             {all.length > 5 && (
               <div className="flex justify-center px-3 py-5">
                 <span className="text-[11px] font-medium" style={{ color: "var(--md-outline)" }}>you're all caught up</span>
