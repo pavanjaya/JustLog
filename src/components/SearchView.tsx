@@ -207,7 +207,11 @@ export default function SearchView({ transactions, onDeleteTransaction, onBulkDe
         body: JSON.stringify({ query: q, transactions }),
       });
       const data = await res.json();
-      setResult(data.answer || data.error || "No answer found.");
+      const raw = data.answer || data.error || "No answer found.";
+      const friendly = raw.includes("Rate limit") || raw.includes("429")
+        ? "AI search is temporarily unavailable (daily limit reached). Try again in a few minutes."
+        : raw;
+      setResult(friendly);
     } catch {
       setResult("Couldn't process that right now.");
     } finally {

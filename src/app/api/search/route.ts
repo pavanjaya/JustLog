@@ -61,6 +61,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ answer }, { headers: CORS_HEADERS });
   } catch (err) {
     console.error("AI search error:", err);
-    return NextResponse.json({ error: `Search failed: ${err instanceof Error ? err.message : "unknown error"}` }, { status: 500, headers: CORS_HEADERS });
+    const msg = err instanceof Error ? err.message : "";
+    const friendly = msg.includes("rate_limit") || msg.includes("429")
+      ? "AI search is temporarily unavailable (daily limit reached). Try again in a few minutes."
+      : "Couldn't process that right now.";
+    return NextResponse.json({ error: friendly }, { status: 500, headers: CORS_HEADERS });
   }
 }
