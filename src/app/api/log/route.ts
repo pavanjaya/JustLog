@@ -199,9 +199,13 @@ export async function POST(req: NextRequest) {
       if (/^From\s+[A-Z]/.test(tx.description)) {
         return { ...tx, category: "Transfer" };
       }
-      // Post-process: "Lent to", "Given to", "Paid to" are always Transfer expenses
+      // Post-process: "Lent to", "Given to", "Paid to [person name]" are always Transfer expenses
+      // But NOT "To Watermelon", "To Swiggy" etc — only actual person names (no food/service keywords)
+      const FOOD_SERVICE_KEYWORDS = ["watermelon", "watarmelon", "apple", "banana", "mango", "swiggy", "zomato", "amazon", "coffee", "tea", "chai", "grocery", "groceries", "petrol", "fuel", "rent", "bill", "medicine", "movie", "netflix", "uber", "ola"];
       if (/^(Lent|Given|Paid)\s+[Tt]o\s+[A-Z]/.test(tx.description)) {
-        return { ...tx, category: "Transfer", type: "expense" as const };
+        const lowerDesc = tx.description.toLowerCase();
+        const isFoodOrService = FOOD_SERVICE_KEYWORDS.some(kw => lowerDesc.includes(kw));
+        if (!isFoodOrService) return { ...tx, category: "Transfer", type: "expense" as const };
       }
       return tx;
     });
