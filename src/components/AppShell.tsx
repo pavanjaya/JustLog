@@ -289,7 +289,6 @@ export default function AppShell() {
 
   async function handleSubscribeSuccess() {
     setSubStatus("trialing");
-    if (user) loadSubscription(user.id);
   }
 
   const isPro = subStatus === "active" || subStatus === "trialing";
