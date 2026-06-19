@@ -40,7 +40,7 @@ Rules:
 - SALARY vs TRANSFER: "salary", "stipend", "paycheck", "income" keywords = "Salary" category. But "from [person name]" (e.g. "4k from Jaya", "got 500 from Rahul") = "Transfer" category — it's a person sending money, not an employer paying salary.
 - DESCRIPTION: ALWAYS fix spelling mistakes before writing the description. Use your language knowledge to correct ANY misspelling — do not copy the user's spelling. Examples: "cofee"→"Coffee", "icecreame"→"Ice Cream", "restraunt"→"Restaurant", "medecine"→"Medicine", "statinory"→"Stationery", "pomogranade"→"Pomegranate", "brocolli"→"Broccoli". Use clean title case. Do NOT include the amount. Preserve meaningful words like "Loan", "Rent", "Fee".
 - CATEGORY PRIORITY (higher rules override lower ones):
-  1. loan/borrowed/lent/gave loan = "Transfer" (HIGHEST PRIORITY — overrides all other rules)
+  1. loan/borrowed/lent/gave loan/given to [person]/gave to [person]/paid to [person] = "Transfer" (HIGHEST PRIORITY — overrides all other rules)
   2. chai/tea/coffee/food/lunch/dinner/breakfast/snack/restaurant/swiggy/zomato = "Food & Drinks"
   3. grocery/groceries/vegetables/fruits/milk/apple/banana/mango/pomegranate/tomato/onion/potato/rice/dal/bread/eggs = "Groceries"
   4. uber/ola/petrol/fuel/auto/bus/metro = "Transport"
@@ -63,7 +63,9 @@ Examples:
 "4k from jaya" → [{"amount": 4000, "type": "income", "category": "Transfer", "description": "From Jaya"}]
 "loan from Rohit 2.5L" → [{"amount": 250000, "type": "income", "category": "Transfer", "description": "Loan from Rohit"}]
 "lent 5000 to Rahul" → [{"amount": 5000, "type": "expense", "category": "Transfer", "description": "Lent to Rahul"}]
-"lend to ashok 40k" → [{"amount": 40000, "type": "expense", "category": "Transfer", "description": "Lent to Ashok"}]`;
+"lend to ashok 40k" → [{"amount": 40000, "type": "expense", "category": "Transfer", "description": "Lent to Ashok"}]
+"given to dipesh 2000" → [{"amount": 2000, "type": "expense", "category": "Transfer", "description": "Given to Dipesh"}]
+"4k from dipesh" → [{"amount": 4000, "type": "income", "category": "Transfer", "description": "From Dipesh"}]`;
 
 interface ParsedTx {
   amount: number;
