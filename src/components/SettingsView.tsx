@@ -5,7 +5,6 @@ import type { User } from "@supabase/supabase-js";
 import type { Space, Transaction } from "@/types";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import SubscriptionPage from "@/components/SubscriptionPage";
 
 function daysLeft(date: Date) {
   return Math.max(0, Math.ceil((date.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
@@ -128,6 +127,7 @@ interface SettingsViewProps {
   validUntil?: Date;
   subPlan?: string;
   onUpgrade?: () => void;
+  onShowSubPage?: () => void;
 }
 
 type Sheet = "none" | "profile" | "spaces" | "about" | "privacy" | "terms" | "rename";
@@ -135,7 +135,7 @@ type Sheet = "none" | "profile" | "spaces" | "about" | "privacy" | "terms" | "re
 export default function SettingsView({
   user, spaces, transactions, activeSpace,
   onDeleteAll, onToast, onRenameSpace, onDeleteSpace, onDeleteSpaceData, onUpdateSpace,
-  subStatus = "active", validUntil, subPlan, onUpgrade,
+  subStatus = "active", validUntil, subPlan, onUpgrade, onShowSubPage,
 }: SettingsViewProps) {
   const router = useRouter();
   const supabase = createClient();
@@ -147,7 +147,6 @@ export default function SettingsView({
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>(avatar);
   const [saving, setSaving] = useState(false);
   const [sheet, setSheet] = useState<Sheet>("none");
-  const [showSubPage, setShowSubPage] = useState(false);
   const [editNameDraft, setEditNameDraft] = useState(name);
   const [darkMode, setDarkMode] = useState(false);
   const [renameSheetTarget, setRenameSheetTarget] = useState<Space | null>(null);
@@ -256,7 +255,7 @@ export default function SettingsView({
       </div>
 
       {/* Subscription card */}
-      <SubscriptionCard subStatus={subStatus} validUntil={validUntil} subPlan={subPlan} onUpgrade={onUpgrade} onManage={() => setShowSubPage(true)} />
+      <SubscriptionCard subStatus={subStatus} validUntil={validUntil} subPlan={subPlan} onUpgrade={onUpgrade} onManage={() => onShowSubPage?.()} />
 
       {/* Group 1 — data */}
       <SettingsGroup>
@@ -440,18 +439,6 @@ export default function SettingsView({
         )}
       </Sheet>
 
-
-      {/* Subscription full page */}
-      {showSubPage && (
-        <SubscriptionPage
-          subStatus={subStatus}
-          validUntil={validUntil}
-          subPlan={subPlan}
-          onBack={() => setShowSubPage(false)}
-          onUpgrade={() => { setShowSubPage(false); onUpgrade?.(); }}
-          onSwitchToAnnual={() => { setShowSubPage(false); onUpgrade?.(); }}
-        />
-      )}
 
       {/* About sheet */}
       <Sheet open={sheet === "about"} onClose={() => setSheet("none")}>

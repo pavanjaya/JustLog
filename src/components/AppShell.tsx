@@ -16,6 +16,7 @@ import Toast from "@/components/Toast";
 import PaywallView from "@/components/PaywallView";
 import SplashScreen from "@/components/SplashScreen";
 import OnboardingScreen from "@/components/OnboardingScreen";
+import SubscriptionPage from "@/components/SubscriptionPage";
 
 type SubStatus = "loading" | "active" | "trialing" | "none" | "free";
 
@@ -29,6 +30,7 @@ export default function AppShell() {
   const [activeSpace, setActiveSpace] = useState<Space | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [subStatus, setSubStatus] = useState<SubStatus>("active");
+  const [showSubPage, setShowSubPage] = useState(false);
   const [subValidUntil, setSubValidUntil] = useState<Date | null>(null);
   const [subPlan, setSubPlan] = useState<string>("monthly");
   const [splashDone, setSplashDone] = useState(false);
@@ -406,6 +408,7 @@ export default function AppShell() {
                 validUntil={subValidUntil ?? undefined}
                 subPlan={subPlan}
                 onUpgrade={() => setSubStatus("none")}
+                onShowSubPage={() => setShowSubPage(true)}
                 onRenameSpace={async (id, name) => {
                   await supabase.from("spaces").update({ name }).eq("id", id);
                   setSpaces((prev) => prev.map((s) => s.id === id ? { ...s, name } : s));
@@ -436,6 +439,17 @@ export default function AppShell() {
       </div>
 
       <Toast message={toast.message} visible={toast.visible} />
+
+      {showSubPage && (
+        <SubscriptionPage
+          subStatus={subStatus}
+          validUntil={subValidUntil ?? undefined}
+          subPlan={subPlan}
+          onBack={() => setShowSubPage(false)}
+          onUpgrade={() => { setShowSubPage(false); setSubStatus("none"); }}
+          onSwitchToAnnual={() => { setShowSubPage(false); setSubStatus("none"); }}
+        />
+      )}
     </div>
   );
 }
