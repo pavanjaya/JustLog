@@ -65,6 +65,7 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
   const [popping, setPopping] = useState(false);
   const [listening, setListening] = useState(false);
   const [ripple, setRipple] = useState(false);
+  const [focused, setFocused] = useState(false);
   const recognitionRef = useRef<{ stop: () => void } | null>(null);
   const suggestions = useMemo(() => getSmartSuggestions(transactions), [transactions]);
 
@@ -189,8 +190,8 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
       className="flex-shrink-0 px-3 pt-2"
       style={{ background: "#fff", paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)" }}
     >
-      {/* Smart suggestion chips */}
-      {value.trim().length < 4 && suggestions.length > 0 && (
+      {/* Smart suggestion chips — hide when keyboard is open */}
+      {!focused && value.trim().length < 4 && suggestions.length > 0 && (
         <div className="flex gap-1.5 overflow-x-auto pb-2 no-scrollbar">
           {suggestions.map((s, i) => (
             <button
@@ -221,6 +222,8 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
             autoComplete="off"
             autoCorrect="off"
             disabled={disabled}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
             className="flex-1 border-none outline-none bg-transparent text-[15px] resize-none leading-[1.5] max-h-[120px] overflow-y-auto no-scrollbar"
             style={{ color: "var(--md-on-surface)" }}
           />
