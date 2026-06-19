@@ -145,6 +145,17 @@ export default function AppShell() {
       App.getLaunchUrl().then((result) => {
         if (result?.url) handleDeepLink(result.url);
       });
+
+      App.addListener("backButton", ({ canGoBack }) => {
+        setView((currentView) => {
+          if (currentView !== "home") return "home";
+          // On home, exit app
+          if (!canGoBack) App.exitApp();
+          return currentView;
+        });
+        setDrawerOpen(false);
+        setSpaceSwitcherOpen(false);
+      });
     }).catch(() => {});
 
     import("@capacitor/browser").then(({ Browser }) => {
