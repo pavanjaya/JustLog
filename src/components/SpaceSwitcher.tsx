@@ -101,7 +101,7 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
 
         {creating ? (
           /* ── Create mode: form only, no list ── */
-          <div className="px-5 pt-2 pb-8">
+          <div className="px-5 pt-2" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 32px)" }}>
             <div className="flex items-center gap-3 mb-5">
               <button
                 onClick={() => setCreating(false)}
@@ -269,7 +269,7 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
             </div>
 
             {/* Create CTA — clear purple button */}
-            <div className="px-4 pb-8 pt-1">
+            <div className="px-4 pt-1" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 32px)" }}>
               <button
                 onClick={() => setCreating(true)}
                 className="w-full py-3.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2"

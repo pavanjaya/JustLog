@@ -191,7 +191,7 @@ export default function OnboardingScreen({ onDone }: Props) {
       </div>
 
       {/* CTA */}
-      <div className="px-6 pb-12">
+      <div className="px-6" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 48px)" }}>
         <button
           onClick={handleStart}
           style={{

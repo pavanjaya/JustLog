@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Safe area insets for Android/iOS notch and nav bar */
+:root {
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+}
 
 /* ─── MATERIAL DESIGN 3 TOKENS ─── */
 :root {

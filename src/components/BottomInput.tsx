@@ -2,12 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-function getNavBarHeight(): number {
-  if (typeof window === "undefined") return 0;
-  const cap = (window as unknown as { Capacitor?: { getPlatform?: () => string } }).Capacitor;
-  if (cap?.getPlatform?.() === "android") return 32;
-  return 0;
-}
 
 import type { Transaction } from "@/types";
 
@@ -46,12 +40,7 @@ function getSmartSuggestions(transactions: Transaction[]): string[] {
 export default function BottomInput({ value, onChange, onSend, disabled, transactions = [] }: BottomInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [popping, setPopping] = useState(false);
-  const [navBarHeight, setNavBarHeight] = useState(0);
   const suggestions = useMemo(() => getSmartSuggestions(transactions), [transactions]);
-
-  useEffect(() => {
-    setNavBarHeight(getNavBarHeight());
-  }, []);
 
   function autoGrow(el: HTMLTextAreaElement) {
     el.style.height = "auto";
@@ -89,7 +78,7 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
   return (
     <div
       className="flex-shrink-0 px-3 pt-2"
-      style={{ background: "#fff", paddingBottom: `${navBarHeight + 16}px` }}
+      style={{ background: "#fff", paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)" }}
     >
       {/* Smart suggestion chips — scrollable row */}
       {value.trim().length < 4 && suggestions.length > 0 && (

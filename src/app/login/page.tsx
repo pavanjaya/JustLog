@@ -63,7 +63,7 @@ export default function LoginPage() {
       </div>
 
       {/* Bottom CTA area */}
-      <div className="flex flex-col items-center gap-4 pb-12">
+      <div className="flex flex-col items-center gap-4" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 48px)" }}>
         <button
           onClick={handleGoogleLogin}
           disabled={loading}

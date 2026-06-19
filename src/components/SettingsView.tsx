@@ -133,7 +133,7 @@ export default function SettingsView({
   }
 
   return (
-    <div className="flex-1 overflow-y-auto no-scrollbar pt-4 pb-6" style={{ background: "#fff" }}>
+    <div className="flex-1 overflow-y-auto no-scrollbar pt-4" style={{ background: "#fff", paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)" }}>
 
       {/* Profile card */}
       <div className="mx-4 mb-3 rounded-2xl overflow-hidden" style={{ background: "var(--md-surface-container-low)" }}>
