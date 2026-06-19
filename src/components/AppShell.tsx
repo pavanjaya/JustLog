@@ -17,7 +17,7 @@ import PaywallView from "@/components/PaywallView";
 import SplashScreen from "@/components/SplashScreen";
 import OnboardingScreen from "@/components/OnboardingScreen";
 
-type SubStatus = "loading" | "active" | "trialing" | "none";
+type SubStatus = "loading" | "active" | "trialing" | "none" | "free";
 
 export default function AppShell() {
   const router = useRouter();
@@ -118,19 +118,37 @@ export default function AppShell() {
     }
   }, [supabase, loadSpaces]);
 
-  const loadSubscription = useCallback(async (userId: string) => {
+  const loadSubscription = useCallback(async (userId: string, userCreatedAt?: string) => {
     const { data } = await supabase
       .from("subscriptions")
       .select("status, valid_until")
       .eq("user_id", userId)
       .single();
-    if (data && (data.status === "active" || data.status === "trialing")) {
+
+    if (data) {
       const validUntil = new Date(data.valid_until);
       if (validUntil > new Date()) {
-        setSubStatus("active");
+        setSubStatus(data.status === "trialing" ? "trialing" : "active");
         return;
       }
     }
+
+    // Auto-grant 7-day trial for new users
+    if (userCreatedAt) {
+      const createdAt = new Date(userCreatedAt);
+      const trialEnd = new Date(createdAt.getTime() + 7 * 24 * 60 * 60 * 1000);
+      if (trialEnd > new Date()) {
+        await supabase.from("subscriptions").upsert({
+          user_id: userId,
+          plan: "trial",
+          status: "trialing",
+          valid_until: trialEnd.toISOString(),
+        }, { onConflict: "user_id" });
+        setSubStatus("trialing");
+        return;
+      }
+    }
+
     setSubStatus("none");
   }, [supabase]);
 
@@ -187,7 +205,7 @@ export default function AppShell() {
         const allSpaces = await loadSpaces(user.id);
         await loadTransactions(space.id, allSpaces);
         setSpaceLoading(false);
-        await loadSubscription(user.id);
+        await loadSubscription(user.id, user.created_at);
       } else {
         setSpaceLoading(false);
         setSubStatus("none");
@@ -204,7 +222,7 @@ export default function AppShell() {
         setActiveSpace(space);
         const allSpaces = await loadSpaces(session.user.id);
         await loadTransactions(space.id, allSpaces);
-        await loadSubscription(session.user.id);
+        await loadSubscription(session.user.id, session.user.created_at);
       } else {
         setSubStatus("none");
         router.replace("/login");
@@ -277,9 +295,14 @@ export default function AppShell() {
   }
 
   async function handleSubscribeSuccess() {
-    if (user) await loadSubscription(user.id);
+    if (user) await loadSubscription(user.id, user.created_at);
   }
 
+  const isPro = subStatus === "active" || subStatus === "trialing";
+  const isActive = isPro || subStatus === "free";
+  const visibleTransactions = isPro
+    ? transactions
+    : transactions.filter(tx => new Date(tx.created_at) > new Date(Date.now() - 90 * 24 * 60 * 60 * 1000));
   const userName = user?.user_metadata?.full_name?.split(" ")[0] ?? user?.email?.split("@")[0];
   const avatarUrl = user?.user_metadata?.avatar_url as string | undefined;
   const userInitial = (user?.user_metadata?.full_name ?? user?.email ?? "?").charAt(0).toUpperCase();
@@ -312,6 +335,8 @@ export default function AppShell() {
         onSwitch={handleSwitchSpace}
         onCreate={handleCreateSpace}
         onClose={() => setSpaceSwitcherOpen(false)}
+        isPro={isPro}
+        onUpgrade={() => setSubStatus("none")}
       />
 
       <TopBar
@@ -330,8 +355,13 @@ export default function AppShell() {
             <div className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "var(--md-primary)", borderTopColor: "transparent" }} />
           </div>
         )}
-        {subStatus === "none" && user && (
-          <PaywallView userId={user.id} onSuccess={handleSubscribeSuccess} />
+        {(subStatus === "none") && user && (
+          <PaywallView
+            userId={user.id}
+            onSuccess={handleSubscribeSuccess}
+            onContinueFree={() => setSubStatus("free")}
+            trialExpired={true}
+          />
         )}
 
         {spaceLoading && (
@@ -340,11 +370,11 @@ export default function AppShell() {
           </div>
         )}
 
-        {!spaceLoading && (subStatus === "active" || subStatus === "trialing") && (
+        {!spaceLoading && isActive && (
           <div key={view} className="flex-1 overflow-hidden flex animate-view-enter">
             {view === "home" && (
               <HomeView
-                transactions={transactions}
+                transactions={visibleTransactions}
                 onAddTransactions={handleAddTransactions}
                 onDeleteTransaction={handleDeleteTransaction}
                 onBulkDelete={handleBulkDelete}
@@ -355,7 +385,7 @@ export default function AppShell() {
               />
             )}
             {view === "story" && <StoryView transactions={transactions} />}
-            {view === "search" && <SearchView transactions={transactions} onDeleteTransaction={handleDeleteTransaction} onBulkDelete={handleBulkDelete} onEditTransaction={handleEditTransaction} />}
+            {view === "search" && <SearchView transactions={visibleTransactions} onDeleteTransaction={handleDeleteTransaction} onBulkDelete={handleBulkDelete} onEditTransaction={handleEditTransaction} isPro={isPro} onUpgrade={() => setSubStatus("none")} />}
             {view === "settings" && (
               <SettingsView
                 user={user}

@@ -26,9 +26,11 @@ interface SpaceSwitcherProps {
   onSwitch: (space: Space) => void;
   onCreate: (name: string, icon: string, includeInPersonal: boolean, peopleCount: number) => Promise<void>;
   onClose: () => void;
+  isPro?: boolean;
+  onUpgrade?: () => void;
 }
 
-export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, onCreate, onClose }: SpaceSwitcherProps) {
+export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, onCreate, onClose, isPro = true, onUpgrade }: SpaceSwitcherProps) {
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState("");
   const [newIcon, setNewIcon] = useState("home");
@@ -271,7 +273,10 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
             {/* Create CTA — clear purple button */}
             <div className="px-4 pt-1" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 32px)" }}>
               <button
-                onClick={() => setCreating(true)}
+                onClick={() => {
+                  if (!isPro && spaces.length >= 1) { onClose(); onUpgrade?.(); return; }
+                  setCreating(true);
+                }}
                 className="w-full py-3.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2"
                 style={{ background: "rgba(200,49,255,0.08)", color: "var(--md-primary)" }}
               >

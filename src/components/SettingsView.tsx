@@ -28,7 +28,7 @@ interface SettingsViewProps {
   onDeleteSpace: (id: string) => void;
   onDeleteSpaceData: (id: string) => void;
   onUpdateSpace?: (id: string, updates: Partial<Space>) => void;
-  subStatus?: "active" | "trialing" | "none" | "loading";
+  subStatus?: "active" | "trialing" | "none" | "loading" | "free";
 }
 
 type Sheet = "none" | "profile" | "spaces" | "about" | "privacy" | "terms" | "rename";

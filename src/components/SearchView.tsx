@@ -10,6 +10,8 @@ interface SearchViewProps {
   onDeleteTransaction: (id: string) => void;
   onBulkDelete: (ids: string[]) => Promise<void>;
   onEditTransaction: (id: string, updates: Partial<Transaction>) => void;
+  isPro?: boolean;
+  onUpgrade?: () => void;
 }
 
 const ic = { width: 16, height: 16, viewBox: "0 0 24 24", fill: "none" as const, stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
@@ -63,7 +65,7 @@ function groupByMonthAndDate(transactions: Transaction[]) {
   return months;
 }
 
-export default function SearchView({ transactions, onDeleteTransaction, onBulkDelete, onEditTransaction }: SearchViewProps) {
+export default function SearchView({ transactions, onDeleteTransaction, onBulkDelete, onEditTransaction, isPro = true, onUpgrade }: SearchViewProps) {
   const [query, setQuery] = useState("");
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -194,6 +196,7 @@ export default function SearchView({ transactions, onDeleteTransaction, onBulkDe
 
   async function runSearch(q: string) {
     if (!q.trim()) return;
+    if (!isPro) { onUpgrade?.(); return; }
     setQuery(q);
     queryRef.current = q;
     setSearchFocused(true);

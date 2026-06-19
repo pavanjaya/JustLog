@@ -5,6 +5,8 @@ import { useState } from "react";
 interface PaywallViewProps {
   userId: string;
   onSuccess: () => void;
+  onContinueFree?: () => void;
+  trialExpired?: boolean;
 }
 
 const FEATURES = [
@@ -34,7 +36,7 @@ function loadRazorpayScript(): Promise<boolean> {
   });
 }
 
-export default function PaywallView({ userId, onSuccess }: PaywallViewProps) {
+export default function PaywallView({ userId, onSuccess, onContinueFree, trialExpired }: PaywallViewProps) {
   const [loading, setLoading] = useState(false);
   const [plan, setPlan] = useState<"monthly" | "yearly">("yearly");
 
@@ -92,8 +94,15 @@ export default function PaywallView({ userId, onSuccess }: PaywallViewProps) {
 
   return (
     <div className="flex flex-col h-full overflow-y-auto no-scrollbar" style={{ background: "#fff" }}>
+      {/* Trial expired banner */}
+      {trialExpired && (
+        <div className="mx-6 mt-6 rounded-2xl px-4 py-3 text-sm text-center font-medium" style={{ background: "rgba(255,107,53,0.1)", color: "#FF6B35" }}>
+          Your 7-day free trial has ended — upgrade to keep going
+        </div>
+      )}
+
       {/* Hero */}
-      <div className="flex flex-col items-center pt-12 pb-6 px-6 text-center">
+      <div className="flex flex-col items-center pt-8 pb-6 px-6 text-center">
         <img src="/logo.svg" alt="JustLog" className="h-10 mb-5" />
         <h1 className="text-2xl font-bold tracking-tight mb-2" style={{ color: "var(--md-on-surface)" }}>
           Your personal finance journal
@@ -182,6 +191,18 @@ export default function PaywallView({ userId, onSuccess }: PaywallViewProps) {
         <p className="text-[11px] text-center" style={{ color: "var(--md-outline)" }}>
           Secure payment via Razorpay · Cancel anytime
         </p>
+        {onContinueFree && (
+          <button
+            onClick={onContinueFree}
+            className="w-full py-3 text-sm text-center"
+            style={{ color: "var(--md-on-surface-variant)" }}
+          >
+            Continue with Free plan
+            <span className="block text-[11px] mt-0.5" style={{ color: "var(--md-outline)" }}>
+              1 space · 3 months history · No AI search
+            </span>
+          </button>
+        )}
       </div>
     </div>
   );
