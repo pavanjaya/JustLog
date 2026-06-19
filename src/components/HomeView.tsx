@@ -299,14 +299,9 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
             <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>
               {selectedIds.size} selected
             </span>
-            <div className="flex items-center gap-3">
-              <button onClick={() => setSelectedIds(new Set(all.map(t => t.id)))} className="text-xs font-semibold" style={{ color: "var(--md-primary)" }}>
-                Select all
-              </button>
-              <button onClick={exitSelectMode} className="text-xs font-semibold" style={{ color: "var(--md-on-surface-variant)" }}>
-                Cancel
-              </button>
-            </div>
+            <button onClick={() => setSelectedIds(new Set(all.map(t => t.id)))} className="text-xs font-semibold" style={{ color: "var(--md-primary)" }}>
+              Select all
+            </button>
           </>
         ) : (
           <>
@@ -434,18 +429,25 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
         )}
       </div>
 
-      {selectMode && selectedIds.size > 0 && (
-        <div className="flex-shrink-0 px-4 pt-2" style={{ background: "#fff", paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)" }}>
+      {selectMode && (
+        <div className="flex-shrink-0 px-4 pt-3 flex gap-3" style={{ background: "#fff", paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)" }}>
+          <button
+            onClick={exitSelectMode}
+            className="flex-1 py-3.5 rounded-2xl text-sm font-semibold"
+            style={{ background: "var(--md-surface-container)", color: "var(--md-on-surface)" }}
+          >
+            Cancel
+          </button>
           <button
             onClick={handleBulkDelete}
-            disabled={bulkDeleting}
-            className="w-full py-3.5 rounded-2xl text-sm font-semibold disabled:opacity-40 flex items-center justify-center gap-2"
+            disabled={bulkDeleting || selectedIds.size === 0}
+            className="flex-1 py-3.5 rounded-2xl text-sm font-semibold disabled:opacity-40 flex items-center justify-center gap-2"
             style={{ background: "var(--md-error)", color: "#fff" }}
           >
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
             </svg>
-            {bulkDeleting ? "Deleting…" : `Delete ${selectedIds.size} ${selectedIds.size === 1 ? "entry" : "entries"}`}
+            {bulkDeleting ? "Deleting…" : selectedIds.size > 0 ? `Delete ${selectedIds.size}` : "Delete"}
           </button>
         </div>
       )}
