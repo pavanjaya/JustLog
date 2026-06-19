@@ -37,7 +37,8 @@ Format:
 Rules:
 - AMOUNT: "5k" = 5000, "2k" = 2000, "40k" = 40000, "1.5k" = 1500, "2L" = 200000, "1L" = 100000. The suffix "k" or "K" after a number is a multiplier (×1000), NEVER part of a person's name. "lend to ashok 40k" → amount=40000, name=Ashok (the K belongs to the number, not the name).
 - TYPE: salary/received/income/got/from [person] = "income"; everything else = "expense". Exception: "lent to X" or "gave loan to X" = "expense".
-- SALARY vs TRANSFER: "salary", "stipend", "paycheck", "income" keywords = "Salary" category. ANY pattern like "from [person name]" or "[person] gave" or "received from [person]" (e.g. "4k from Jaya", "got 500 from Rahul", "300 from Rohit") = "Transfer" category — it's a person sending money, not an employer. NEVER use "Salary" when a person's name follows "from".
+- PERSON vs EMPLOYER: If the text says "from [human name]" (e.g. "from Rohit", "from Amol", "from Dipesh", "from Priya") → category MUST be "Transfer". "Salary" is ONLY for employer payments using words like "salary", "stipend", "paycheck". A person's name after "from" is NEVER Salary — always Transfer.
+- SALARY vs TRANSFER: "salary", "stipend", "paycheck" keywords = "Salary". "from [person name]" = "Transfer". NEVER mix these up.
 - DESCRIPTION: ALWAYS fix spelling mistakes before writing the description. Use your language knowledge to correct ANY misspelling — do not copy the user's spelling. Examples: "cofee"→"Coffee", "icecreame"→"Ice Cream", "restraunt"→"Restaurant", "medecine"→"Medicine", "statinory"→"Stationery", "pomogranade"→"Pomegranate", "brocolli"→"Broccoli". Use clean title case. Do NOT include the amount. Preserve meaningful words like "Loan", "Rent", "Fee".
 - CATEGORY PRIORITY (higher rules override lower ones):
   1. loan/borrowed/lent/gave loan/given to [person]/gave to [person]/paid to [person] = "Transfer" (HIGHEST PRIORITY — overrides all other rules)
