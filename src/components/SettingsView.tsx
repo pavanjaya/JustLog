@@ -6,6 +6,84 @@ import type { Space, Transaction } from "@/types";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
+function daysLeft(date: Date) {
+  return Math.max(0, Math.ceil((date.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+}
+
+function SubscriptionCard({ subStatus, validUntil, onUpgrade }: { subStatus?: string; validUntil?: Date; onUpgrade?: () => void }) {
+  const days = validUntil ? daysLeft(validUntil) : 0;
+
+  if (subStatus === "trialing") {
+    const pct = validUntil ? Math.max(0, (validUntil.getTime() - Date.now()) / (7 * 24 * 60 * 60 * 1000)) : 0;
+    return (
+      <div className="mx-4 mb-3 p-4 rounded-2xl" style={{ background: "rgba(200,49,255,0.06)", border: "1px solid rgba(200,49,255,0.15)" }}>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>JustLog Pro</span>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(200,49,255,0.15)", color: "var(--md-primary)" }}>TRIAL</span>
+          </div>
+          <span className="text-xs font-semibold" style={{ color: "var(--md-primary)" }}>{days} day{days !== 1 ? "s" : ""} left</span>
+        </div>
+        <div className="h-1.5 rounded-full overflow-hidden mb-3" style={{ background: "rgba(200,49,255,0.15)" }}>
+          <div className="h-full rounded-full transition-all" style={{ width: `${pct * 100}%`, background: "var(--md-primary)" }} />
+        </div>
+        <button onClick={onUpgrade} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
+          Upgrade to Pro · ₹49/month
+        </button>
+      </div>
+    );
+  }
+
+  if (subStatus === "active") {
+    return (
+      <div className="mx-4 mb-3 p-4 rounded-2xl flex items-center gap-3" style={{ background: "rgba(46,125,50,0.05)", border: "1px solid rgba(46,125,50,0.15)" }}>
+        <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(46,125,50,0.1)" }}>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#2E7D32" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>JustLog Pro</span>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(46,125,50,0.12)", color: "#2E7D32" }}>ACTIVE</span>
+          </div>
+          <div className="text-xs mt-0.5" style={{ color: "var(--md-on-surface-variant)" }}>
+            {validUntil ? `Renews ${validUntil.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}` : "Full access"}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (subStatus === "free") {
+    return (
+      <div className="mx-4 mb-3 rounded-2xl overflow-hidden" style={{ border: "1px solid var(--md-outline-variant)" }}>
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>Free Plan</span>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "var(--md-surface-container-highest)", color: "var(--md-on-surface-variant)" }}>FREE</span>
+          </div>
+          <div className="text-xs mb-3" style={{ color: "var(--md-on-surface-variant)" }}>1 space · 3 months history · No AI search</div>
+          <button onClick={onUpgrade} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
+            Upgrade to Pro · ₹49/month
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // none — show upgrade prompt
+  return (
+    <div className="mx-4 mb-3 p-4 rounded-2xl" style={{ background: "rgba(255,107,53,0.06)", border: "1px solid rgba(255,107,53,0.2)" }}>
+      <div className="text-sm font-semibold mb-1" style={{ color: "var(--md-on-surface)" }}>No active plan</div>
+      <div className="text-xs mb-3" style={{ color: "var(--md-on-surface-variant)" }}>Your trial has ended. Upgrade to keep logging.</div>
+      <button onClick={onUpgrade} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
+        Upgrade to Pro · ₹49/month
+      </button>
+    </div>
+  );
+}
+
 function SpaceIcon({ icon, size = 18, color = "currentColor" }: { icon: string; size?: number; color?: string }) {
   const p = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: color, strokeWidth: 1.8, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
   switch (icon) {
@@ -29,6 +107,8 @@ interface SettingsViewProps {
   onDeleteSpaceData: (id: string) => void;
   onUpdateSpace?: (id: string, updates: Partial<Space>) => void;
   subStatus?: "active" | "trialing" | "none" | "loading" | "free";
+  validUntil?: Date;
+  onUpgrade?: () => void;
 }
 
 type Sheet = "none" | "profile" | "spaces" | "about" | "privacy" | "terms" | "rename";
@@ -36,7 +116,7 @@ type Sheet = "none" | "profile" | "spaces" | "about" | "privacy" | "terms" | "re
 export default function SettingsView({
   user, spaces, transactions, activeSpace,
   onDeleteAll, onToast, onRenameSpace, onDeleteSpace, onDeleteSpaceData, onUpdateSpace,
-  subStatus = "active",
+  subStatus = "active", validUntil, onUpgrade,
 }: SettingsViewProps) {
   const router = useRouter();
   const supabase = createClient();
@@ -156,29 +236,7 @@ export default function SettingsView({
       </div>
 
       {/* Subscription card */}
-      <div className="mx-4 mb-3 p-4 rounded-2xl flex items-center justify-between gap-3" style={{ background: "var(--md-surface-container-low)" }}>
-        <div>
-          <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>JustLog Pro</span>
-            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full" style={{
-              background: subStatus === "trialing" ? "#EDE7F6" : subStatus === "active" ? "#E8F5E9" : "#FFF3E0",
-              color: subStatus === "trialing" ? "#6A1B9A" : subStatus === "active" ? "#2E7D32" : "#E65100",
-            }}>
-              {subStatus === "trialing" ? "Free Trial" : subStatus === "active" ? "Active" : "Inactive"}
-            </span>
-          </div>
-          <div className="text-xs" style={{ color: "var(--md-on-surface-variant)" }}>
-            {subStatus === "trialing" ? "Your free trial is active" : subStatus === "active" ? "₹99 / month" : "Subscribe to unlock all features"}
-          </div>
-        </div>
-        <button
-          onClick={subStatus === "none" ? () => onToast("Stripe setup pending") : handleManageBilling}
-          className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold"
-          style={{ background: "var(--md-surface-container-highest)", color: "var(--md-on-surface)" }}
-        >
-          {subStatus === "none" ? "Subscribe" : "Manage"}
-        </button>
-      </div>
+      <SubscriptionCard subStatus={subStatus} validUntil={validUntil} onUpgrade={onUpgrade} />
 
       {/* Group 1 — data */}
       <SettingsGroup>

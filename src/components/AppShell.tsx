@@ -29,6 +29,7 @@ export default function AppShell() {
   const [activeSpace, setActiveSpace] = useState<Space | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [subStatus, setSubStatus] = useState<SubStatus>("active");
+  const [subValidUntil, setSubValidUntil] = useState<Date | null>(null);
   const [splashDone, setSplashDone] = useState(false);
   const [onboardingDone, setOnboardingDone] = useState(() => {
     if (typeof window === "undefined") return true;
@@ -128,6 +129,7 @@ export default function AppShell() {
     if (data) {
       const validUntil = new Date(data.valid_until);
       if (validUntil > new Date()) {
+        setSubValidUntil(validUntil);
         setSubStatus(data.status === "trialing" ? "trialing" : "active");
         return;
       }
@@ -144,6 +146,7 @@ export default function AppShell() {
           status: "trialing",
           valid_until: trialEnd.toISOString(),
         }, { onConflict: "user_id" });
+        setSubValidUntil(trialEnd);
         setSubStatus("trialing");
         return;
       }
@@ -326,6 +329,9 @@ export default function AppShell() {
         onNavigate={(v) => { setView(v); setDrawerOpen(false); }}
         onDeleteAll={handleDeleteAll}
         user={user}
+        subStatus={subStatus}
+        validUntil={subValidUntil}
+        onUpgrade={() => setSubStatus("none")}
       />
 
       <SpaceSwitcher
@@ -395,6 +401,8 @@ export default function AppShell() {
                 onDeleteAll={handleDeleteAll}
                 onToast={showToast}
                 subStatus={subStatus}
+                validUntil={subValidUntil ?? undefined}
+                onUpgrade={() => setSubStatus("none")}
                 onRenameSpace={async (id, name) => {
                   await supabase.from("spaces").update({ name }).eq("id", id);
                   setSpaces((prev) => prev.map((s) => s.id === id ? { ...s, name } : s));

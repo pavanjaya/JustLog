@@ -15,6 +15,9 @@ interface DrawerProps {
   onNavigate: (view: View) => void;
   onDeleteAll: () => void;
   user: User | null;
+  subStatus?: "loading" | "active" | "trialing" | "none" | "free";
+  validUntil?: Date | null;
+  onUpgrade?: () => void;
 }
 
 const ic = { width: 22, height: 22, viewBox: "0 0 24 24", fill: "none" as const, stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
@@ -23,7 +26,7 @@ function IconStory()    { return <svg {...ic}><rect x="3" y="3" width="18" heigh
 function IconSettings() { return <svg {...ic}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>; }
 function IconLogOut()   { return <svg {...ic}><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>; }
 
-export default function Drawer({ open, view, onClose, onNavigate, onDeleteAll, user }: DrawerProps) {
+export default function Drawer({ open, view, onClose, onNavigate, onDeleteAll, user, subStatus, validUntil, onUpgrade }: DrawerProps) {
   const router = useRouter();
   const [confirmSignOut, setConfirmSignOut] = useState(false);
   const name = user?.user_metadata?.full_name ?? user?.email?.split("@")[0] ?? "You";
@@ -68,6 +71,28 @@ export default function Drawer({ open, view, onClose, onNavigate, onDeleteAll, u
             <div className="min-w-0">
               <div className="text-base font-semibold truncate" style={{ color: "var(--md-on-surface)" }}>{name}</div>
               <div className="text-sm truncate mt-0.5" style={{ color: "var(--md-on-surface-variant)" }}>{email}</div>
+              {subStatus && subStatus !== "loading" && (
+                <div className="mt-1.5">
+                  {subStatus === "active" && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(46,125,50,0.12)", color: "#2E7D32" }}>✓ PRO</span>
+                  )}
+                  {subStatus === "trialing" && validUntil && (
+                    <button onClick={() => { onUpgrade?.(); onClose(); }} className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(200,49,255,0.12)", color: "var(--md-primary)" }}>
+                      TRIAL · {Math.max(0, Math.ceil((validUntil.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))}d left
+                    </button>
+                  )}
+                  {subStatus === "free" && (
+                    <button onClick={() => { onUpgrade?.(); onClose(); }} className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "var(--md-surface-container-highest)", color: "var(--md-on-surface-variant)" }}>
+                      FREE · Upgrade
+                    </button>
+                  )}
+                  {subStatus === "none" && (
+                    <button onClick={() => { onUpgrade?.(); onClose(); }} className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(255,107,53,0.12)", color: "#FF6B35" }}>
+                      Trial ended · Upgrade
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
