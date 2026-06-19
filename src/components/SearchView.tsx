@@ -312,7 +312,7 @@ export default function SearchView({ transactions, onDeleteTransaction, onBulkDe
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto no-scrollbar pb-6">
+      <div className="flex-1 overflow-y-auto no-scrollbar" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)" }}>
         {/* AI result */}
         {result !== null && (
           <div className="mx-4 mb-3 p-4 rounded-2xl animate-fade-up" style={{ background: "rgba(200,49,255,0.05)" }}>
@@ -383,7 +383,7 @@ export default function SearchView({ transactions, onDeleteTransaction, onBulkDe
       </div>
 
       {selectMode && selectedIds.size > 0 && (
-        <div className="flex-shrink-0 px-4 pb-4 pt-2" style={{ background: "#fff" }}>
+        <div className="flex-shrink-0 px-4 pt-2" style={{ background: "#fff", paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)" }}>
           <button
             onClick={handleBulkDelete}
             disabled={bulkDeleting}
