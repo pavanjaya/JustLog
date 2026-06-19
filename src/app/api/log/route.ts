@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import Groq from "groq-sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const VALID_CATEGORIES = [
   "Salary",
@@ -170,7 +170,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing text" }, { status: 400, headers: CORS_HEADERS });
   }
 
-  const apiKey = process.env.GROQ_API_KEY ?? "";
+  const apiKey = process.env.GEMINI_API_KEY ?? "";
   const isMock = !apiKey;
 
   if (isMock) {
@@ -180,18 +180,10 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const groq = new Groq({ apiKey });
-
-    const response = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      max_tokens: 1000,
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: text },
-      ],
-    });
-
-    const raw = response.choices[0]?.message?.content ?? "";
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const result = await model.generateContent(`${SYSTEM_PROMPT}\n\nUser input: ${text}`);
+    const raw = result.response.text();
 
     const cleaned = raw.replace(/```json|```/g, "").trim();
     let parsed: unknown;
