@@ -14,7 +14,7 @@ function fmt(date: Date) {
   return date.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
-function SubscriptionCard({ subStatus, validUntil, onUpgrade, onManage }: { subStatus?: string; validUntil?: Date; onUpgrade?: () => void; onManage?: () => void }) {
+function SubscriptionCard({ subStatus, validUntil, subPlan, onUpgrade, onManage }: { subStatus?: string; validUntil?: Date; subPlan?: string; onUpgrade?: () => void; onManage?: () => void }) {
   const days = validUntil ? daysLeft(validUntil) : 0;
 
   if (subStatus === "trialing") {
@@ -125,6 +125,7 @@ interface SettingsViewProps {
   onUpdateSpace?: (id: string, updates: Partial<Space>) => void;
   subStatus?: "active" | "trialing" | "none" | "loading" | "free";
   validUntil?: Date;
+  subPlan?: string;
   onUpgrade?: () => void;
 }
 
@@ -133,7 +134,7 @@ type Sheet = "none" | "profile" | "spaces" | "about" | "privacy" | "terms" | "re
 export default function SettingsView({
   user, spaces, transactions, activeSpace,
   onDeleteAll, onToast, onRenameSpace, onDeleteSpace, onDeleteSpaceData, onUpdateSpace,
-  subStatus = "active", validUntil, onUpgrade,
+  subStatus = "active", validUntil, subPlan, onUpgrade,
 }: SettingsViewProps) {
   const router = useRouter();
   const supabase = createClient();
@@ -253,7 +254,7 @@ export default function SettingsView({
       </div>
 
       {/* Subscription card */}
-      <SubscriptionCard subStatus={subStatus} validUntil={validUntil} onUpgrade={onUpgrade} onManage={() => setSheet("subscription")} />
+      <SubscriptionCard subStatus={subStatus} validUntil={validUntil} subPlan={subPlan} onUpgrade={onUpgrade} onManage={() => setSheet("subscription")} />
 
       {/* Group 1 — data */}
       <SettingsGroup>
@@ -482,7 +483,7 @@ export default function SettingsView({
             <AboutRow label="Status" value={subStatus === "active" ? "Active" : subStatus === "trialing" ? "In Trial" : "Inactive"} />
             {validUntil && subStatus === "active" && <AboutRow label="Renews on" value={fmt(validUntil)} />}
             {validUntil && subStatus === "trialing" && <AboutRow label="Trial ends" value={fmt(validUntil)} />}
-            <AboutRow label="Price" value={subStatus === "active" ? "₹49/month or ₹499/year" : subStatus === "trialing" ? "Free for 7 days" : "Free"} last />
+            <AboutRow label="Price" value={subStatus === "active" ? (subPlan === "yearly" ? "₹499/year" : "₹49/month") : subStatus === "trialing" ? "Free for 7 days" : "Free"} last />
           </div>
 
           {/* What's included */}

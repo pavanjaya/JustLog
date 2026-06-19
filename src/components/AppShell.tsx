@@ -30,6 +30,7 @@ export default function AppShell() {
   const [user, setUser] = useState<User | null>(null);
   const [subStatus, setSubStatus] = useState<SubStatus>("active");
   const [subValidUntil, setSubValidUntil] = useState<Date | null>(null);
+  const [subPlan, setSubPlan] = useState<string>("monthly");
   const [splashDone, setSplashDone] = useState(false);
   const [onboardingDone, setOnboardingDone] = useState(() => {
     if (typeof window === "undefined") return true;
@@ -122,7 +123,7 @@ export default function AppShell() {
   const loadSubscription = useCallback(async (userId: string, userCreatedAt?: string) => {
     const { data } = await supabase
       .from("subscriptions")
-      .select("status, valid_until")
+      .select("status, valid_until, plan")
       .eq("user_id", userId)
       .single();
 
@@ -130,6 +131,7 @@ export default function AppShell() {
       const validUntil = new Date(data.valid_until);
       if (validUntil > new Date()) {
         setSubValidUntil(validUntil);
+        setSubPlan(data.plan ?? "monthly");
         setSubStatus(data.status === "trialing" ? "trialing" : "active");
         return;
       }
@@ -402,6 +404,7 @@ export default function AppShell() {
                 onToast={showToast}
                 subStatus={subStatus}
                 validUntil={subValidUntil ?? undefined}
+                subPlan={subPlan}
                 onUpgrade={() => setSubStatus("none")}
                 onRenameSpace={async (id, name) => {
                   await supabase.from("spaces").update({ name }).eq("id", id);
