@@ -14,6 +14,7 @@ import SettingsView from "@/components/SettingsView";
 import SpaceSwitcher from "@/components/SpaceSwitcher";
 import Toast from "@/components/Toast";
 import PaywallView from "@/components/PaywallView";
+import SplashScreen from "@/components/SplashScreen";
 
 type SubStatus = "loading" | "active" | "trialing" | "none";
 
@@ -27,6 +28,7 @@ export default function AppShell() {
   const [activeSpace, setActiveSpace] = useState<Space | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [subStatus, setSubStatus] = useState<SubStatus>("active");
+  const [splashDone, setSplashDone] = useState(false);
   const ensureDefaultSpaceRunning = useRef(false);
   const personalSpaceId = useRef<string | null>(null);
   const [spaceLoading, setSpaceLoading] = useState(false);
@@ -261,6 +263,7 @@ export default function AppShell() {
       className="flex flex-col max-w-[430px] mx-auto relative"
       style={{ height: "100dvh", background: "var(--md-surface)" }}
     >
+      {!splashDone && <SplashScreen onDone={() => setSplashDone(true)} />}
       <Drawer
         open={drawerOpen}
         view={view}
