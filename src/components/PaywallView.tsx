@@ -82,6 +82,22 @@ export default function PaywallView({ userId, onSuccess, onContinueFree, trialEx
   const [loading, setLoading] = useState(false);
   const [plan, setPlan] = useState<"monthly" | "yearly">("yearly");
 
+  // New user — start free trial (no payment)
+  async function handleStartTrial() {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/subscription/trial", { method: "POST" });
+      const result = await res.json();
+      if (result.success) onSuccess();
+      else alert("Could not start trial. Please try again.");
+    } catch {
+      alert("Something went wrong. Try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Trial expired — pay now via Razorpay
   async function handleSubscribe() {
     setLoading(true);
     try {
@@ -148,10 +164,12 @@ export default function PaywallView({ userId, onSuccess, onContinueFree, trialEx
       <div className="flex flex-col items-center px-6 pt-8 pb-5 text-center">
         <img src="/logo.svg" alt="JustLog" className="h-9 mb-5" />
         <h1 className="text-[22px] font-bold tracking-tight leading-snug mb-2" style={{ color: "var(--md-on-surface)" }}>
-          Your personal finance journal
+          {trialExpired ? "Continue with JustLog Pro" : "Your personal finance journal"}
         </h1>
         <p className="text-[13px] leading-relaxed" style={{ color: "var(--md-on-surface-variant)" }}>
-          Log expenses and income in seconds. Let AI do the analysis.
+          {trialExpired
+            ? "Pick a plan to keep your data and access all features."
+            : "Log expenses and income in seconds. Let AI do the analysis."}
         </p>
       </div>
 
@@ -165,55 +183,56 @@ export default function PaywallView({ userId, onSuccess, onContinueFree, trialEx
         ))}
       </div>
 
-      {/* Plan toggle */}
-      <div className="mx-4 mb-4 rounded-[14px] p-1 flex" style={{ background: "var(--md-surface-container-low)" }}>
-        <button
-          onClick={() => setPlan("monthly")}
-          className="flex-1 py-2.5 rounded-[10px] text-[13px] font-medium transition-colors"
-          style={{
-            background: plan === "monthly" ? "var(--md-surface)" : "transparent",
-            color: plan === "monthly" ? "var(--md-on-surface)" : "var(--md-on-surface-variant)",
-            boxShadow: plan === "monthly" ? "0 1px 4px rgba(0,0,0,0.1)" : "none",
-          }}
-        >
-          ₹49 / month
-        </button>
-        <button
-          onClick={() => setPlan("yearly")}
-          className="flex-1 py-2.5 rounded-[10px] text-[13px] font-medium transition-colors relative"
-          style={{
-            background: plan === "yearly" ? "var(--md-surface)" : "transparent",
-            color: plan === "yearly" ? "var(--md-on-surface)" : "var(--md-on-surface-variant)",
-            boxShadow: plan === "yearly" ? "0 1px 4px rgba(0,0,0,0.1)" : "none",
-          }}
-        >
-          ₹499 / year
-          <span
-            className="absolute -top-2 right-3 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-            style={{ background: "#FF6B35", color: "#fff" }}
+      {/* Plan toggle — only shown when paying */}
+      {trialExpired && (
+        <div className="mx-4 mb-4 rounded-[14px] p-1 flex" style={{ background: "var(--md-surface-container-low)" }}>
+          <button
+            onClick={() => setPlan("monthly")}
+            className="flex-1 py-2.5 rounded-[10px] text-[13px] font-medium transition-colors"
+            style={{
+              background: plan === "monthly" ? "var(--md-surface)" : "transparent",
+              color: plan === "monthly" ? "var(--md-on-surface)" : "var(--md-on-surface-variant)",
+              boxShadow: plan === "monthly" ? "0 1px 4px rgba(0,0,0,0.1)" : "none",
+            }}
           >
-            -15%
-          </span>
-        </button>
-      </div>
+            ₹49 / month
+          </button>
+          <button
+            onClick={() => setPlan("yearly")}
+            className="flex-1 py-2.5 rounded-[10px] text-[13px] font-medium transition-colors relative"
+            style={{
+              background: plan === "yearly" ? "var(--md-surface)" : "transparent",
+              color: plan === "yearly" ? "var(--md-on-surface)" : "var(--md-on-surface-variant)",
+              boxShadow: plan === "yearly" ? "0 1px 4px rgba(0,0,0,0.1)" : "none",
+            }}
+          >
+            ₹499 / year
+            <span className="absolute -top-2 right-3 text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "#FF6B35", color: "#fff" }}>
+              -15%
+            </span>
+          </button>
+        </div>
+      )}
 
-      {/* Trial info */}
-      <div className="mx-4 mb-5 rounded-[14px] px-4 py-3.5 flex items-start gap-3" style={{ background: "rgba(200,49,255,0.05)", border: "1px solid rgba(200,49,255,0.12)" }}>
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--md-primary)" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 mt-0.5">
-          <polyline points="20 6 9 17 4 12"/>
-        </svg>
-        <div>
-          <div className="text-[13px] font-semibold mb-0.5" style={{ color: "var(--md-primary)" }}>7-day free trial — no charge today</div>
-          <div className="text-[12px] leading-relaxed" style={{ color: "var(--md-on-surface-variant)" }}>
-            Cancel before your trial ends and you won't be charged.
+      {/* Trial info — only for new users */}
+      {!trialExpired && (
+        <div className="mx-4 mb-5 rounded-[14px] px-4 py-3.5 flex items-start gap-3" style={{ background: "rgba(200,49,255,0.05)", border: "1px solid rgba(200,49,255,0.12)" }}>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--md-primary)" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 mt-0.5">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          <div>
+            <div className="text-[13px] font-semibold mb-0.5" style={{ color: "var(--md-primary)" }}>7-day free trial — no payment needed</div>
+            <div className="text-[12px] leading-relaxed" style={{ color: "var(--md-on-surface-variant)" }}>
+              Try all Pro features free. After 7 days, choose a plan or continue with the Free tier.
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* CTA */}
       <div className="mx-4 flex flex-col gap-3">
         <button
-          onClick={handleSubscribe}
+          onClick={trialExpired ? handleSubscribe : handleStartTrial}
           disabled={loading}
           className="w-full py-3.5 rounded-[14px] text-[14px] font-semibold flex items-center justify-center gap-2 active:opacity-80"
           style={{ background: "var(--md-primary)", color: "#fff", opacity: loading ? 0.7 : 1 }}
@@ -224,13 +243,15 @@ export default function PaywallView({ userId, onSuccess, onContinueFree, trialEx
                 <circle cx="12" cy="12" r="10" strokeOpacity={0.25}/>
                 <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round"/>
               </svg>
-              Opening checkout…
+              {trialExpired ? "Opening checkout…" : "Starting trial…"}
             </>
-          ) : "Start 7-day free trial"}
+          ) : trialExpired
+            ? `Subscribe · ${plan === "yearly" ? "₹499/year" : "₹49/month"}`
+            : "Start 7-day free trial"}
         </button>
 
         <p className="text-[11px] text-center" style={{ color: "var(--md-outline)" }}>
-          Secured by Razorpay · Cancel anytime
+          {trialExpired ? "Secured by Razorpay · Cancel anytime" : "No credit card required · Cancel anytime"}
         </p>
 
         {onContinueFree && (

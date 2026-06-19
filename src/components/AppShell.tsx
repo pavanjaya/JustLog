@@ -124,7 +124,7 @@ export default function AppShell() {
     }
   }, [supabase, loadSpaces]);
 
-  const loadSubscription = useCallback(async (userId: string, userCreatedAt?: string) => {
+  const loadSubscription = useCallback(async (userId: string) => {
     const { data } = await supabase
       .from("subscriptions")
       .select("status, valid_until, plan")
@@ -133,7 +133,7 @@ export default function AppShell() {
 
     if (data) {
       const validUntil = new Date(data.valid_until);
-      if (validUntil > new Date()) {
+      if (validUntil > new Date() && data.status !== "cancelled") {
         setSubValidUntil(validUntil);
         setSubPlan(data.plan ?? "monthly");
         setSubStatus(data.status === "trialing" ? "trialing" : "active");
@@ -141,23 +141,7 @@ export default function AppShell() {
       }
     }
 
-    // Auto-grant 7-day trial for new users
-    if (userCreatedAt) {
-      const createdAt = new Date(userCreatedAt);
-      const trialEnd = new Date(createdAt.getTime() + 7 * 24 * 60 * 60 * 1000);
-      if (trialEnd > new Date()) {
-        await supabase.from("subscriptions").upsert({
-          user_id: userId,
-          plan: "trial",
-          status: "trialing",
-          valid_until: trialEnd.toISOString(),
-        }, { onConflict: "user_id" });
-        setSubValidUntil(trialEnd);
-        setSubStatus("trialing");
-        return;
-      }
-    }
-
+    // No subscription or expired — show paywall
     setSubStatus("none");
   }, [supabase]);
 
@@ -214,7 +198,7 @@ export default function AppShell() {
         const allSpaces = await loadSpaces(user.id);
         await loadTransactions(space.id, allSpaces);
         setSpaceLoading(false);
-        await loadSubscription(user.id, user.created_at);
+        await loadSubscription(user.id);
       } else {
         setSpaceLoading(false);
         setSubStatus("none");
@@ -231,7 +215,7 @@ export default function AppShell() {
         setActiveSpace(space);
         const allSpaces = await loadSpaces(session.user.id);
         await loadTransactions(space.id, allSpaces);
-        await loadSubscription(session.user.id, session.user.created_at);
+        await loadSubscription(session.user.id);
       } else {
         setSubStatus("none");
         router.replace("/login");
@@ -304,7 +288,7 @@ export default function AppShell() {
   }
 
   async function handleSubscribeSuccess() {
-    if (user) await loadSubscription(user.id, user.created_at);
+    if (user) await loadSubscription(user.id);
   }
 
   const isPro = subStatus === "active" || subStatus === "trialing";
@@ -374,7 +358,7 @@ export default function AppShell() {
             userId={user.id}
             onSuccess={handleSubscribeSuccess}
             onContinueFree={() => setSubStatus("free")}
-            trialExpired={true}
+            trialExpired={false}
           />
         )}
 
