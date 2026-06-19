@@ -40,9 +40,9 @@ Rules:
 - PERSON vs EMPLOYER: If the text says "from [human name]" (e.g. "from Rohit", "from Amol", "from Dipesh", "from Priya") → category MUST be "Transfer". "Salary" is ONLY for employer payments using words like "salary", "stipend", "paycheck". A person's name after "from" is NEVER Salary — always Transfer.
 - SALARY vs TRANSFER: "salary", "stipend", "paycheck" keywords = "Salary". "from [person name]" = "Transfer". NEVER mix these up.
 - DESCRIPTION: ALWAYS fix spelling mistakes before writing the description. Use your language knowledge to correct ANY misspelling — do not copy the user's spelling. Examples: "cofee"→"Coffee", "icecreame"→"Ice Cream", "restraunt"→"Restaurant", "medecine"→"Medicine", "statinory"→"Stationery", "pomogranade"→"Pomegranate", "brocolli"→"Broccoli". Use clean title case. Do NOT include the amount. Preserve meaningful words like "Loan", "Rent", "Fee".
+- *** MOST IMPORTANT RULE ***: "from [human name]" patterns like "500 from Rohit", "from Amol", "from Dipesh", "4k from Priya" → category = "Transfer". This overrides EVERYTHING including income type detection. These are person-to-person money transfers, NOT salary.
 - CATEGORY PRIORITY (higher rules override lower ones):
-  1. loan/borrowed/lent/gave loan/given to [person]/gave to [person]/paid to [person] = "Transfer" (HIGHEST PRIORITY — overrides all other rules)
-  1b. "[amount] from [person name]" / "from [person]" / "received from [person]" = "Transfer" (person sending money, NOT salary)
+  1. loan/borrowed/lent/gave loan/given to [person]/gave to [person]/paid to [person] OR "from [person name]" = "Transfer" (HIGHEST PRIORITY — overrides all other rules)
   2. chai/tea/coffee/food/lunch/dinner/breakfast/snack/restaurant/swiggy/zomato = "Food & Drinks"
   3. grocery/groceries/vegetables/fruits/milk/apple/banana/mango/pomegranate/tomato/onion/potato/rice/dal/bread/eggs = "Groceries"
   4. uber/ola/petrol/fuel/auto/bus/metro = "Transport"
@@ -136,7 +136,8 @@ function mockParse(text: string): ParsedTx[] {
     for (const [keyword, cat] of Object.entries(CATEGORY_MAP)) {
       if (lower.includes(keyword)) { category = cat; break; }
     }
-    if (isIncome && category === "Other") category = "Salary";
+    if (lower.match(/from\s+[a-z]/)) category = "Transfer";
+    else if (isIncome && category === "Other") category = "Salary";
 
     const description = seg.replace(/\d+(\.\d+)?/g, "").replace(/[₹$]/g, "").trim()
       .split(" ").filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") || "Transaction";
