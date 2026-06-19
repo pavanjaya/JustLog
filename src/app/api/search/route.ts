@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import Groq from "groq-sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { Transaction } from "@/types";
 
 const SYSTEM_PROMPT = `You are JustLog's search assistant. The user has logged transaction data and wants to query it in natural language.
@@ -34,35 +34,29 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing transactions" }, { status: 400, headers: CORS_HEADERS });
   }
 
-  const apiKey = process.env.GROQ_API_KEY ?? "";
+  const apiKey = process.env.GEMINI_API_KEY ?? "";
   if (!apiKey) {
     return NextResponse.json({ answer: "Search requires an AI key — not configured yet." }, { headers: CORS_HEADERS });
   }
 
   try {
-    const groq = new Groq({ apiKey });
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-    // Summarise transactions to keep token count low
     const txSummary = transactions.slice(-200).map(tx =>
       `${tx.created_at.slice(0, 10)} | ${tx.type} | ${tx.category} | ${tx.description} | ₹${tx.amount}`
     ).join("\n");
 
-    const response = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      max_tokens: 300,
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: `Transactions:\n${txSummary}\n\nQuestion: ${query}` },
-      ],
-    });
-
-    const answer = response.choices[0]?.message?.content ?? "No answer found.";
+    const response = await model.generateContent(
+      `${SYSTEM_PROMPT}\n\nTransactions:\n${txSummary}\n\nQuestion: ${query}`
+    );
+    const answer = response.response.text() || "No answer found.";
 
     return NextResponse.json({ answer }, { headers: CORS_HEADERS });
   } catch (err) {
     console.error("AI search error:", err);
     const msg = err instanceof Error ? err.message : "";
-    const friendly = msg.includes("rate_limit") || msg.includes("429")
+    const friendly = msg.includes("rate_limit") || msg.includes("429") || msg.includes("RESOURCE_EXHAUSTED")
       ? "AI search is temporarily unavailable (daily limit reached). Try again in a few minutes."
       : "Couldn't process that right now.";
     return NextResponse.json({ error: friendly }, { status: 500, headers: CORS_HEADERS });
