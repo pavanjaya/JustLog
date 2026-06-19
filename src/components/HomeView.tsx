@@ -131,9 +131,8 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
       const wordRaw = ambiguousMatch[1].match(/\d/) ? ambiguousMatch[2] : ambiguousMatch[1];
       const word = wordRaw.toLowerCase();
       const isKnownWord = KNOWN_WORDS.includes(word);
-      // Only clarify if the word starts with uppercase (likely a proper name) or matches a known name pattern
-      const looksLikeName = wordRaw[0] === wordRaw[0].toUpperCase() && wordRaw[0] !== wordRaw[0].toLowerCase();
-      if (!hasDirection && !isKnownWord && looksLikeName) {
+      // Clarify for any unknown word paired with amount (could be person/company/bank name)
+      if (!hasDirection && !isKnownWord) {
         const numStr = ambiguousMatch[1].match(/\d/) ? ambiguousMatch[1] : ambiguousMatch[2];
         const name = ambiguousMatch[1].match(/\d/) ? ambiguousMatch[2] : ambiguousMatch[1];
         const raw = numStr.toLowerCase();
