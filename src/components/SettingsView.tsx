@@ -160,6 +160,7 @@ export default function SettingsView({
   const [spacePeopleCount, setSpacePeopleCount] = useState(1);
   const [showPinPad, setShowPinPad] = useState(false);
   const [showExportSheet, setShowExportSheet] = useState(false);
+  const [exportRange, setExportRange] = useState<"this-month" | "last-month" | "3-months" | "all">("this-month");
   const fileRef = useRef<HTMLInputElement>(null);
 
   const initials = nameVal.charAt(0).toUpperCase();
@@ -193,10 +194,21 @@ export default function SettingsView({
     setSaving(false);
   }
 
+  function getFilteredTransactions() {
+    const now = new Date();
+    const start = new Date();
+    if (exportRange === "this-month") { start.setDate(1); start.setHours(0,0,0,0); }
+    else if (exportRange === "last-month") { start.setMonth(now.getMonth() - 1, 1); start.setHours(0,0,0,0); now.setDate(0); }
+    else if (exportRange === "3-months") { start.setMonth(now.getMonth() - 3, 1); start.setHours(0,0,0,0); }
+    else return transactions;
+    return transactions.filter(tx => new Date(tx.created_at) >= start && new Date(tx.created_at) <= now);
+  }
+
   function handleExportCSV() {
-    if (!transactions.length) { onToast("No transactions to export"); return; }
+    const txs = getFilteredTransactions();
+    if (!txs.length) { onToast("No transactions in this period"); return; }
     const header = "Date,Type,Category,Description,Amount";
-    const rows = transactions.map((tx) => {
+    const rows = txs.map((tx) => {
       const d = new Date(tx.created_at).toLocaleDateString("en-IN");
       return `${d},${tx.type},${tx.category},"${tx.description}",${tx.amount}`;
     });
@@ -213,20 +225,21 @@ export default function SettingsView({
   }
 
   function handleExportPDF() {
-    if (!transactions.length) { onToast("No transactions to export"); return; }
+    const txs = getFilteredTransactions();
+    if (!txs.length) { onToast("No transactions in this period"); return; }
     const spaceName = activeSpace?.name ?? "Personal";
     const dateStr = new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
 
     // Group by month
-    const grouped: Record<string, typeof transactions> = {};
-    transactions.forEach((tx) => {
+    const grouped: Record<string, typeof txs> = {};
+    txs.forEach((tx) => {
       const key = new Date(tx.created_at).toLocaleDateString("en-IN", { month: "long", year: "numeric" });
       if (!grouped[key]) grouped[key] = [];
       grouped[key].push(tx);
     });
 
-    const totalIncome = transactions.filter(t => t.type === "income").reduce((s, t) => s + t.amount, 0);
-    const totalExpense = transactions.filter(t => t.type === "expense").reduce((s, t) => s + t.amount, 0);
+    const totalIncome = txs.filter(t => t.type === "income").reduce((s, t) => s + t.amount, 0);
+    const totalExpense = txs.filter(t => t.type === "expense").reduce((s, t) => s + t.amount, 0);
     const balance = totalIncome - totalExpense;
 
     const monthSections = Object.entries(grouped).map(([month, txs]) => {
@@ -275,7 +288,7 @@ export default function SettingsView({
       </style></head><body>
       <div class="header">
         <div><div class="logo">JustLog</div><div style="font-size:12px;color:#666;margin-top:2px">${spaceName} space</div></div>
-        <div class="meta">Generated on ${dateStr}<br>${transactions.length} transactions</div>
+        <div class="meta">Generated on ${dateStr}<br>${txs.length} transactions</div>
       </div>
       <div class="summary">
         <div class="summary-card"><div class="label">Total Income</div><div class="value" style="color:#16a34a">₹${totalIncome.toLocaleString("en-IN")}</div></div>
@@ -659,7 +672,22 @@ export default function SettingsView({
         <div className="fixed bottom-0 left-0 right-0 z-[900] max-w-[430px] mx-auto rounded-t-[28px] p-6 flex flex-col gap-4" style={{ background: "var(--md-surface)", paddingBottom: "calc(env(safe-area-inset-bottom,0px) + 24px)" }}>
           <div className="w-9 h-1 rounded-full mx-auto mb-2" style={{ background: "var(--md-outline-variant)" }} />
           <div className="text-[17px] font-semibold" style={{ color: "var(--md-on-surface)" }}>Export Data</div>
-          <div className="text-[13px]" style={{ color: "var(--md-on-surface-variant)" }}>{transactions.length} transactions · {activeSpace?.name}</div>
+          <div className="text-[13px]" style={{ color: "var(--md-on-surface-variant)" }}>{activeSpace?.name}</div>
+
+          {/* Range selector */}
+          <div className="flex gap-2 flex-wrap">
+            {(["this-month", "last-month", "3-months", "all"] as const).map((r) => {
+              const labels = { "this-month": "This month", "last-month": "Last month", "3-months": "Last 3 months", "all": "All time" };
+              const active = exportRange === r;
+              return (
+                <button key={r} onClick={() => setExportRange(r)}
+                  className="px-3 py-1.5 rounded-full text-[12px] font-medium"
+                  style={{ background: active ? "var(--md-primary)" : "var(--md-surface-container)", color: active ? "#fff" : "var(--md-on-surface-variant)" }}>
+                  {labels[r]}
+                </button>
+              );
+            })}
+          </div>
 
           {/* PDF */}
           <button onClick={handleExportPDF} className="w-full flex items-center gap-4 px-4 py-4 rounded-[16px] text-left active:opacity-80" style={{ background: "var(--md-primary)", color: "#fff" }}>
