@@ -242,7 +242,8 @@ export default function AppShell() {
   }, [ensureDefaultSpace, loadTransactions, loadSubscription, supabase]);
 
   async function handleSwitchSpace(space: Space, allSpaces?: Space[], bypassPin = false) {
-    if (!bypassPin && space.pin_hash && !unlockedSpaces.has(space.id)) {
+    const isPersonal = (allSpaces ?? spaces).indexOf(space) === 0 || space.id === personalSpaceId.current;
+    if (!bypassPin && !isPersonal && space.pin_hash && !unlockedSpaces.has(space.id)) {
       setPendingSpace(space);
       return;
     }
