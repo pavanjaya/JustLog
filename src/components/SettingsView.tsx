@@ -159,6 +159,7 @@ export default function SettingsView({
   const [spaceIncludePersonal, setSpaceIncludePersonal] = useState(false);
   const [spacePeopleCount, setSpacePeopleCount] = useState(1);
   const [showPinPad, setShowPinPad] = useState(false);
+  const [showExportSheet, setShowExportSheet] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const initials = nameVal.charAt(0).toUpperCase();
@@ -192,7 +193,7 @@ export default function SettingsView({
     setSaving(false);
   }
 
-  function handleExport() {
+  function handleExportCSV() {
     if (!transactions.length) { onToast("No transactions to export"); return; }
     const header = "Date,Type,Category,Description,Amount";
     const rows = transactions.map((tx) => {
@@ -207,7 +208,90 @@ export default function SettingsView({
     a.download = `justlog-${activeSpace?.name ?? "export"}-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    onToast("Exported successfully");
+    setShowExportSheet(false);
+    onToast("CSV exported");
+  }
+
+  function handleExportPDF() {
+    if (!transactions.length) { onToast("No transactions to export"); return; }
+    const spaceName = activeSpace?.name ?? "Personal";
+    const dateStr = new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+
+    // Group by month
+    const grouped: Record<string, typeof transactions> = {};
+    transactions.forEach((tx) => {
+      const key = new Date(tx.created_at).toLocaleDateString("en-IN", { month: "long", year: "numeric" });
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(tx);
+    });
+
+    const totalIncome = transactions.filter(t => t.type === "income").reduce((s, t) => s + t.amount, 0);
+    const totalExpense = transactions.filter(t => t.type === "expense").reduce((s, t) => s + t.amount, 0);
+    const balance = totalIncome - totalExpense;
+
+    const monthSections = Object.entries(grouped).map(([month, txs]) => {
+      const mIncome = txs.filter(t => t.type === "income").reduce((s, t) => s + t.amount, 0);
+      const mExpense = txs.filter(t => t.type === "expense").reduce((s, t) => s + t.amount, 0);
+      const rows = txs.map(tx => `
+        <tr>
+          <td>${new Date(tx.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</td>
+          <td>${tx.description}</td>
+          <td>${tx.category}</td>
+          <td style="color:${tx.type === "income" ? "#16a34a" : "#dc2626"};text-align:right;font-weight:600">
+            ${tx.type === "income" ? "+" : "−"}₹${tx.amount.toLocaleString("en-IN")}
+          </td>
+        </tr>`).join("");
+      return `
+        <div class="month-block">
+          <div class="month-header">
+            <span>${month}</span>
+            <span style="font-size:12px;color:#666">Income ₹${mIncome.toLocaleString("en-IN")} &nbsp;|&nbsp; Expense ₹${mExpense.toLocaleString("en-IN")}</span>
+          </div>
+          <table><thead><tr><th>Date</th><th>Description</th><th>Category</th><th style="text-align:right">Amount</th></tr></thead>
+          <tbody>${rows}</tbody></table>
+        </div>`;
+    }).join("");
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
+      <title>JustLog — ${spaceName}</title>
+      <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: -apple-system, sans-serif; font-size:13px; color:#1a1a1a; padding:32px; }
+        .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; padding-bottom:16px; border-bottom:2px solid #7c3aed; }
+        .logo { font-size:22px; font-weight:700; color:#7c3aed; }
+        .meta { text-align:right; font-size:12px; color:#666; }
+        .summary { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:24px; }
+        .summary-card { padding:12px 16px; border-radius:10px; background:#f5f3ff; }
+        .summary-card .label { font-size:11px; color:#7c3aed; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; }
+        .summary-card .value { font-size:18px; font-weight:700; }
+        .month-block { margin-bottom:20px; }
+        .month-header { display:flex; justify-content:space-between; align-items:center; padding:8px 0; margin-bottom:6px; border-bottom:1px solid #e5e7eb; font-weight:600; font-size:13px; }
+        table { width:100%; border-collapse:collapse; }
+        th { text-align:left; font-size:11px; font-weight:600; color:#666; text-transform:uppercase; letter-spacing:0.4px; padding:6px 8px; border-bottom:1px solid #e5e7eb; }
+        td { padding:7px 8px; border-bottom:1px solid #f3f4f6; font-size:12px; }
+        tr:last-child td { border-bottom:none; }
+        .footer { margin-top:24px; padding-top:12px; border-top:1px solid #e5e7eb; font-size:11px; color:#999; text-align:center; }
+        @media print { body { padding:16px; } }
+      </style></head><body>
+      <div class="header">
+        <div><div class="logo">JustLog</div><div style="font-size:12px;color:#666;margin-top:2px">${spaceName} space</div></div>
+        <div class="meta">Generated on ${dateStr}<br>${transactions.length} transactions</div>
+      </div>
+      <div class="summary">
+        <div class="summary-card"><div class="label">Total Income</div><div class="value" style="color:#16a34a">₹${totalIncome.toLocaleString("en-IN")}</div></div>
+        <div class="summary-card"><div class="label">Total Expense</div><div class="value" style="color:#dc2626">₹${totalExpense.toLocaleString("en-IN")}</div></div>
+        <div class="summary-card"><div class="label">Balance</div><div class="value" style="color:${balance >= 0 ? "#16a34a" : "#dc2626"}">₹${Math.abs(balance).toLocaleString("en-IN")}</div></div>
+      </div>
+      ${monthSections}
+      <div class="footer">Exported from JustLog · justlog.app</div>
+    </body></html>`;
+
+    const win = window.open("", "_blank");
+    if (!win) { onToast("Allow popups to export PDF"); return; }
+    win.document.write(html);
+    win.document.close();
+    setTimeout(() => { win.print(); }, 400);
+    setShowExportSheet(false);
   }
 
   function toggleDarkMode() {
@@ -285,7 +369,7 @@ export default function SettingsView({
 
       {/* Group 1 — data */}
       <SettingsGroup>
-        <SettingsItem icon={<IconExport />} label="Export Data" sublabel={`${transactions.length} transactions`} onClick={handleExport} />
+        <SettingsItem icon={<IconExport />} label="Export Data" sublabel={`${transactions.length} transactions`} onClick={() => { if (!transactions.length) { onToast("No transactions to export"); return; } setShowExportSheet(true); }} />
         <SettingsItem icon={<IconFolders />} label="Manage Spaces" sublabel={`${spaces.length} space${spaces.length !== 1 ? "s" : ""}`} onClick={() => setSheet("spaces")} last />
       </SettingsGroup>
 
@@ -569,6 +653,38 @@ export default function SettingsView({
     </div>
     </div>
 
+    {showExportSheet && (
+      <>
+        <div className="fixed inset-0 z-[800]" style={{ background: "rgba(0,0,0,0.4)" }} onClick={() => setShowExportSheet(false)} />
+        <div className="fixed bottom-0 left-0 right-0 z-[900] max-w-[430px] mx-auto rounded-t-[28px] p-6 flex flex-col gap-4" style={{ background: "var(--md-surface)", paddingBottom: "calc(env(safe-area-inset-bottom,0px) + 24px)" }}>
+          <div className="w-9 h-1 rounded-full mx-auto mb-2" style={{ background: "var(--md-outline-variant)" }} />
+          <div className="text-[17px] font-semibold" style={{ color: "var(--md-on-surface)" }}>Export Data</div>
+          <div className="text-[13px]" style={{ color: "var(--md-on-surface-variant)" }}>{transactions.length} transactions · {activeSpace?.name}</div>
+
+          {/* PDF */}
+          <button onClick={handleExportPDF} className="w-full flex items-center gap-4 px-4 py-4 rounded-[16px] text-left active:opacity-80" style={{ background: "var(--md-primary)", color: "#fff" }}>
+            <div className="w-10 h-10 rounded-[12px] flex items-center justify-center flex-shrink-0" style={{ background: "rgba(255,255,255,0.15)" }}>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            </div>
+            <div>
+              <div className="text-[15px] font-semibold">Download PDF</div>
+              <div className="text-[12px] opacity-80">Beautiful summary, easy to read</div>
+            </div>
+          </button>
+
+          {/* CSV */}
+          <button onClick={handleExportCSV} className="w-full flex items-center gap-4 px-4 py-4 rounded-[16px] text-left active:opacity-80" style={{ background: "var(--md-surface-container-low)", border: "1.5px solid var(--md-outline-variant)" }}>
+            <div className="w-10 h-10 rounded-[12px] flex items-center justify-center flex-shrink-0" style={{ background: "var(--md-surface-container)" }}>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--md-on-surface-variant)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <div>
+              <div className="text-[15px] font-semibold" style={{ color: "var(--md-on-surface)" }}>Export CSV</div>
+              <div className="text-[12px]" style={{ color: "var(--md-on-surface-variant)" }}>For Excel or accounting software</div>
+            </div>
+          </button>
+        </div>
+      </>
+    )}
     {showPinPad && spaceActionTarget && (
       <PinPad
         mode="set"
