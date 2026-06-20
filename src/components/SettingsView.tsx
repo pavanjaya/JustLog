@@ -5,6 +5,7 @@ import type { User } from "@supabase/supabase-js";
 import type { Space, Transaction } from "@/types";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import PinPad from "@/components/PinPad";
 
 function daysLeft(date: Date) {
   return Math.max(0, Math.ceil((date.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
@@ -157,6 +158,7 @@ export default function SettingsView({
   const [confirmAction, setConfirmAction] = useState<null | "clear" | "delete">(null);
   const [spaceIncludePersonal, setSpaceIncludePersonal] = useState(false);
   const [spacePeopleCount, setSpacePeopleCount] = useState(1);
+  const [showPinPad, setShowPinPad] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const initials = nameVal.charAt(0).toUpperCase();
@@ -233,6 +235,7 @@ export default function SettingsView({
   }
 
   return (
+    <>
     <div className="flex-1 flex flex-col" style={{ background: "var(--md-surface)", overflow: "hidden" }}>
       {/* Header */}
       <div
@@ -445,6 +448,32 @@ export default function SettingsView({
                       )}
                     </>
                   )}
+                  {/* PIN management */}
+                  {spaceActionTarget.pin_hash ? (
+                    <>
+                      <ListRow
+                        icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>}
+                        label="Change PIN"
+                        sublabel="Set a new 4-digit PIN"
+                        onClick={() => setShowPinPad(true)}
+                      />
+                      <ListRow
+                        icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>}
+                        label="Remove PIN"
+                        sublabel="Anyone can open this space"
+                        danger
+                        onClick={() => { onUpdateSpace?.(spaceActionTarget!.id, { pin_hash: null }); onToast("PIN removed"); }}
+                      />
+                    </>
+                  ) : (
+                    <ListRow
+                      icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>}
+                      label="Add PIN Lock"
+                      sublabel="Require PIN to open this space"
+                      onClick={() => setShowPinPad(true)}
+                    />
+                  )}
+
                   {confirmAction === "clear" ? (
                     <div className="px-4 py-4"><ConfirmBox message={`Clear all transactions in "${spaceActionTarget.name}"?`} confirmLabel="Yes, Clear" onConfirm={() => { onDeleteSpaceData(spaceActionTarget.id); setConfirmAction(null); setSpaceActionTarget(null); onToast(`"${spaceActionTarget.name}" cleared`); }} onCancel={() => setConfirmAction(null)} /></div>
                   ) : (
@@ -537,6 +566,20 @@ export default function SettingsView({
 
     </div>
     </div>
+
+    {showPinPad && spaceActionTarget && (
+      <PinPad
+        mode="set"
+        spaceName={spaceActionTarget.name}
+        onConfirm={(pinHash) => {
+          onUpdateSpace?.(spaceActionTarget.id, { pin_hash: pinHash });
+          setShowPinPad(false);
+          onToast("PIN saved");
+        }}
+        onClose={() => setShowPinPad(false)}
+      />
+    )}
+    </>
   );
 }
 

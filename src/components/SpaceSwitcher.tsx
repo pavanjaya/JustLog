@@ -215,20 +215,33 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
                   </div>
                 </button>
 
-                {/* PIN input */}
+                {/* PIN input — 4 dot boxes */}
                 {enablePin && (
                   <div className="animate-fade-up">
-                    <input
-                      type="number"
-                      inputMode="numeric"
-                      maxLength={4}
-                      placeholder="Enter 4-digit PIN"
-                      value={pinValue}
-                      onChange={(e) => { const v = e.target.value.replace(/\D/g, "").slice(0,4); setPinValue(v); setPinError(""); }}
-                      className="w-full px-4 py-3 rounded-2xl text-sm outline-none text-center tracking-[0.5em] font-bold"
-                      style={{ background: "var(--md-surface-container-low)", border: `1.5px solid ${pinError ? "var(--md-error)" : "var(--md-outline-variant)"}`, color: "var(--md-on-surface)", letterSpacing: "0.4em" }}
-                    />
-                    {pinError && <div className="text-xs px-1 mt-1" style={{ color: "var(--md-error)" }}>{pinError}</div>}
+                    <div className="flex gap-2 justify-center relative">
+                      {[0,1,2,3].map((i) => (
+                        <div
+                          key={i}
+                          className="w-12 h-12 rounded-[14px] flex items-center justify-center"
+                          style={{ background: "var(--md-surface-container-low)", border: `1.5px solid ${pinError ? "var(--md-error)" : i < pinValue.length ? "var(--md-primary)" : "var(--md-outline-variant)"}` }}
+                        >
+                          <span className="text-[18px] font-bold" style={{ color: "var(--md-on-surface)" }}>
+                            {pinValue[i] ?? ""}
+                          </span>
+                        </div>
+                      ))}
+                      {/* Hidden input to capture keyboard */}
+                      <input
+                        type="tel"
+                        inputMode="numeric"
+                        maxLength={4}
+                        value={pinValue}
+                        onChange={(e) => { const v = e.target.value.replace(/\D/g, "").slice(0,4); setPinValue(v); setPinError(""); }}
+                        className="absolute inset-0 opacity-0 w-full"
+                        autoFocus={enablePin}
+                      />
+                    </div>
+                    {pinError && <div className="text-xs text-center mt-2" style={{ color: "var(--md-error)" }}>{pinError}</div>}
                   </div>
                 )}
 
