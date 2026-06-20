@@ -467,13 +467,10 @@ export default function AppShell() {
                   await supabase.from("spaces").update({ name }).eq("id", id);
                   setSpaces((prev) => prev.map((s) => s.id === id ? { ...s, name } : s));
                 }}
-                onDeleteSpace={async (id) => {
-                  const deletingSpace = spaces.find((s) => s.id === id);
+                onDeleteSpace={async (id, action = "delete") => {
                   const personalId = personalSpaceId.current;
-                  if (deletingSpace?.include_in_personal && personalId && personalId !== id) {
-                    // Move entries to Personal instead of deleting
+                  if (action === "move" && personalId && personalId !== id) {
                     await supabase.from("transactions").update({ space_id: personalId }).eq("space_id", id);
-                    showToast("Entries moved to Personal");
                   } else {
                     await supabase.from("transactions").delete().eq("space_id", id);
                   }

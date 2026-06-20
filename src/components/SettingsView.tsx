@@ -121,7 +121,7 @@ interface SettingsViewProps {
   onDeleteAll: () => void;
   onToast: (msg: string) => void;
   onRenameSpace: (id: string, name: string) => void;
-  onDeleteSpace: (id: string) => void;
+  onDeleteSpace: (id: string, action?: "move" | "delete") => void;
   onDeleteSpaceData: (id: string) => void;
   onUpdateSpace?: (id: string, updates: Partial<Space>) => void;
   subStatus?: "active" | "trialing" | "none" | "loading" | "free";
@@ -160,6 +160,7 @@ export default function SettingsView({
   const [spacePeopleCount, setSpacePeopleCount] = useState(1);
   const [showPinPad, setShowPinPad] = useState(false);
   const [showExportSheet, setShowExportSheet] = useState(false);
+  const [showDeleteLinkedSheet, setShowDeleteLinkedSheet] = useState(false);
   const [exportRange, setExportRange] = useState<"this-month" | "last-month" | "3-months" | "all">("this-month");
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -328,7 +329,11 @@ export default function SettingsView({
 
   function confirmDeleteSpace(space: Space) {
     if (spaces.length <= 1) { onToast("Can't delete your only space"); return; }
-    setConfirmAction("delete");
+    if (space.include_in_personal) {
+      setShowDeleteLinkedSheet(true);
+    } else {
+      setConfirmAction("delete");
+    }
   }
 
   return (
@@ -579,9 +584,9 @@ export default function SettingsView({
                     <ListRow icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>} label="Clear All Transactions" sublabel="Removes all entries, keeps the space" onClick={() => setConfirmAction("clear")} />
                   )}
                   {confirmAction === "delete" ? (
-                    <div className="px-4 py-4"><ConfirmBox message={spaceActionTarget.include_in_personal ? `Delete "${spaceActionTarget.name}"? It's linked to Personal — all entries will be moved to Personal automatically.` : `Delete "${spaceActionTarget.name}"? All data will be lost.`} confirmLabel="Yes, Delete" danger onConfirm={() => { onDeleteSpace(spaceActionTarget.id); setConfirmAction(null); setSpaceActionTarget(null); onToast(`"${spaceActionTarget.name}" deleted`); }} onCancel={() => setConfirmAction(null)} /></div>
+                    <div className="px-4 py-4"><ConfirmBox message={`Delete "${spaceActionTarget.name}"? All data will be lost.`} confirmLabel="Yes, Delete" danger onConfirm={() => { onDeleteSpace(spaceActionTarget.id); setConfirmAction(null); setSpaceActionTarget(null); onToast(`"${spaceActionTarget.name}" deleted`); }} onCancel={() => setConfirmAction(null)} /></div>
                   ) : spaces.length > 1 && spaceActionTarget.name !== "Personal" ? (
-                    <ListRow icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>} label="Delete Space" danger onClick={() => setConfirmAction("delete")} />
+                    <ListRow icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>} label="Delete Space" danger onClick={() => confirmDeleteSpace(spaceActionTarget)} />
                   ) : null}
                 </div>
               </>
@@ -666,6 +671,64 @@ export default function SettingsView({
     </div>
     </div>
 
+    {showDeleteLinkedSheet && spaceActionTarget && (
+      <>
+        <div className="fixed inset-0 z-[800]" style={{ background: "rgba(0,0,0,0.4)" }} onClick={() => setShowDeleteLinkedSheet(false)} />
+        <div className="fixed bottom-0 left-0 right-0 z-[900] max-w-[430px] mx-auto rounded-t-[28px] p-6 flex flex-col gap-4" style={{ background: "var(--md-surface)", paddingBottom: "calc(env(safe-area-inset-bottom,0px) + 24px)" }}>
+          <div className="w-9 h-1 rounded-full mx-auto mb-2" style={{ background: "var(--md-outline-variant)" }} />
+
+          {/* Header */}
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-[12px] flex items-center justify-center flex-shrink-0" style={{ background: "rgba(200,49,255,0.1)" }}>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--md-primary)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+            </div>
+            <div>
+              <div className="text-[15px] font-semibold" style={{ color: "var(--md-on-surface)" }}>This space is linked to Personal</div>
+              <div className="text-[12px]" style={{ color: "var(--md-on-surface-variant)" }}>Entries from "{spaceActionTarget.name}" are visible in Personal</div>
+            </div>
+          </div>
+
+          <div className="text-[13px]" style={{ color: "var(--md-on-surface-variant)" }}>
+            What should happen to these entries when you delete this space?
+          </div>
+
+          {/* Keep in Personal */}
+          <button
+            onClick={() => { onDeleteSpace(spaceActionTarget.id, "move"); setShowDeleteLinkedSheet(false); setSpaceActionTarget(null); onToast(`"${spaceActionTarget.name}" deleted · Entries kept in Personal`); }}
+            className="w-full flex items-center gap-4 px-4 py-4 rounded-[16px] text-left active:opacity-80"
+            style={{ background: "var(--md-primary)", color: "#fff" }}
+          >
+            <div className="w-10 h-10 rounded-[12px] flex items-center justify-center flex-shrink-0" style={{ background: "rgba(255,255,255,0.15)" }}>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[15px] font-semibold">Keep in Personal</span>
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: "rgba(255,255,255,0.2)" }}>Recommended</span>
+              </div>
+              <div className="text-[12px] opacity-80">Entries stay in Personal history permanently</div>
+            </div>
+          </button>
+
+          {/* Delete everything */}
+          <button
+            onClick={() => { onDeleteSpace(spaceActionTarget.id, "delete"); setShowDeleteLinkedSheet(false); setSpaceActionTarget(null); onToast(`"${spaceActionTarget.name}" deleted`); }}
+            className="w-full flex items-center gap-4 px-4 py-4 rounded-[16px] text-left active:opacity-80"
+            style={{ background: "var(--md-surface-container-low)", border: "1.5px solid var(--md-outline-variant)" }}
+          >
+            <div className="w-10 h-10 rounded-[12px] flex items-center justify-center flex-shrink-0" style={{ background: "var(--md-surface-container)" }}>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--md-error)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+            </div>
+            <div>
+              <div className="text-[15px] font-semibold" style={{ color: "var(--md-on-surface)" }}>Delete everywhere</div>
+              <div className="text-[12px]" style={{ color: "var(--md-on-surface-variant)" }}>Remove entries from Personal and this space</div>
+            </div>
+          </button>
+
+          <button onClick={() => setShowDeleteLinkedSheet(false)} className="text-[13px] text-center py-1" style={{ color: "var(--md-on-surface-variant)" }}>Cancel</button>
+        </div>
+      </>
+    )}
     {showExportSheet && (
       <>
         <div className="fixed inset-0 z-[800]" style={{ background: "rgba(0,0,0,0.4)" }} onClick={() => setShowExportSheet(false)} />
