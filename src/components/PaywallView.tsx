@@ -31,6 +31,7 @@ const FEATURES = [
   { label: "Multiple spaces — personal & business" },
   { label: "AI search — ask anything about your money" },
   { label: "Spaces with mirror-to-personal & shared splits" },
+  { label: "PIN lock — keep sensitive spaces private" },
   { label: "Full history, insights & CSV export" },
 ];
 
