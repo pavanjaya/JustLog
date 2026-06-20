@@ -204,47 +204,6 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
                   </div>
                 </button>
 
-                {/* PIN Lock */}
-                <button type="button" onClick={() => { setEnablePin((v) => !v); setPinValue(""); setPinError(""); }} className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left" style={{ background: enablePin ? "rgba(200,49,255,0.06)" : "var(--md-surface-container-low)", border: `1.5px solid ${enablePin ? "var(--md-primary)" : "transparent"}` }}>
-                  <div className="flex items-center justify-center flex-shrink-0" style={{ width: 18, height: 18, borderRadius: 4, background: enablePin ? "var(--md-primary)" : "transparent", border: `2px solid ${enablePin ? "var(--md-primary)" : "var(--md-outline-variant)"}` }}>
-                    {enablePin && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>PIN Lock</div>
-                    <div className="text-[11px] mt-0.5" style={{ color: "var(--md-on-surface-variant)" }}>Require a 4-digit PIN to open this space</div>
-                  </div>
-                </button>
-
-                {/* PIN input — 4 dot boxes */}
-                {enablePin && (
-                  <div className="animate-fade-up">
-                    <div className="flex gap-2 justify-center relative">
-                      {[0,1,2,3].map((i) => (
-                        <div
-                          key={i}
-                          className="w-12 h-12 rounded-[14px] flex items-center justify-center"
-                          style={{ background: "var(--md-surface-container-low)", border: `1.5px solid ${pinError ? "var(--md-error)" : i < pinValue.length ? "var(--md-primary)" : "var(--md-outline-variant)"}` }}
-                        >
-                          <span className="text-[18px] font-bold" style={{ color: "var(--md-on-surface)" }}>
-                            {pinValue[i] ?? ""}
-                          </span>
-                        </div>
-                      ))}
-                      {/* Hidden input to capture keyboard */}
-                      <input
-                        type="tel"
-                        inputMode="numeric"
-                        maxLength={4}
-                        value={pinValue}
-                        onChange={(e) => { const v = e.target.value.replace(/\D/g, "").slice(0,4); setPinValue(v); setPinError(""); }}
-                        className="absolute inset-0 opacity-0 w-full"
-                        autoFocus={enablePin}
-                      />
-                    </div>
-                    {pinError && <div className="text-xs text-center mt-2" style={{ color: "var(--md-error)" }}>{pinError}</div>}
-                  </div>
-                )}
-
                 {/* People stepper */}
                 {sharedExpense && (
                   <div className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl animate-fade-up" style={{ background: "rgba(200,49,255,0.06)", border: "1.5px solid rgba(200,49,255,0.15)" }}>
@@ -261,6 +220,35 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                       </button>
                     </div>
+                  </div>
+                )}
+
+                {/* PIN Lock */}
+                <button type="button" onClick={() => { setEnablePin((v) => !v); setPinValue(""); setPinError(""); }} className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left" style={{ background: enablePin ? "rgba(200,49,255,0.06)" : "var(--md-surface-container-low)", border: `1.5px solid ${enablePin ? "var(--md-primary)" : "transparent"}` }}>
+                  <div className="flex items-center justify-center flex-shrink-0" style={{ width: 18, height: 18, borderRadius: 4, background: enablePin ? "var(--md-primary)" : "transparent", border: `2px solid ${enablePin ? "var(--md-primary)" : "var(--md-outline-variant)"}` }}>
+                    {enablePin && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>PIN Lock</div>
+                    <div className="text-[11px] mt-0.5" style={{ color: "var(--md-on-surface-variant)" }}>Require a 4-digit PIN to open this space</div>
+                  </div>
+                </button>
+
+                {/* PIN input — 4 visible digit boxes */}
+                {enablePin && (
+                  <div className="animate-fade-up">
+                    <div className="flex gap-2 justify-center relative">
+                      {[0,1,2,3].map((i) => (
+                        <div key={i} className="w-12 h-12 rounded-[14px] flex items-center justify-center"
+                          style={{ background: "var(--md-surface-container-low)", border: `1.5px solid ${pinError ? "var(--md-error)" : i < pinValue.length ? "var(--md-primary)" : "var(--md-outline-variant)"}` }}>
+                          <span className="text-[18px] font-bold" style={{ color: "var(--md-on-surface)" }}>{pinValue[i] ?? ""}</span>
+                        </div>
+                      ))}
+                      <input type="tel" inputMode="numeric" maxLength={4} value={pinValue}
+                        onChange={(e) => { const v = e.target.value.replace(/\D/g, "").slice(0,4); setPinValue(v); setPinError(""); }}
+                        className="absolute inset-0 opacity-0 w-full" autoFocus={enablePin} />
+                    </div>
+                    {pinError && <div className="text-xs text-center mt-2" style={{ color: "var(--md-error)" }}>{pinError}</div>}
                   </div>
                 )}
               </div>
