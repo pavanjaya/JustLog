@@ -37,6 +37,9 @@ export default function AppShell() {
   const [subValidUntil, setSubValidUntil] = useState<Date | null>(null);
   const [subPlan, setSubPlan] = useState<string>("monthly");
   const [splashDone, setSplashDone] = useState(false);
+  const [showNamePrompt, setShowNamePrompt] = useState(false);
+  const [nameInput, setNameInput] = useState("");
+  const [savingName, setSavingName] = useState(false);
   const [pendingSpace, setPendingSpace] = useState<Space | null>(null);
   const [unlockedSpaces, setUnlockedSpaces] = useState<Set<string>>(new Set());
   const [onboardingDone, setOnboardingDone] = useState(() => {
@@ -195,6 +198,9 @@ export default function AppShell() {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       setUser(user);
       if (user) {
+        if (!user.user_metadata?.full_name && !user.email && user.phone) {
+          setShowNamePrompt(true);
+        }
         setSpaceLoading(true);
         const space = await ensureDefaultSpace(user.id);
         setActiveSpace(space);
@@ -235,6 +241,10 @@ export default function AppShell() {
     if (space.pin_hash && !unlockedSpaces.has(space.id)) {
       setPendingSpace(space);
       return;
+    }
+    // Lock previous space when leaving it
+    if (activeSpace?.pin_hash && activeSpace.id !== space.id) {
+      setUnlockedSpaces((prev) => { const next = new Set(prev); next.delete(activeSpace.id); return next; });
     }
     setActiveSpace(space);
     setTransactions([]);
@@ -306,9 +316,18 @@ export default function AppShell() {
   const visibleTransactions = isPro
     ? transactions
     : transactions.filter(tx => new Date(tx.created_at) > new Date(Date.now() - 90 * 24 * 60 * 60 * 1000));
-  const userName = user?.user_metadata?.full_name?.split(" ")[0] ?? user?.email?.split("@")[0];
+  const userName = user?.user_metadata?.full_name?.split(" ")[0] ?? user?.email?.split("@")[0] ?? user?.phone?.slice(-4);
   const avatarUrl = user?.user_metadata?.avatar_url as string | undefined;
-  const userInitial = (user?.user_metadata?.full_name ?? user?.email ?? "?").charAt(0).toUpperCase();
+  const userInitial = (user?.user_metadata?.full_name ?? user?.email ?? user?.phone ?? "?").charAt(0).toUpperCase();
+
+  async function handleSaveName() {
+    if (!nameInput.trim()) return;
+    setSavingName(true);
+    const { data } = await supabase.auth.updateUser({ data: { full_name: nameInput.trim() } });
+    if (data.user) setUser(data.user);
+    setSavingName(false);
+    setShowNamePrompt(false);
+  }
 
   return (
     <div
@@ -316,6 +335,35 @@ export default function AppShell() {
       style={{ height: "100dvh", background: "var(--md-surface)" }}
     >
       {!splashDone && <SplashScreen onDone={() => setSplashDone(true)} />}
+      {showNamePrompt && (
+        <div className="fixed inset-0 flex items-end justify-center z-[900] px-4" style={{ background: "rgba(0,0,0,0.4)" }}>
+          <div className="w-full max-w-[430px] rounded-t-[28px] p-6 pb-10 flex flex-col gap-4" style={{ background: "var(--md-surface)" }}>
+            <div className="text-[20px] font-bold" style={{ color: "var(--md-on-surface)" }}>What should we call you?</div>
+            <div className="text-[14px]" style={{ color: "var(--md-on-surface-variant)" }}>Add your name to personalize JustLog.</div>
+            <input
+              autoFocus
+              type="text"
+              placeholder="Your name"
+              value={nameInput}
+              onChange={(e) => setNameInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSaveName()}
+              className="w-full px-4 py-3.5 rounded-[14px] text-[16px] outline-none"
+              style={{ background: "var(--md-surface-container-low)", border: "1.5px solid var(--md-outline-variant)", color: "var(--md-on-surface)" }}
+            />
+            <button
+              onClick={handleSaveName}
+              disabled={savingName || !nameInput.trim()}
+              className="w-full py-4 rounded-[16px] text-[15px] font-semibold"
+              style={{ background: nameInput.trim() ? "var(--md-primary)" : "var(--md-surface-container-high)", color: nameInput.trim() ? "#fff" : "var(--md-outline)", opacity: savingName ? 0.7 : 1 }}
+            >
+              {savingName ? "Saving…" : "Continue"}
+            </button>
+            <button onClick={() => setShowNamePrompt(false)} className="text-[13px] text-center" style={{ color: "var(--md-on-surface-variant)" }}>
+              Skip for now
+            </button>
+          </div>
+        </div>
+      )}
       {splashDone && !onboardingDone && (
         <OnboardingScreen onDone={() => {
           localStorage.setItem("jl_onboarded", "1");
