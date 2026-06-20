@@ -79,11 +79,13 @@ export default function AppShell() {
           .eq("space_id", space.id)
           .order("created_at", { ascending: true });
         if (linked_data) {
-          const tagged = (linked_data as Transaction[]).map((tx) => ({
-            ...tx,
-            description: space.pin_hash ? "Miscellaneous" : tx.description,
-            spaceName: space.name,
-          }));
+          const tagged = (linked_data as Transaction[])
+            .filter((tx) => tx.type === "expense")
+            .map((tx) => ({
+              ...tx,
+              description: space.pin_hash ? "Miscellaneous" : tx.description,
+              spaceName: space.name,
+            }));
           txs = [...txs, ...tagged];
         }
       }
@@ -466,13 +468,23 @@ export default function AppShell() {
                   setSpaces((prev) => prev.map((s) => s.id === id ? { ...s, name } : s));
                 }}
                 onDeleteSpace={async (id) => {
-                  await supabase.from("transactions").delete().eq("space_id", id);
+                  const deletingSpace = spaces.find((s) => s.id === id);
+                  const personalId = personalSpaceId.current;
+                  if (deletingSpace?.include_in_personal && personalId && personalId !== id) {
+                    // Move entries to Personal instead of deleting
+                    await supabase.from("transactions").update({ space_id: personalId }).eq("space_id", id);
+                    showToast("Entries moved to Personal");
+                  } else {
+                    await supabase.from("transactions").delete().eq("space_id", id);
+                  }
                   await supabase.from("spaces").delete().eq("id", id);
                   const remaining = spaces.filter((s) => s.id !== id);
                   setSpaces(remaining);
                   if (activeSpace?.id === id && remaining.length > 0) {
                     setActiveSpace(remaining[0]);
                     await loadTransactions(remaining[0].id);
+                  } else if (activeSpace?.id === personalId) {
+                    await loadTransactions(personalId, remaining);
                   }
                 }}
                 onDeleteSpaceData={async (id) => {
