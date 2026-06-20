@@ -237,8 +237,8 @@ export default function AppShell() {
     };
   }, [ensureDefaultSpace, loadTransactions, loadSubscription, supabase]);
 
-  async function handleSwitchSpace(space: Space, allSpaces?: Space[]) {
-    if (space.pin_hash && !unlockedSpaces.has(space.id)) {
+  async function handleSwitchSpace(space: Space, allSpaces?: Space[], bypassPin = false) {
+    if (!bypassPin && space.pin_hash && !unlockedSpaces.has(space.id)) {
       setPendingSpace(space);
       return;
     }
@@ -496,7 +496,7 @@ export default function AppShell() {
             setUnlockedSpaces((prev) => new Set([...prev, pendingSpace.id]));
             const space = pendingSpace;
             setPendingSpace(null);
-            handleSwitchSpace(space);
+            handleSwitchSpace(space, undefined, true);
           }}
           onClose={() => setPendingSpace(null)}
         />
