@@ -183,7 +183,7 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
             {showMore && (
               <div className="flex flex-col gap-2 mt-1 animate-fade-up">
                 {/* Include in Personal */}
-                <button type="button" onClick={() => setIncludeInPersonal((v) => !v)} className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left" style={{ background: includeInPersonal ? "rgba(200,49,255,0.06)" : "var(--md-surface-container-low)", border: `1.5px solid ${includeInPersonal ? "var(--md-primary)" : "transparent"}` }}>
+                <button type="button" onClick={() => { setIncludeInPersonal((v) => !v); setSharedExpense(false); }} className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left" style={{ background: includeInPersonal ? "rgba(200,49,255,0.06)" : "var(--md-surface-container-low)", border: `1.5px solid ${includeInPersonal ? "var(--md-primary)" : "transparent"}` }}>
                   <div className="flex items-center justify-center flex-shrink-0" style={{ width: 18, height: 18, borderRadius: 4, background: includeInPersonal ? "var(--md-primary)" : "transparent", border: `2px solid ${includeInPersonal ? "var(--md-primary)" : "var(--md-outline-variant)"}` }}>
                     {includeInPersonal && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
                   </div>
@@ -194,7 +194,7 @@ export default function SpaceSwitcher({ open, spaces, activeSpaceId, onSwitch, o
                 </button>
 
                 {/* Shared Expense */}
-                <button type="button" onClick={() => setSharedExpense((v) => !v)} className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left" style={{ background: sharedExpense ? "rgba(200,49,255,0.06)" : "var(--md-surface-container-low)", border: `1.5px solid ${sharedExpense ? "var(--md-primary)" : "transparent"}` }}>
+                <button type="button" onClick={() => { setSharedExpense((v) => !v); setIncludeInPersonal(false); }} className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left" style={{ background: sharedExpense ? "rgba(200,49,255,0.06)" : "var(--md-surface-container-low)", border: `1.5px solid ${sharedExpense ? "var(--md-primary)" : "transparent"}` }}>
                   <div className="flex items-center justify-center flex-shrink-0" style={{ width: 18, height: 18, borderRadius: 4, background: sharedExpense ? "var(--md-primary)" : "transparent", border: `2px solid ${sharedExpense ? "var(--md-primary)" : "var(--md-outline-variant)"}` }}>
                     {sharedExpense && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
                   </div>
