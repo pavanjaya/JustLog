@@ -79,7 +79,11 @@ export default function AppShell() {
           .eq("space_id", space.id)
           .order("created_at", { ascending: true });
         if (linked_data) {
-          const tagged = (linked_data as Transaction[]).map((tx) => ({ ...tx, spaceName: space.name }));
+          const tagged = (linked_data as Transaction[]).map((tx) => ({
+            ...tx,
+            description: space.pin_hash ? "Miscellaneous" : tx.description,
+            spaceName: space.name,
+          }));
           txs = [...txs, ...tagged];
         }
       }
