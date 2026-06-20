@@ -464,9 +464,20 @@ export default function SettingsView({
                     <SpaceIcon icon={sp.icon} size={16} color={sp.id === activeSpace?.id ? "#fff" : "var(--md-on-surface-variant)"} />
                   </div>
                   <span className="flex-1 text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>{sp.name}</span>
-                  {sp.id === activeSpace?.id && (
-                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: "#E8F5E9", color: "#2E7D32" }}>Active</span>
-                  )}
+                  <div className="flex items-center gap-1.5">
+                    {sp.include_in_personal && (
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--md-on-surface-variant)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+                    )}
+                    {sp.people_count > 1 && (
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--md-on-surface-variant)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                    )}
+                    {sp.pin_hash && (
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--md-on-surface-variant)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                    )}
+                    {sp.id === activeSpace?.id && (
+                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full" style={{ background: "#E8F5E9", color: "#2E7D32" }}>Active</span>
+                    )}
+                  </div>
                   <Chevron />
                 </button>
               ))}
