@@ -449,29 +449,31 @@ export default function SettingsView({
                     </>
                   )}
                   {/* PIN management */}
-                  {spaceActionTarget.pin_hash ? (
-                    <>
+                  {spaceActionTarget.name !== "Personal" && (
+                    spaceActionTarget.pin_hash ? (
+                      <>
+                        <ListRow
+                          icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>}
+                          label="Change PIN"
+                          sublabel="Set a new 4-digit PIN"
+                          onClick={() => setShowPinPad(true)}
+                        />
+                        <ListRow
+                          icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>}
+                          label="Remove PIN"
+                          sublabel="Anyone can open this space"
+                          danger
+                          onClick={() => { onUpdateSpace?.(spaceActionTarget!.id, { pin_hash: null }); onToast("PIN removed"); }}
+                        />
+                      </>
+                    ) : (
                       <ListRow
                         icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>}
-                        label="Change PIN"
-                        sublabel="Set a new 4-digit PIN"
+                        label="Add PIN Lock"
+                        sublabel="Require PIN to open this space"
                         onClick={() => setShowPinPad(true)}
                       />
-                      <ListRow
-                        icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>}
-                        label="Remove PIN"
-                        sublabel="Anyone can open this space"
-                        danger
-                        onClick={() => { onUpdateSpace?.(spaceActionTarget!.id, { pin_hash: null }); onToast("PIN removed"); }}
-                      />
-                    </>
-                  ) : (
-                    <ListRow
-                      icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>}
-                      label="Add PIN Lock"
-                      sublabel="Require PIN to open this space"
-                      onClick={() => setShowPinPad(true)}
-                    />
+                    )
                   )}
 
                   {confirmAction === "clear" ? (
