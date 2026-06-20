@@ -679,17 +679,13 @@ export default function SettingsView({
 
           {/* Header */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-[12px] flex items-center justify-center flex-shrink-0" style={{ background: "rgba(200,49,255,0.1)" }}>
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--md-primary)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+            <div className="w-10 h-10 rounded-[12px] flex items-center justify-center flex-shrink-0" style={{ background: "rgba(220,38,38,0.1)" }}>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--md-error)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
             </div>
             <div>
-              <div className="text-[15px] font-semibold" style={{ color: "var(--md-on-surface)" }}>This space is linked to Personal</div>
-              <div className="text-[12px]" style={{ color: "var(--md-on-surface-variant)" }}>Entries from "{spaceActionTarget.name}" are visible in Personal</div>
+              <div className="text-[15px] font-semibold" style={{ color: "var(--md-on-surface)" }}>Delete "{spaceActionTarget.name}"?</div>
+              <div className="text-[12px]" style={{ color: "var(--md-on-surface-variant)" }}>This space is linked to Personal. What happens to its entries?</div>
             </div>
-          </div>
-
-          <div className="text-[13px]" style={{ color: "var(--md-on-surface-variant)" }}>
-            What should happen to these entries when you delete this space?
           </div>
 
           {/* Keep in Personal */}
