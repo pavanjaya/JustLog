@@ -67,6 +67,8 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
   const [ripple, setRipple] = useState(false);
   const [focused, setFocused] = useState(false);
   const recognitionRef = useRef<{ stop: () => void } | null>(null);
+  const nativeListenerRef = useRef<{ remove: () => void } | null>(null);
+  const nativeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const suggestions = useMemo(() => getSmartSuggestions(transactions), [transactions]);
 
   useEffect(() => {
@@ -115,8 +117,11 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
   async function toggleVoice() {
     if (listening) {
       if (isNative()) {
+        if (nativeTimeoutRef.current) clearTimeout(nativeTimeoutRef.current);
+        nativeListenerRef.current?.remove();
+        nativeListenerRef.current = null;
         const { SpeechRecognition } = await import("@capacitor-community/speech-recognition");
-        await SpeechRecognition.stop();
+        await SpeechRecognition.stop().catch(() => {});
       } else {
         recognitionRef.current?.stop();
       }
@@ -152,13 +157,15 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
             if (el) requestAnimationFrame(() => autoGrow(el));
           }
         });
+        nativeListenerRef.current = listener;
 
-        // Stop after silence (plugin fires onend automatically)
-        setTimeout(async () => {
+        // Auto-stop after 15s as fallback — user can tap mic to stop earlier
+        nativeTimeoutRef.current = setTimeout(async () => {
           listener.remove();
-          await SpeechRecognition.stop();
+          nativeListenerRef.current = null;
+          await SpeechRecognition.stop().catch(() => {});
           setListening(false);
-        }, 8000);
+        }, 15000);
 
       } catch (e) {
         console.error("Native speech error:", e);
