@@ -317,7 +317,6 @@ export default function AppShell() {
   }
 
   async function handleSubscribeSuccess() {
-    // Re-fetch subscription from Supabase to get accurate status after payment
     if (user) {
       await loadSubscription(user.id);
     } else {
@@ -326,6 +325,8 @@ export default function AppShell() {
       setSubValidUntil(monthEnd);
       setSubStatus("active");
     }
+    // Ensure paywall is dismissed regardless of what loadSubscription returns
+    setSubStatus((prev) => prev === "none" ? "trialing" : prev);
   }
 
   const isPro = subStatus === "active" || subStatus === "trialing";
