@@ -563,10 +563,12 @@ export default function AppShell() {
           subStatus={subStatus}
           validUntil={subValidUntil ?? undefined}
           subPlan={subPlan}
+          userId={user?.id}
           onBack={() => setShowSubPage(false)}
           onUpgrade={() => { setShowSubPage(false); setSubStatus("none"); }}
           onSwitchToAnnual={() => { setShowSwitchSheet(true); }}
           onCancelled={() => { setShowSubPage(false); setSubStatus("none"); }}
+          onPaymentSuccess={() => { setShowSubPage(false); handleSubscribeSuccess(); showToast("Welcome to Pro! 🎉"); }}
         />
       )}
     </div>

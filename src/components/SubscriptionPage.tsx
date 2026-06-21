@@ -2,14 +2,34 @@
 
 import { useState } from "react";
 
+declare global {
+  interface Window {
+    Razorpay: new (options: Record<string, unknown>) => { open: () => void };
+  }
+}
+
+function loadRazorpayScript(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (document.getElementById("razorpay-script")) { resolve(true); return; }
+    const script = document.createElement("script");
+    script.id = "razorpay-script";
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
+
 interface SubscriptionPageProps {
   subStatus: "loading" | "active" | "trialing" | "none" | "free";
   validUntil?: Date;
   subPlan?: string;
+  userId?: string;
   onBack: () => void;
   onUpgrade: () => void;
   onSwitchToAnnual: () => void;
   onCancelled?: () => void;
+  onPaymentSuccess?: () => void;
 }
 
 function daysLeft(date: Date) {
@@ -53,11 +73,50 @@ function Tick({ active }: { active: boolean }) {
 type CancelStep = "idle" | "reasons" | "confirming" | "done";
 
 export default function SubscriptionPage({
-  subStatus, validUntil, subPlan, onBack, onUpgrade, onSwitchToAnnual, onCancelled,
+  subStatus, validUntil, subPlan, userId, onBack, onUpgrade, onSwitchToAnnual, onCancelled, onPaymentSuccess,
 }: SubscriptionPageProps) {
   const [cancelStep, setCancelStep] = useState<CancelStep>("idle");
   const [cancelReason, setCancelReason] = useState("");
   const [cancelling, setCancelling] = useState(false);
+  const [payLoading, setPayLoading] = useState(false);
+  const [payPlan, setPayPlan] = useState<"monthly" | "yearly">("monthly");
+
+  async function handleDirectPay(plan: "monthly" | "yearly") {
+    if (!userId) { onUpgrade(); return; }
+    setPayLoading(true);
+    setPayPlan(plan);
+    try {
+      const loaded = await loadRazorpayScript();
+      if (!loaded) { alert("Could not load payment."); setPayLoading(false); return; }
+      const res = await fetch("/api/razorpay/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan }),
+      });
+      const { orderId, amount, currency, keyId, error } = await res.json();
+      if (error || !orderId) { alert("Could not create order. Try again."); setPayLoading(false); return; }
+      new window.Razorpay({
+        key: keyId, amount, currency,
+        name: "JustLog",
+        description: plan === "yearly" ? "JustLog Pro Annual — ₹599/year" : "JustLog Pro Monthly — ₹79/month",
+        image: "/logo.svg",
+        order_id: orderId,
+        handler: async (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
+          const verify = await fetch("/api/razorpay/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ orderId: response.razorpay_order_id, paymentId: response.razorpay_payment_id, signature: response.razorpay_signature, userId, plan }),
+          });
+          const result = await verify.json();
+          if (result.success) { onPaymentSuccess?.() || onUpgrade(); }
+          else alert("Payment verified but activation failed. Contact support.");
+        },
+        prefill: {},
+        theme: { color: "#C831FF" },
+        modal: { ondismiss: () => setPayLoading(false) },
+      }).open();
+    } catch { alert("Something went wrong. Try again."); setPayLoading(false); }
+  }
 
   const isPro = subStatus === "active";
   const isTrial = subStatus === "trialing";
@@ -155,9 +214,22 @@ export default function SubscriptionPage({
 
         {/* Upgrade CTA */}
         {(isTrial || isFree || subStatus === "none") && (
-          <div className="mx-4 mt-3">
-            <button onClick={onUpgrade} className="w-full py-3.5 rounded-[14px] text-[14px] font-semibold active:opacity-80" style={{ background: "var(--md-primary)", color: "#fff" }}>
-              {isTrial ? "Upgrade Now · ₹79 / month" : "Get Pro · ₹79 / month"}
+          <div className="mx-4 mt-3 flex flex-col gap-2">
+            <button
+              onClick={() => handleDirectPay("monthly")}
+              disabled={payLoading}
+              className="w-full py-3.5 rounded-[14px] text-[14px] font-semibold active:opacity-80 flex items-center justify-center gap-2"
+              style={{ background: "var(--md-primary)", color: "#fff", opacity: payLoading && payPlan === "monthly" ? 0.7 : 1 }}
+            >
+              {payLoading && payPlan === "monthly" ? "Opening checkout…" : "Continue Pro — ₹79/month"}
+            </button>
+            <button
+              onClick={() => handleDirectPay("yearly")}
+              disabled={payLoading}
+              className="w-full py-3.5 rounded-[14px] text-[14px] font-semibold active:opacity-80 relative"
+              style={{ border: "2px solid var(--md-primary)", color: "var(--md-primary)", opacity: payLoading && payPlan === "yearly" ? 0.7 : 1 }}
+            >
+              {payLoading && payPlan === "yearly" ? "Opening checkout…" : "Best Value — ₹599/year · Save 37% ⭐"}
             </button>
           </div>
         )}
