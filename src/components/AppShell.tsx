@@ -31,24 +31,10 @@ export default function AppShell() {
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [activeSpace, setActiveSpace] = useState<Space | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  // Read subscription from localStorage synchronously so paywall never flashes on refresh
-  const [subStatus, setSubStatus] = useState<SubStatus>(() => {
-    if (typeof window === "undefined") return "loading";
-    try {
-      const c = JSON.parse(localStorage.getItem("jl_sub") ?? "{}");
-      if (c.status === "trialing" || c.status === "active" || c.status === "free") return c.status as SubStatus;
-    } catch { /* ignore */ }
-    return "loading";
-  });
+  const [subStatus, setSubStatus] = useState<SubStatus>("loading");
   const [showSubPage, setShowSubPage] = useState(false);
   const [showSwitchSheet, setShowSwitchSheet] = useState(false);
-  const [subValidUntil, setSubValidUntil] = useState<Date | null>(() => {
-    if (typeof window === "undefined") return null;
-    try {
-      const c = JSON.parse(localStorage.getItem("jl_sub") ?? "{}");
-      return c.validUntil ? new Date(c.validUntil) : null;
-    } catch { return null; }
-  });
+  const [subValidUntil, setSubValidUntil] = useState<Date | null>(null);
   const [subPlan, setSubPlan] = useState<string>(() => {
     if (typeof window === "undefined") return "monthly";
     try {
@@ -73,6 +59,18 @@ export default function AppShell() {
   const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: "", visible: false });
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const supabase = createClient();
+
+  // Read localStorage cache on client mount — avoids hydration mismatch
+  useEffect(() => {
+    try {
+      const c = JSON.parse(localStorage.getItem("jl_sub") ?? "{}");
+      if (c.status === "trialing" || c.status === "active" || c.status === "free") {
+        setSubStatus(c.status as SubStatus);
+        if (c.validUntil) setSubValidUntil(new Date(c.validUntil));
+        if (c.plan) setSubPlan(c.plan);
+      }
+    } catch { /* ignore */ }
+  }, []);
 
   function showToast(message: string) {
     if (toastTimer.current) clearTimeout(toastTimer.current);
