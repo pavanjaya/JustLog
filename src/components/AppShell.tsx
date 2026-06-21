@@ -421,12 +421,14 @@ export default function AppShell() {
           </div>
         )}
         {(subStatus === "none") && user && (
-          <PaywallView
-            userId={user.id}
-            onSuccess={handleSubscribeSuccess}
-            onContinueFree={() => setSubStatus("free")}
-            trialExpired={false}
-          />
+          <div className="flex-1 w-full">
+            <PaywallView
+              userId={user.id}
+              onSuccess={handleSubscribeSuccess}
+              onContinueFree={() => setSubStatus("free")}
+              trialExpired={false}
+            />
+          </div>
         )}
 
         {spaceLoading && (

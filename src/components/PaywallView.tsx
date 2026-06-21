@@ -108,7 +108,7 @@ export default function PaywallView({ userId, onSuccess, onContinueFree, trialEx
   if (screen === "trial-success") {
     return (
       <div
-        className="flex flex-col h-full overflow-y-auto no-scrollbar px-6"
+        className="flex flex-col h-full w-full overflow-y-auto no-scrollbar px-6"
         style={{ background: "var(--md-surface)", paddingTop: safeTop, paddingBottom: safeBottom }}
       >
         <div className="flex-1 flex flex-col items-center justify-center text-center gap-0">
@@ -151,7 +151,7 @@ export default function PaywallView({ userId, onSuccess, onContinueFree, trialEx
   if (screen === "subscribe") {
     return (
       <div
-        className="flex flex-col h-full overflow-y-auto no-scrollbar"
+        className="flex flex-col h-full w-full overflow-y-auto no-scrollbar"
         style={{ background: "var(--md-surface)", paddingTop: safeTop, paddingBottom: safeBottom }}
       >
         {/* Back */}
@@ -246,7 +246,7 @@ export default function PaywallView({ userId, onSuccess, onContinueFree, trialEx
   /* ── Main paywall screen ── */
   return (
     <div
-      className="flex flex-col h-full overflow-y-auto no-scrollbar"
+      className="flex flex-col h-full w-full overflow-y-auto no-scrollbar"
       style={{ background: "var(--md-surface)", paddingTop: safeTop, paddingBottom: safeBottom }}
     >
       {/* Top row: Logo + close */}
