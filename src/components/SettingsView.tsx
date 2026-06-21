@@ -176,6 +176,8 @@ export default function SettingsView({
   const email = user?.email ?? "";
   const avatar = user?.user_metadata?.avatar_url as string | undefined;
 
+  const isPro = subStatus === "active" || subStatus === "trialing";
+
   const [nameVal, setNameVal] = useState(name);
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>(avatar);
   const [saving, setSaving] = useState(false);
@@ -424,7 +426,7 @@ export default function SettingsView({
 
       {/* Group 1 — data */}
       <SettingsGroup>
-        <SettingsItem icon={<IconExport />} label="Export Data" sublabel={`${transactions.length} transactions`} onClick={() => { if (!transactions.length) { onToast("No transactions to export"); return; } setShowExportSheet(true); }} />
+        <SettingsItem icon={<IconExport />} label="Export Data" sublabel={isPro ? `${transactions.length} transactions` : "Pro only"} onClick={() => { if (!isPro) { onUpgrade?.(); return; } if (!transactions.length) { onToast("No transactions to export"); return; } setShowExportSheet(true); }} />
         <SettingsItem icon={<IconFolders />} label="Manage Spaces" sublabel={`${spaces.length} space${spaces.length !== 1 ? "s" : ""}`} onClick={() => setSheet("spaces")} last />
       </SettingsGroup>
 
@@ -598,7 +600,7 @@ export default function SettingsView({
                       )}
                     </>
                   )}
-                  {/* PIN management */}
+                  {/* PIN management — Pro only */}
                   {spaceActionTarget.name !== "Personal" && (
                     spaceActionTarget.pin_hash ? (
                       <>
@@ -606,7 +608,7 @@ export default function SettingsView({
                           icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>}
                           label="Change PIN"
                           sublabel="Set a new 4-digit PIN"
-                          onClick={() => setShowPinPad(true)}
+                          onClick={() => isPro ? setShowPinPad(true) : onUpgrade?.()}
                         />
                         <ListRow
                           icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>}
@@ -620,8 +622,8 @@ export default function SettingsView({
                       <ListRow
                         icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>}
                         label="Add PIN Lock"
-                        sublabel="Require PIN to open this space"
-                        onClick={() => setShowPinPad(true)}
+                        sublabel={isPro ? "Require PIN to open this space" : "Pro only"}
+                        onClick={() => isPro ? setShowPinPad(true) : onUpgrade?.()}
                       />
                     )
                   )}
