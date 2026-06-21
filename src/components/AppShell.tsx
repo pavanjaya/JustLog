@@ -106,12 +106,12 @@ export default function AppShell() {
     return data as Space[];
   }, [supabase]);
 
-  // Ensures the user has at least one space; creates "Personal" if not
-  const ensureDefaultSpace = useCallback(async (userId: string): Promise<Space> => {
+  // Ensures the user has at least one space; creates "Personal" if not. Returns [defaultSpace, allSpaces].
+  const ensureDefaultSpace = useCallback(async (userId: string): Promise<[Space, Space[]]> => {
     // Prevent concurrent calls from both seeing "no spaces" and creating duplicates
     if (ensureDefaultSpaceRunning.current) {
       const existing = await loadSpaces(userId);
-      return existing[0];
+      return [existing[0], existing];
     }
     ensureDefaultSpaceRunning.current = true;
     try {
@@ -119,7 +119,7 @@ export default function AppShell() {
       if (existing.length > 0) {
         setSpaces(existing);
         personalSpaceId.current = existing[0].id;
-        return existing[0];
+        return [existing[0], existing];
       }
       const { data, error } = await supabase
         .from("spaces")
@@ -130,7 +130,7 @@ export default function AppShell() {
       const space = data as Space;
       setSpaces([space]);
       personalSpaceId.current = space.id;
-      return space;
+      return [space, [space]];
     } finally {
       ensureDefaultSpaceRunning.current = false;
     }
@@ -208,12 +208,13 @@ export default function AppShell() {
           setShowNamePrompt(true);
         }
         setSpaceLoading(true);
-        const space = await ensureDefaultSpace(user.id);
+        const [space, allSpaces] = await ensureDefaultSpace(user.id);
         setActiveSpace(space);
-        const allSpaces = await loadSpaces(user.id);
-        await loadTransactions(space.id, allSpaces);
+        await Promise.all([
+          loadTransactions(space.id, allSpaces),
+          loadSubscription(user.id),
+        ]);
         setSpaceLoading(false);
-        await loadSubscription(user.id);
       } else {
         setSpaceLoading(false);
         setSubStatus("none");
@@ -226,11 +227,12 @@ export default function AppShell() {
       if (event === "INITIAL_SESSION") return;
       setUser(session?.user ?? null);
       if (session?.user) {
-        const space = await ensureDefaultSpace(session.user.id);
+        const [space, allSpaces] = await ensureDefaultSpace(session.user.id);
         setActiveSpace(space);
-        const allSpaces = await loadSpaces(session.user.id);
-        await loadTransactions(space.id, allSpaces);
-        await loadSubscription(session.user.id);
+        await Promise.all([
+          loadTransactions(space.id, allSpaces),
+          loadSubscription(session.user.id),
+        ]);
       } else {
         setSubStatus("none");
         router.replace("/login");
