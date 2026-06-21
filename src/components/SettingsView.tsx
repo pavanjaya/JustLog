@@ -39,7 +39,7 @@ function SubscriptionCard({ subStatus, validUntil, subPlan, onUpgrade, onManage 
           <div className="text-xs mt-2" style={{ color: "var(--md-on-surface-variant)" }}>Trial ends {validUntil ? fmt(validUntil) : ""} · Tap to manage</div>
         </button>
         <div className="px-4 pb-4">
-          <button onClick={onUpgrade} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
+          <button onClick={onManage} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
             Upgrade to Pro · ₹79/month
           </button>
         </div>
