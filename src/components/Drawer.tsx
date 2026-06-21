@@ -77,19 +77,19 @@ export default function Drawer({ open, view, onClose, onNavigate, onDeleteAll, u
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(46,125,50,0.12)", color: "#2E7D32" }}>✓ PRO</span>
                   )}
                   {subStatus === "trialing" && validUntil && (
-                    <button onClick={() => { onUpgrade?.(); onClose(); }} className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(200,49,255,0.12)", color: "var(--md-primary)" }}>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(200,49,255,0.12)", color: "var(--md-primary)" }}>
                       TRIAL · {Math.max(0, Math.ceil((validUntil.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))}d left
-                    </button>
+                    </span>
                   )}
                   {subStatus === "free" && (
-                    <button onClick={() => { onUpgrade?.(); onClose(); }} className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "var(--md-surface-container-highest)", color: "var(--md-on-surface-variant)" }}>
-                      FREE · Upgrade
-                    </button>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "var(--md-surface-container-highest)", color: "var(--md-on-surface-variant)" }}>
+                      FREE
+                    </span>
                   )}
                   {subStatus === "none" && (
-                    <button onClick={() => { onUpgrade?.(); onClose(); }} className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(255,107,53,0.12)", color: "#FF6B35" }}>
-                      Trial ended · Upgrade
-                    </button>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(255,107,53,0.12)", color: "#FF6B35" }}>
+                      Trial ended
+                    </span>
                   )}
                 </div>
               )}
