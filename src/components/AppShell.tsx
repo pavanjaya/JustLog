@@ -137,28 +137,17 @@ export default function AppShell() {
     }
   }, [supabase, loadSpaces]);
 
-  const loadSubscription = useCallback(async (userId: string) => {
-    const { data } = await supabase
-      .from("subscriptions")
-      .select("status, valid_until, plan")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (data) {
-      const validUntil = new Date(data.valid_until);
-      setSubValidUntil(validUntil); // always set so trial-expiry detection works
-      if (validUntil > new Date() && data.status !== "cancelled") {
-        setSubPlan(data.plan ?? "monthly");
-        setSubStatus(data.status === "trialing" ? "trialing" : "active");
-        return;
-      }
+  const loadSubscription = useCallback(async (_userId?: string) => {
+    try {
+      const res = await fetch("/api/subscription/status");
+      const data = await res.json();
+      if (data.validUntil) setSubValidUntil(new Date(data.validUntil));
+      if (data.plan) setSubPlan(data.plan);
+      setSubStatus(data.status === "trialing" ? "trialing" : data.status === "active" ? "active" : "none");
+    } catch {
+      // On error keep current status — don't reset to none
     }
-
-    // No subscription or expired — show paywall
-    setSubStatus("none");
-  }, [supabase]);
+  }, []);
 
   // Handle deep link auth callback from Capacitor
   useEffect(() => {
@@ -215,7 +204,7 @@ export default function AppShell() {
         setActiveSpace(space);
         await Promise.all([
           loadTransactions(space.id, allSpaces),
-          loadSubscription(user.id),
+          loadSubscription(),
         ]);
         setSpaceLoading(false);
       } else {
@@ -236,7 +225,7 @@ export default function AppShell() {
         setActiveSpace(space);
         await Promise.all([
           loadTransactions(space.id, allSpaces),
-          loadSubscription(session.user.id),
+          loadSubscription(),
         ]);
       } else {
         setSubStatus("none");
