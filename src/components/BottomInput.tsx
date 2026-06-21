@@ -148,6 +148,14 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
           popup: false,
         });
 
+        const stopNative = async () => {
+          if (nativeTimeoutRef.current) clearTimeout(nativeTimeoutRef.current);
+          nativeListenerRef.current?.remove();
+          nativeListenerRef.current = null;
+          await SpeechRecognition.stop().catch(() => {});
+          setListening(false);
+        };
+
         const listener = await SpeechRecognition.addListener("partialResults", (data: { matches?: string[] }) => {
           if (data.matches?.length) {
             const transcript = data.matches[0].trim();
@@ -155,17 +163,14 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
             onChange(combined);
             const el = textareaRef.current;
             if (el) requestAnimationFrame(() => autoGrow(el));
+            // Stop as soon as we have a result — recognition is done
+            stopNative();
           }
         });
         nativeListenerRef.current = listener;
 
-        // Auto-stop after 15s as fallback — user can tap mic to stop earlier
-        nativeTimeoutRef.current = setTimeout(async () => {
-          listener.remove();
-          nativeListenerRef.current = null;
-          await SpeechRecognition.stop().catch(() => {});
-          setListening(false);
-        }, 15000);
+        // Auto-stop after 15s as fallback
+        nativeTimeoutRef.current = setTimeout(stopNative, 15000);
 
       } catch (e) {
         console.error("Native speech error:", e);
