@@ -142,7 +142,9 @@ export default function AppShell() {
       .from("subscriptions")
       .select("status, valid_until, plan")
       .eq("user_id", userId)
-      .single();
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
     if (data) {
       const validUntil = new Date(data.valid_until);

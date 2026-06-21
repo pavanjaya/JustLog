@@ -48,14 +48,33 @@ export async function POST(req: NextRequest) {
   const validUntil = new Date();
   validUntil.setDate(validUntil.getDate() + (isYearly ? 365 : 37)); // 30 days + 7 trial
 
-  await supabase.from("subscriptions").upsert({
-    user_id: userId,
-    plan: plan ?? "monthly",
-    status: "active",
-    payment_id: paymentId,
-    order_id: orderId,
-    valid_until: validUntil.toISOString(),
-  }, { onConflict: "user_id" });
+  // Try to update existing record first, insert if none exists
+  const { data: existing } = await supabase
+    .from("subscriptions")
+    .select("id")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (existing) {
+    await supabase.from("subscriptions").update({
+      plan: plan ?? "monthly",
+      status: "active",
+      payment_id: paymentId,
+      order_id: orderId,
+      valid_until: validUntil.toISOString(),
+    }).eq("id", existing.id);
+  } else {
+    await supabase.from("subscriptions").insert({
+      user_id: userId,
+      plan: plan ?? "monthly",
+      status: "active",
+      payment_id: paymentId,
+      order_id: orderId,
+      valid_until: validUntil.toISOString(),
+    });
+  }
 
   return NextResponse.json({ success: true }, { headers: CORS_HEADERS });
 }
