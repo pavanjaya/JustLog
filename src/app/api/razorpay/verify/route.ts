@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400, headers: CORS_HEADERS });
   }
 
-  // Verify signature
+  // Verify Razorpay signature
   const expected = crypto
     .createHmac("sha256", keySecret)
     .update(`${orderId}|${paymentId}`)
@@ -38,7 +38,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400, headers: CORS_HEADERS });
   }
 
-  // Store subscription in Supabase
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -46,34 +45,23 @@ export async function POST(req: NextRequest) {
 
   const isYearly = plan === "yearly";
   const validUntil = new Date();
-  validUntil.setDate(validUntil.getDate() + (isYearly ? 365 : 37)); // 30 days + 7 trial
+  validUntil.setDate(validUntil.getDate() + (isYearly ? 365 : 30));
 
-  // Try to update existing record first, insert if none exists
-  const { data: existing } = await supabase
-    .from("subscriptions")
-    .select("id")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  // Delete all old subscriptions for this user and insert a fresh active one
+  await supabase.from("subscriptions").delete().eq("user_id", userId);
 
-  if (existing) {
-    await supabase.from("subscriptions").update({
-      plan: plan ?? "monthly",
-      status: "active",
-      payment_id: paymentId,
-      order_id: orderId,
-      valid_until: validUntil.toISOString(),
-    }).eq("id", existing.id);
-  } else {
-    await supabase.from("subscriptions").insert({
-      user_id: userId,
-      plan: plan ?? "monthly",
-      status: "active",
-      payment_id: paymentId,
-      order_id: orderId,
-      valid_until: validUntil.toISOString(),
-    });
+  const { error } = await supabase.from("subscriptions").insert({
+    user_id: userId,
+    plan: plan ?? "monthly",
+    status: "active",
+    payment_id: paymentId,
+    order_id: orderId,
+    valid_until: validUntil.toISOString(),
+  });
+
+  if (error) {
+    console.error("Supabase insert error:", error);
+    return NextResponse.json({ error: "DB error", detail: error.message }, { status: 500, headers: CORS_HEADERS });
   }
 
   return NextResponse.json({ success: true }, { headers: CORS_HEADERS });
