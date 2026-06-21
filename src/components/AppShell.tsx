@@ -35,23 +35,14 @@ export default function AppShell() {
   const [showSubPage, setShowSubPage] = useState(false);
   const [showSwitchSheet, setShowSwitchSheet] = useState(false);
   const [subValidUntil, setSubValidUntil] = useState<Date | null>(null);
-  const [subPlan, setSubPlan] = useState<string>(() => {
-    if (typeof window === "undefined") return "monthly";
-    try {
-      const c = JSON.parse(localStorage.getItem("jl_sub") ?? "{}");
-      return c.plan ?? "monthly";
-    } catch { return "monthly"; }
-  });
+  const [subPlan, setSubPlan] = useState<string>("monthly");
   const [splashDone, setSplashDone] = useState(false);
   const [showNamePrompt, setShowNamePrompt] = useState(false);
   const [nameInput, setNameInput] = useState("");
   const [savingName, setSavingName] = useState(false);
   const [pendingSpace, setPendingSpace] = useState<Space | null>(null);
   const [unlockedSpaces, setUnlockedSpaces] = useState<Set<string>>(new Set());
-  const [onboardingDone, setOnboardingDone] = useState(() => {
-    if (typeof window === "undefined") return true;
-    return localStorage.getItem("jl_onboarded") === "1";
-  });
+  const [onboardingDone, setOnboardingDone] = useState(true);
   const ensureDefaultSpaceRunning = useRef(false);
   const personalSpaceId = useRef<string | null>(null);
   const [spaceLoading, setSpaceLoading] = useState(true);
@@ -60,8 +51,11 @@ export default function AppShell() {
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const supabase = createClient();
 
-  // Read localStorage cache on client mount — avoids hydration mismatch
+  // Read localStorage on client mount — avoids hydration mismatch
   useEffect(() => {
+    // Onboarding
+    setOnboardingDone(localStorage.getItem("jl_onboarded") === "1");
+    // Subscription cache
     try {
       const c = JSON.parse(localStorage.getItem("jl_sub") ?? "{}");
       if (c.status === "trialing" || c.status === "active" || c.status === "free") {
