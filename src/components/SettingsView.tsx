@@ -15,7 +15,7 @@ function fmt(date: Date) {
   return date.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
-function SubscriptionCard({ subStatus, validUntil, subPlan, onUpgrade, onManage }: { subStatus?: string; validUntil?: Date; subPlan?: string; onUpgrade?: () => void; onManage?: () => void }) {
+function SubscriptionCard({ subStatus, validUntil, subPlan, onUpgrade, onManage, trialUsed, onStartTrial }: { subStatus?: string; validUntil?: Date; subPlan?: string; onUpgrade?: () => void; onManage?: () => void; trialUsed?: boolean; onStartTrial?: () => void }) {
   const days = validUntil ? daysLeft(validUntil) : 0;
 
   if (subStatus === "trialing") {
@@ -83,9 +83,15 @@ function SubscriptionCard({ subStatus, validUntil, subPlan, onUpgrade, onManage 
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-on-surface-variant)" }}><path d="M9 18l6-6-6-6"/></svg>
         </button>
         <div className="px-4 pb-4">
-          <button onClick={onManage} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
-            Upgrade to Pro · ₹79/month
-          </button>
+          {trialUsed ? (
+            <button onClick={onManage} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
+              Upgrade to Pro · ₹79/month
+            </button>
+          ) : (
+            <button onClick={onStartTrial} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
+              Try Pro free — 7 days
+            </button>
+          )}
         </div>
       </div>
     );
@@ -383,7 +389,15 @@ export default function SettingsView({
       </div>
 
       {/* Subscription card */}
-      <SubscriptionCard subStatus={subStatus} validUntil={validUntil} subPlan={subPlan} onUpgrade={onUpgrade} onManage={() => onShowSubPage?.()} />
+      <SubscriptionCard
+        subStatus={subStatus}
+        validUntil={validUntil}
+        subPlan={subPlan}
+        onUpgrade={onUpgrade}
+        onManage={() => onShowSubPage?.()}
+        trialUsed={!!validUntil}
+        onStartTrial={() => onUpgrade?.()}
+      />
 
       {/* Group 1 — data */}
       <SettingsGroup>
