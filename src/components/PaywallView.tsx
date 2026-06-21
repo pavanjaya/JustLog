@@ -4,7 +4,8 @@ import { useState } from "react";
 
 interface PaywallViewProps {
   userId: string;
-  onSuccess: () => void;
+  onSuccess: () => void; // trial started
+  onPaymentSuccess?: () => void; // direct payment from paywall
   onContinueFree?: () => void;
   trialExpired?: boolean;
   trialStats?: { transactions: number; spaces: number };
@@ -46,7 +47,7 @@ const TRIAL_UNLOCKS = [
 
 type Screen = "main" | "trial-success" | "subscribe" | "downgrade-confirm";
 
-export default function PaywallView({ userId, onSuccess, onContinueFree, trialExpired, trialStats }: PaywallViewProps) {
+export default function PaywallView({ userId, onSuccess, onPaymentSuccess, onContinueFree, trialExpired, trialStats }: PaywallViewProps) {
   const [screen, setScreen] = useState<Screen>("main");
   const [plan, setPlan] = useState<"monthly" | "yearly">("yearly");
   const [loading, setLoading] = useState(false);
@@ -95,7 +96,7 @@ export default function PaywallView({ userId, onSuccess, onContinueFree, trialEx
             }),
           });
           const result = await verify.json();
-          if (result.success) onSuccess();
+          if (result.success) (onPaymentSuccess ?? onSuccess)();
           else alert("Payment verified but activation failed. Contact support.");
         },
         prefill: {},

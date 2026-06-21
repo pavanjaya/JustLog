@@ -148,8 +148,8 @@ export default function AppShell() {
 
     if (data) {
       const validUntil = new Date(data.valid_until);
+      setSubValidUntil(validUntil); // always set so trial-expiry detection works
       if (validUntil > new Date() && data.status !== "cancelled") {
-        setSubValidUntil(validUntil);
         setSubPlan(data.plan ?? "monthly");
         setSubStatus(data.status === "trialing" ? "trialing" : "active");
         return;
@@ -316,14 +316,30 @@ export default function AppShell() {
     if (data) setTransactions((prev) => [...prev, ...(data as Transaction[])]);
   }
 
+  function handleTrialSuccess() {
+    // Trial just started
+    setSubStatus("trialing");
+    const trialEnd = new Date();
+    trialEnd.setDate(trialEnd.getDate() + 7);
+    setSubValidUntil(trialEnd);
+    if (user) {
+      const uid = user.id;
+      setTimeout(() => loadSubscription(uid), 1500);
+    }
+  }
+
   async function handleSubscribeSuccess() {
-    // Immediately update UI to active so user isn't stuck on paywall/trial
+    // Payment verified — immediately show PRO
+    setSubStatus("active");
+    setSubPlan("monthly");
     const monthEnd = new Date();
     monthEnd.setDate(monthEnd.getDate() + 30);
     setSubValidUntil(monthEnd);
-    setSubStatus("active");
-    // Re-fetch in background to sync accurate data from DB
-    if (user) loadSubscription(user.id);
+    // Re-sync from DB after short delay to get accurate plan/date
+    if (user) {
+      const uid = user.id;
+      setTimeout(() => loadSubscription(uid), 1500);
+    }
   }
 
   const isPro = subStatus === "active" || subStatus === "trialing";
@@ -418,7 +434,7 @@ export default function AppShell() {
         <div className="flex items-center justify-between px-4 py-2.5" style={{ background: "var(--md-primary)" }}>
           <span className="text-[13px] font-medium text-white">⚡ Pro Trial — {trialDaysLeft} day{trialDaysLeft !== 1 ? "s" : ""} remaining</span>
           <div className="flex items-center gap-3">
-            <button onClick={() => setSubStatus("none")} className="text-[12px] font-semibold text-white underline">Upgrade</button>
+            <button onClick={() => setShowSubPage(true)} className="text-[12px] font-semibold text-white underline">Upgrade</button>
             <button onClick={() => setTrialBannerDismissed(true)} className="text-white opacity-70 active:opacity-100">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
@@ -456,7 +472,8 @@ export default function AppShell() {
           <div className="flex-1 w-full">
             <PaywallView
               userId={user.id}
-              onSuccess={handleSubscribeSuccess}
+              onSuccess={handleTrialSuccess}
+              onPaymentSuccess={() => { handleSubscribeSuccess(); showToast("Welcome to Pro! 🎉"); }}
               onContinueFree={isTrialExpired ? undefined : () => setSubStatus("free")}
               trialExpired={isTrialExpired}
               trialStats={isTrialExpired ? { transactions: transactions.length, spaces: spaces.length } : undefined}

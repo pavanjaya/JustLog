@@ -15,9 +15,44 @@ function fmt(date: Date) {
   return date.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
-function SubscriptionCard({ subStatus, validUntil, subPlan, onUpgrade, onManage, trialUsed, onStartTrial }: { subStatus?: string; validUntil?: Date; subPlan?: string; onUpgrade?: () => void; onManage?: () => void; trialUsed?: boolean; onStartTrial?: () => void }) {
+function SubscriptionCard({ subStatus, validUntil, subPlan, onManage, onStartTrial }: {
+  subStatus?: string; validUntil?: Date; subPlan?: string;
+  onManage?: () => void; onStartTrial?: () => void;
+}) {
   const days = validUntil ? daysLeft(validUntil) : 0;
+  const trialUsed = !!validUntil; // if validUntil exists, they've had a trial before
 
+  // ── PRO ACTIVE ──
+  if (subStatus === "active") {
+    return (
+      <div className="mx-4 mb-3 rounded-2xl overflow-hidden" style={{ background: "rgba(46,125,50,0.05)", border: "1px solid rgba(46,125,50,0.15)" }}>
+        <button onClick={onManage} className="w-full p-4 flex items-center gap-3 text-left">
+          <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(46,125,50,0.1)" }}>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#2E7D32" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>💜 JustLog Pro</span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(46,125,50,0.12)", color: "#2E7D32" }}>ACTIVE</span>
+            </div>
+            <div className="text-xs mt-0.5" style={{ color: "var(--md-on-surface-variant)" }}>
+              {subPlan === "yearly" ? "Annual" : "Monthly"} · {validUntil ? `Renews ${fmt(validUntil)}` : "Full access"}
+            </div>
+          </div>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-on-surface-variant)", flexShrink: 0 }}><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+        {subPlan !== "yearly" && (
+          <div className="px-4 pb-4">
+            <button onClick={onManage} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
+              Switch to Annual · Save 37% ⭐
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ── TRIAL ACTIVE ──
   if (subStatus === "trialing") {
     const pct = validUntil ? Math.min(1, Math.max(0, (validUntil.getTime() - Date.now()) / (7 * 24 * 60 * 60 * 1000))) : 0;
     return (
@@ -25,18 +60,15 @@ function SubscriptionCard({ subStatus, validUntil, subPlan, onUpgrade, onManage,
         <button onClick={onManage} className="w-full p-4 text-left">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>JustLog Pro</span>
+              <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>⚡ Pro Trial</span>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(200,49,255,0.15)", color: "var(--md-primary)" }}>TRIAL</span>
             </div>
-            <div className="flex items-center gap-1" style={{ color: "var(--md-primary)" }}>
-              <span className="text-xs font-semibold">{days}d left</span>
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-            </div>
+            <span className="text-xs font-semibold" style={{ color: "var(--md-primary)" }}>{days}d left</span>
           </div>
           <div className="h-1.5 rounded-full overflow-hidden mb-1" style={{ background: "rgba(200,49,255,0.15)" }}>
             <div className="h-full rounded-full" style={{ width: `${pct * 100}%`, background: "var(--md-primary)" }} />
           </div>
-          <div className="text-xs mt-2" style={{ color: "var(--md-on-surface-variant)" }}>Trial ends {validUntil ? fmt(validUntil) : ""} · Tap to manage</div>
+          <div className="text-xs mt-2" style={{ color: "var(--md-on-surface-variant)" }}>Trial ends {validUntil ? fmt(validUntil) : ""}</div>
         </button>
         <div className="px-4 pb-4">
           <button onClick={onManage} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
@@ -47,63 +79,56 @@ function SubscriptionCard({ subStatus, validUntil, subPlan, onUpgrade, onManage,
     );
   }
 
-  if (subStatus === "active") {
-    return (
-      <button onClick={onManage} className="mx-4 mb-3 w-[calc(100%-2rem)] p-4 rounded-2xl flex items-center gap-3 text-left" style={{ background: "rgba(46,125,50,0.05)", border: "1px solid rgba(46,125,50,0.15)" }}>
-        <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(46,125,50,0.1)" }}>
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#2E7D32" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>JustLog Pro</span>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(46,125,50,0.12)", color: "#2E7D32" }}>ACTIVE</span>
-          </div>
-          <div className="text-xs mt-0.5" style={{ color: "var(--md-on-surface-variant)" }}>
-            {validUntil ? `Renews ${fmt(validUntil)}` : "Full access"} · Tap to manage
-          </div>
-        </div>
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-on-surface-variant)", flexShrink: 0 }}><path d="M9 18l6-6-6-6"/></svg>
-      </button>
-    );
-  }
-
+  // ── FREE (chose free plan) ──
   if (subStatus === "free") {
     return (
       <div className="mx-4 mb-3 rounded-2xl overflow-hidden" style={{ border: "1px solid var(--md-outline-variant)" }}>
-        <button onClick={onManage} className="w-full p-4 flex items-center justify-between text-left">
-          <div>
-            <div className="flex items-center gap-2 mb-0.5">
-              <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>Free Plan</span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "var(--md-surface-container-highest)", color: "var(--md-on-surface-variant)" }}>FREE</span>
-            </div>
-            <div className="text-xs" style={{ color: "var(--md-on-surface-variant)" }}>1 space · 3 months · No AI search</div>
+        <div className="p-4">
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>🆓 Free Plan</span>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "var(--md-surface-container-highest)", color: "var(--md-on-surface-variant)" }}>FREE</span>
           </div>
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-on-surface-variant)" }}><path d="M9 18l6-6-6-6"/></svg>
-        </button>
-        <div className="px-4 pb-4">
-          {trialUsed ? (
-            <button onClick={onManage} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
-              Upgrade to Pro · ₹79/month
-            </button>
-          ) : (
-            <button onClick={onStartTrial} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
-              Try Pro free — 7 days
-            </button>
-          )}
+          <div className="text-xs mb-3" style={{ color: "var(--md-on-surface-variant)" }}>1 space · 30 days history · No AI search</div>
+          <button onClick={onStartTrial} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
+            Try Pro free — 7 days
+          </button>
         </div>
       </div>
     );
   }
 
+  // ── NONE: trial expired OR new user ──
+  if (trialUsed) {
+    // Trial expired — show upgrade to paid
+    return (
+      <div className="mx-4 mb-3 rounded-2xl overflow-hidden" style={{ background: "rgba(255,107,53,0.06)", border: "1px solid rgba(255,107,53,0.2)" }}>
+        <div className="p-4">
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>Free Plan</span>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(255,107,53,0.12)", color: "#FF6B35" }}>TRIAL ENDED</span>
+          </div>
+          <div className="text-xs mb-3" style={{ color: "var(--md-on-surface-variant)" }}>Your trial ended. Upgrade to keep full access.</div>
+          <button onClick={onManage} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
+            Upgrade to Pro · ₹79/month
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // New user — never trialed
   return (
-    <div className="mx-4 mb-3 p-4 rounded-2xl" style={{ background: "rgba(255,107,53,0.06)", border: "1px solid rgba(255,107,53,0.2)" }}>
-      <div className="text-sm font-semibold mb-1" style={{ color: "var(--md-on-surface)" }}>No active plan</div>
-      <div className="text-xs mb-3" style={{ color: "var(--md-on-surface-variant)" }}>Your trial has ended. Upgrade to keep logging.</div>
-      <button onClick={onManage} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
-        Upgrade to Pro · ₹79/month
-      </button>
+    <div className="mx-4 mb-3 rounded-2xl overflow-hidden" style={{ border: "1px solid var(--md-outline-variant)" }}>
+      <div className="p-4">
+        <div className="flex items-center gap-2 mb-0.5">
+          <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>🆓 Free Plan</span>
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "var(--md-surface-container-highest)", color: "var(--md-on-surface-variant)" }}>FREE</span>
+        </div>
+        <div className="text-xs mb-3" style={{ color: "var(--md-on-surface-variant)" }}>1 space · 30 days history · No AI search</div>
+        <button onClick={onStartTrial} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
+          Try Pro free — 7 days
+        </button>
+      </div>
     </div>
   );
 }
@@ -393,9 +418,7 @@ export default function SettingsView({
         subStatus={subStatus}
         validUntil={validUntil}
         subPlan={subPlan}
-        onUpgrade={onUpgrade}
         onManage={() => onShowSubPage?.()}
-        trialUsed={!!validUntil}
         onStartTrial={() => onUpgrade?.()}
       />
 
