@@ -31,11 +31,31 @@ export default function AppShell() {
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [activeSpace, setActiveSpace] = useState<Space | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [subStatus, setSubStatus] = useState<SubStatus>("active");
+  // Read subscription from localStorage synchronously so paywall never flashes on refresh
+  const [subStatus, setSubStatus] = useState<SubStatus>(() => {
+    if (typeof window === "undefined") return "loading";
+    try {
+      const c = JSON.parse(localStorage.getItem("jl_sub") ?? "{}");
+      if (c.status === "trialing" || c.status === "active" || c.status === "free") return c.status as SubStatus;
+    } catch { /* ignore */ }
+    return "loading";
+  });
   const [showSubPage, setShowSubPage] = useState(false);
   const [showSwitchSheet, setShowSwitchSheet] = useState(false);
-  const [subValidUntil, setSubValidUntil] = useState<Date | null>(null);
-  const [subPlan, setSubPlan] = useState<string>("monthly");
+  const [subValidUntil, setSubValidUntil] = useState<Date | null>(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      const c = JSON.parse(localStorage.getItem("jl_sub") ?? "{}");
+      return c.validUntil ? new Date(c.validUntil) : null;
+    } catch { return null; }
+  });
+  const [subPlan, setSubPlan] = useState<string>(() => {
+    if (typeof window === "undefined") return "monthly";
+    try {
+      const c = JSON.parse(localStorage.getItem("jl_sub") ?? "{}");
+      return c.plan ?? "monthly";
+    } catch { return "monthly"; }
+  });
   const [splashDone, setSplashDone] = useState(false);
   const [showNamePrompt, setShowNamePrompt] = useState(false);
   const [nameInput, setNameInput] = useState("");
@@ -138,29 +158,29 @@ export default function AppShell() {
   }, [supabase, loadSpaces]);
 
   const loadSubscription = useCallback(async () => {
-    // Read cached status first for instant render (no paywall flash on refresh)
-    const cached = localStorage.getItem("jl_sub");
-    if (cached) {
-      try {
-        const c = JSON.parse(cached);
-        if (c.validUntil) setSubValidUntil(new Date(c.validUntil));
-        if (c.plan) setSubPlan(c.plan);
-        setSubStatus(c.status);
-      } catch { /* ignore bad cache */ }
-    }
-
-    // Then verify from server and update
     try {
       const res = await fetch("/api/subscription/status");
       const data = await res.json();
-      const status: SubStatus = data.status === "trialing" ? "trialing" : data.status === "active" ? "active" : "none";
+      const serverStatus: SubStatus = data.status === "trialing" ? "trialing" : data.status === "active" ? "active" : "none";
+
+      // Never downgrade from an active/trialing cache to "none" due to server auth glitches.
+      // Only update if server returns a positive status, or if we had no status (loading/none).
+      setSubStatus((prev) => {
+        if (serverStatus === "trialing" || serverStatus === "active") return serverStatus;
+        if (prev === "loading" || prev === "none") return serverStatus; // first load or truly none
+        return prev; // keep cached trialing/active/free — don't let server "none" override
+      });
+
       if (data.validUntil) setSubValidUntil(new Date(data.validUntil));
       if (data.plan) setSubPlan(data.plan);
-      setSubStatus(status);
-      // Cache the result
-      localStorage.setItem("jl_sub", JSON.stringify({ status, validUntil: data.validUntil, plan: data.plan }));
+
+      // Only update cache when server confirms a real status
+      if (serverStatus !== "none") {
+        localStorage.setItem("jl_sub", JSON.stringify({ status: serverStatus, validUntil: data.validUntil, plan: data.plan }));
+      }
     } catch {
-      // On network error, keep cached status — don't reset to none
+      // Network error — keep current state
+      setSubStatus((prev) => prev === "loading" ? "none" : prev);
     }
   }, []);
 
