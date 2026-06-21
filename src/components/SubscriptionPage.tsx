@@ -108,7 +108,7 @@ export default function SubscriptionPage({
             body: JSON.stringify({ orderId: response.razorpay_order_id, paymentId: response.razorpay_payment_id, signature: response.razorpay_signature, userId, plan }),
           });
           const result = await verify.json();
-          if (result.success) { onPaymentSuccess?.() || onUpgrade(); }
+          if (result.success) { if (onPaymentSuccess) onPaymentSuccess(); else onUpgrade(); }
           else alert("Payment verified but activation failed. Contact support.");
         },
         prefill: {},
