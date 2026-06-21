@@ -124,25 +124,24 @@ export default function PaywallView({ userId, onSuccess, onContinueFree, trialEx
           <h1 className="text-[26px] font-bold tracking-tight mb-2" style={{ color: "var(--md-on-surface)" }}>
             Pro trial started!
           </h1>
-          <p className="text-[14px] mb-2" style={{ color: "var(--md-on-surface-variant)" }}>
+          <p className="text-[14px] mb-8" style={{ color: "var(--md-on-surface-variant)" }}>
             7 days free · No card needed · Cancel anytime
           </p>
 
-        </div>
-
-        {/* CTA */}
-        <div className="flex flex-col gap-3 pt-8">
-          <button
-            onClick={onSuccess}
-            className="w-full py-4 rounded-[16px] text-[15px] font-semibold active:opacity-80 flex items-center justify-center gap-2"
-            style={{ background: "var(--md-primary)", color: "#fff" }}
-          >
-            Start exploring
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </button>
-          <p className="text-[11px] text-center" style={{ color: "var(--md-outline)" }}>
-            Trial ends in 7 days. We&apos;ll remind you before it expires.
-          </p>
+          {/* CTA */}
+          <div className="flex flex-col gap-3 w-full">
+            <button
+              onClick={onSuccess}
+              className="w-full py-4 rounded-[16px] text-[15px] font-semibold active:opacity-80 flex items-center justify-center gap-2"
+              style={{ background: "var(--md-primary)", color: "#fff" }}
+            >
+              Start exploring
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+            <p className="text-[11px] text-center" style={{ color: "var(--md-outline)" }}>
+              Trial ends in 7 days. We&apos;ll remind you before it expires.
+            </p>
+          </div>
         </div>
       </div>
     );
