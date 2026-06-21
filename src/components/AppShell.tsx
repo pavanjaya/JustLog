@@ -315,10 +315,15 @@ export default function AppShell() {
   }
 
   async function handleSubscribeSuccess() {
-    const trialEnd = new Date();
-    trialEnd.setDate(trialEnd.getDate() + 7);
-    setSubValidUntil(trialEnd);
-    setSubStatus("trialing");
+    // Re-fetch subscription from Supabase to get accurate status after payment
+    if (user) {
+      await loadSubscription(user.id);
+    } else {
+      const monthEnd = new Date();
+      monthEnd.setDate(monthEnd.getDate() + 30);
+      setSubValidUntil(monthEnd);
+      setSubStatus("active");
+    }
   }
 
   const isPro = subStatus === "active" || subStatus === "trialing";
