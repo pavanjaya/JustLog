@@ -358,9 +358,11 @@ export default function AppShell() {
   const trialDaysLeft = subValidUntil && subStatus === "trialing"
     ? Math.max(0, Math.ceil((subValidUntil.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
     : 0;
+  const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   const visibleTransactions = isPro
     ? transactions
-    : transactions.filter(tx => new Date(tx.created_at) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
+    : transactions.filter(tx => new Date(tx.created_at) > cutoff);
+  const hiddenTransactionCount = isPro ? 0 : transactions.filter(tx => new Date(tx.created_at) <= cutoff).length;
   const freeMonthlyLimitHit = false;
   const userName = user?.user_metadata?.full_name?.split(" ")[0] ?? user?.email?.split("@")[0] ?? user?.phone?.slice(-4);
   const avatarUrl = user?.user_metadata?.avatar_url as string | undefined;
@@ -502,6 +504,8 @@ export default function AppShell() {
             {view === "home" && (
               <HomeView
                 transactions={visibleTransactions}
+                allTransactions={transactions}
+                hiddenCount={hiddenTransactionCount}
                 onAddTransactions={freeMonthlyLimitHit ? undefined : handleAddTransactions}
                 onDeleteTransaction={handleDeleteTransaction}
                 onBulkDelete={handleBulkDelete}

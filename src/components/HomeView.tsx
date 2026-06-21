@@ -18,6 +18,8 @@ import { useCountUp } from "@/lib/useCountUp";
 
 interface HomeViewProps {
   transactions: Transaction[];
+  allTransactions?: Transaction[]; // full history for accurate totals
+  hiddenCount?: number; // transactions older than 30 days (free users)
   onAddTransactions?: ((txs: Transaction[]) => Promise<void>) | undefined;
   onDeleteTransaction: (id: string) => void;
   onBulkDelete: (ids: string[]) => Promise<void>;
@@ -31,7 +33,7 @@ interface HomeViewProps {
 
 type AiState = "idle" | "loading" | "success" | "error" | "clarify";
 
-export default function HomeView({ transactions, onAddTransactions, onDeleteTransaction, onBulkDelete, onEditTransaction, onSeeAll, userName = "there", activeSpace, logDisabled, onUpgrade }: HomeViewProps) {
+export default function HomeView({ transactions, allTransactions, hiddenCount = 0, onAddTransactions, onDeleteTransaction, onBulkDelete, onEditTransaction, onSeeAll, userName = "there", activeSpace, logDisabled, onUpgrade }: HomeViewProps) {
   const [input, setInput] = useState("");
   const [aiState, setAiState] = useState<AiState>("idle");
   const [newTxs, setNewTxs] = useState<Transaction[]>([]);
@@ -87,8 +89,9 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
   const todayExpense = transactions
     .filter((tx) => new Date(tx.created_at).toDateString() === today && tx.type === "expense")
     .reduce((sum, tx) => sum + tx.amount, 0);
-  const totalIncome = transactions.filter((tx) => tx.type === "income").reduce((sum, tx) => sum + tx.amount, 0);
-  const totalExpense = transactions.filter((tx) => tx.type === "expense").reduce((sum, tx) => sum + tx.amount, 0);
+  const allTxs = allTransactions ?? transactions;
+  const totalIncome = allTxs.filter((tx) => tx.type === "income").reduce((sum, tx) => sum + tx.amount, 0);
+  const totalExpense = allTxs.filter((tx) => tx.type === "expense").reduce((sum, tx) => sum + tx.amount, 0);
   const balance = totalIncome - totalExpense;
 
   const animatedBalance = useCountUp(balance);
@@ -416,7 +419,24 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
         ) : (
           <>
             {/* In flex-col-reverse, last JSX item appears at top visually */}
-            {all.length > 5 && (
+            {hiddenCount > 0 ? (
+              <button
+                onClick={onUpgrade}
+                className="w-full flex items-center gap-3 px-4 py-4 active:opacity-70"
+                style={{ borderTop: "1px solid var(--md-outline-variant)" }}
+              >
+                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(200,49,255,0.08)" }}>
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--md-primary)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                </div>
+                <div className="flex-1 text-left">
+                  <div className="text-[13px] font-semibold" style={{ color: "var(--md-primary)" }}>
+                    {hiddenCount} older transaction{hiddenCount !== 1 ? "s" : ""} hidden
+                  </div>
+                  <div className="text-[11px]" style={{ color: "var(--md-on-surface-variant)" }}>Upgrade to Pro to see full history</div>
+                </div>
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-on-surface-variant)" }}><path d="M9 18l6-6-6-6"/></svg>
+              </button>
+            ) : all.length > 5 && (
               <div className="flex justify-center px-3 py-5">
                 <span className="text-[11px] font-medium" style={{ color: "var(--md-outline)" }}>you're all caught up</span>
               </div>
