@@ -228,6 +228,8 @@ export default function AppShell() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       // INITIAL_SESSION is already handled by getUser() above — skip to avoid duplicate space creation
       if (event === "INITIAL_SESSION") return;
+      // TOKEN_REFRESHED should not re-load subscription (would override optimistic state)
+      if (event === "TOKEN_REFRESHED") return;
       setUser(session?.user ?? null);
       if (session?.user) {
         const [space, allSpaces] = await ensureDefaultSpace(session.user.id);
@@ -317,29 +319,20 @@ export default function AppShell() {
   }
 
   function handleTrialSuccess() {
-    // Trial just started
+    // Trial just started — set optimistic state, DB record already created
     setSubStatus("trialing");
     const trialEnd = new Date();
     trialEnd.setDate(trialEnd.getDate() + 7);
     setSubValidUntil(trialEnd);
-    if (user) {
-      const uid = user.id;
-      setTimeout(() => loadSubscription(uid), 1500);
-    }
   }
 
   async function handleSubscribeSuccess() {
-    // Payment verified — immediately show PRO
+    // Payment verified — DB already updated by verify route, set optimistic state
     setSubStatus("active");
     setSubPlan("monthly");
     const monthEnd = new Date();
     monthEnd.setDate(monthEnd.getDate() + 30);
     setSubValidUntil(monthEnd);
-    // Re-sync from DB after short delay to get accurate plan/date
-    if (user) {
-      const uid = user.id;
-      setTimeout(() => loadSubscription(uid), 1500);
-    }
   }
 
   const isPro = subStatus === "active" || subStatus === "trialing";
