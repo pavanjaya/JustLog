@@ -40,7 +40,7 @@ function SubscriptionCard({ subStatus, validUntil, subPlan, onUpgrade, onManage 
         </button>
         <div className="px-4 pb-4">
           <button onClick={onUpgrade} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
-            Upgrade to Pro · ₹49/month
+            Upgrade to Pro · ₹79/month
           </button>
         </div>
       </div>
@@ -84,7 +84,7 @@ function SubscriptionCard({ subStatus, validUntil, subPlan, onUpgrade, onManage 
         </button>
         <div className="px-4 pb-4">
           <button onClick={onUpgrade} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
-            Upgrade to Pro · ₹49/month
+            Upgrade to Pro · ₹79/month
           </button>
         </div>
       </div>
@@ -96,7 +96,7 @@ function SubscriptionCard({ subStatus, validUntil, subPlan, onUpgrade, onManage 
       <div className="text-sm font-semibold mb-1" style={{ color: "var(--md-on-surface)" }}>No active plan</div>
       <div className="text-xs mb-3" style={{ color: "var(--md-on-surface-variant)" }}>Your trial has ended. Upgrade to keep logging.</div>
       <button onClick={onUpgrade} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
-        Upgrade to Pro · ₹49/month
+        Upgrade to Pro · ₹79/month
       </button>
     </div>
   );

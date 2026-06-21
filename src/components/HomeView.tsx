@@ -18,18 +18,20 @@ import { useCountUp } from "@/lib/useCountUp";
 
 interface HomeViewProps {
   transactions: Transaction[];
-  onAddTransactions: (txs: Transaction[]) => Promise<void>;
+  onAddTransactions?: ((txs: Transaction[]) => Promise<void>) | undefined;
   onDeleteTransaction: (id: string) => void;
   onBulkDelete: (ids: string[]) => Promise<void>;
   onEditTransaction: (id: string, updates: Partial<Transaction>) => void;
   onSeeAll: () => void;
   userName?: string;
   activeSpace?: Space | null;
+  logDisabled?: boolean;
+  onUpgrade?: () => void;
 }
 
 type AiState = "idle" | "loading" | "success" | "error" | "clarify";
 
-export default function HomeView({ transactions, onAddTransactions, onDeleteTransaction, onBulkDelete, onEditTransaction, onSeeAll, userName = "there", activeSpace }: HomeViewProps) {
+export default function HomeView({ transactions, onAddTransactions, onDeleteTransaction, onBulkDelete, onEditTransaction, onSeeAll, userName = "there", activeSpace, logDisabled, onUpgrade }: HomeViewProps) {
   const [input, setInput] = useState("");
   const [aiState, setAiState] = useState<AiState>("idle");
   const [newTxs, setNewTxs] = useState<Transaction[]>([]);
@@ -102,6 +104,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
   async function handleSend() {
     const text = input.trim();
     if (!text || isLoading) return;
+    if (logDisabled || !onAddTransactions) { onUpgrade?.(); return; }
 
     setIsLoading(true);
     setInput("");
@@ -204,7 +207,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
     };
     setClarifyAmount(null);
     setAiState("loading");
-    await onAddTransactions([tx]);
+    await onAddTransactions?.([tx]);
     setNewTxs([tx]);
     setAiState("success");
     scrollToBottom();
@@ -224,7 +227,7 @@ export default function HomeView({ transactions, onAddTransactions, onDeleteTran
     };
     setClarifyPerson(null);
     setAiState("loading");
-    await onAddTransactions([tx]);
+    await onAddTransactions?.([tx]);
     setNewTxs([tx]);
     setAiState("success");
     scrollToBottom();

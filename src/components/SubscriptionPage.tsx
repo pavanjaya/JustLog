@@ -117,7 +117,7 @@ export default function SubscriptionPage({
                   {isPro ? "JustLog Pro" : isTrial ? "Free Trial" : isFree ? "Free Plan" : "No Active Plan"}
                 </div>
                 <div className="text-[13px] mt-1 font-medium" style={{ color: isPro || isTrial ? "rgba(255,255,255,0.7)" : "var(--md-on-surface-variant)" }}>
-                  {isPro && subPlan === "yearly" ? "₹499 / year" : isPro ? "₹49 / month" : isTrial ? `${days} day${days !== 1 ? "s" : ""} remaining` : "Limited features"}
+                  {isPro && subPlan === "yearly" ? "₹599 / year" : isPro ? "₹79 / month" : isTrial ? `${days} day${days !== 1 ? "s" : ""} remaining` : "Limited features"}
                 </div>
               </div>
               <div className="px-3 py-1 rounded-full text-[11px] font-bold tracking-wide mt-0.5" style={{
@@ -157,7 +157,7 @@ export default function SubscriptionPage({
         {(isTrial || isFree || subStatus === "none") && (
           <div className="mx-4 mt-3">
             <button onClick={onUpgrade} className="w-full py-3.5 rounded-[14px] text-[14px] font-semibold active:opacity-80" style={{ background: "var(--md-primary)", color: "#fff" }}>
-              {isTrial ? "Upgrade Now · ₹49 / month" : "Get Pro · ₹49 / month"}
+              {isTrial ? "Upgrade Now · ₹79 / month" : "Get Pro · ₹79 / month"}
             </button>
           </div>
         )}
@@ -171,7 +171,7 @@ export default function SubscriptionPage({
               { label: "Status", value: isPro ? "Active" : isTrial ? "In Trial" : isFree ? "Free" : "Expired", valueColor: isPro ? "#2E7D32" : isTrial ? "#7c3aed" : undefined },
               ...(validUntil && isPro ? [{ label: "Access until", value: fmt(validUntil) }] : []),
               ...(validUntil && isTrial ? [{ label: "Trial ends", value: fmt(validUntil) }] : []),
-              { label: "Price", value: isPro ? (subPlan === "yearly" ? "₹499 / year" : "₹49 / month") : isTrial ? "Free for 7 days" : "Free" },
+              { label: "Price", value: isPro ? (subPlan === "yearly" ? "₹599 / year" : "₹79 / month") : isTrial ? "Free for 7 days" : "Free" },
             ].map((row, i) => (
               <div key={row.label} className="flex items-center justify-between px-4 py-3.5" style={{ borderTop: i > 0 ? "1px solid rgba(0,0,0,0.05)" : "none" }}>
                 <span className="text-[13px]" style={{ color: "var(--md-on-surface-variant)" }}>{row.label}</span>

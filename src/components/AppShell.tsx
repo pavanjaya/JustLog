@@ -49,6 +49,7 @@ export default function AppShell() {
   const ensureDefaultSpaceRunning = useRef(false);
   const personalSpaceId = useRef<string | null>(null);
   const [spaceLoading, setSpaceLoading] = useState(true);
+  const [trialBannerDismissed, setTrialBannerDismissed] = useState(false);
   const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: "", visible: false });
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const supabase = createClient();
@@ -322,9 +323,14 @@ export default function AppShell() {
 
   const isPro = subStatus === "active" || subStatus === "trialing";
   const isActive = isPro || subStatus === "free";
+  const isTrialExpired = subStatus === "none" && !!subValidUntil && subValidUntil < new Date();
+  const trialDaysLeft = subValidUntil && subStatus === "trialing"
+    ? Math.max(0, Math.ceil((subValidUntil.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+    : 0;
   const visibleTransactions = isPro
     ? transactions
-    : transactions.filter(tx => new Date(tx.created_at) > new Date(Date.now() - 90 * 24 * 60 * 60 * 1000));
+    : transactions.filter(tx => new Date(tx.created_at) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
+  const freeMonthlyLimitHit = false;
   const userName = user?.user_metadata?.full_name?.split(" ")[0] ?? user?.email?.split("@")[0] ?? user?.phone?.slice(-4);
   const avatarUrl = user?.user_metadata?.avatar_url as string | undefined;
   const userInitial = (user?.user_metadata?.full_name ?? user?.email ?? user?.phone ?? "?").charAt(0).toUpperCase();
@@ -402,6 +408,27 @@ export default function AppShell() {
         onUpgrade={() => setSubStatus("none")}
       />
 
+      {/* Trial banner */}
+      {subStatus === "trialing" && trialDaysLeft > 0 && !trialBannerDismissed && view === "home" && (
+        <div className="flex items-center justify-between px-4 py-2.5" style={{ background: "var(--md-primary)" }}>
+          <span className="text-[13px] font-medium text-white">⚡ Pro Trial — {trialDaysLeft} day{trialDaysLeft !== 1 ? "s" : ""} remaining</span>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setSubStatus("none")} className="text-[12px] font-semibold text-white underline">Upgrade</button>
+            <button onClick={() => setTrialBannerDismissed(true)} className="text-white opacity-70 active:opacity-100">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Free plan limit banner */}
+      {freeMonthlyLimitHit && view === "home" && (
+        <div className="flex items-center justify-between px-4 py-2.5" style={{ background: "#FF6B35" }}>
+          <span className="text-[12px] font-medium text-white">You&apos;ve used all 50 free transactions this month</span>
+          <button onClick={() => setSubStatus("none")} className="text-[12px] font-semibold text-white underline ml-2 flex-shrink-0">Upgrade</button>
+        </div>
+      )}
+
       {view !== "settings" && subStatus !== "none" && (
         <TopBar
           onNavigate={setView}
@@ -425,8 +452,9 @@ export default function AppShell() {
             <PaywallView
               userId={user.id}
               onSuccess={handleSubscribeSuccess}
-              onContinueFree={() => setSubStatus("free")}
-              trialExpired={false}
+              onContinueFree={isTrialExpired ? undefined : () => setSubStatus("free")}
+              trialExpired={isTrialExpired}
+              trialStats={isTrialExpired ? { transactions: transactions.length, spaces: spaces.length } : undefined}
             />
           </div>
         )}
@@ -442,13 +470,15 @@ export default function AppShell() {
             {view === "home" && (
               <HomeView
                 transactions={visibleTransactions}
-                onAddTransactions={handleAddTransactions}
+                onAddTransactions={freeMonthlyLimitHit ? undefined : handleAddTransactions}
                 onDeleteTransaction={handleDeleteTransaction}
                 onBulkDelete={handleBulkDelete}
                 onEditTransaction={handleEditTransaction}
                 onSeeAll={() => setView("search")}
                 userName={userName}
                 activeSpace={activeSpace}
+                logDisabled={freeMonthlyLimitHit}
+                onUpgrade={() => setSubStatus("none")}
               />
             )}
             {view === "story" && <StoryView transactions={transactions} />}

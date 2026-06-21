@@ -7,6 +7,7 @@ interface PaywallViewProps {
   onSuccess: () => void;
   onContinueFree?: () => void;
   trialExpired?: boolean;
+  trialStats?: { transactions: number; spaces: number };
 }
 
 declare global {
@@ -28,11 +29,13 @@ function loadRazorpayScript(): Promise<boolean> {
 }
 
 const FEATURES = [
-  { label: "Multiple spaces — personal & business" },
-  { label: "AI search — ask anything about your money" },
-  { label: "Spaces with mirror-to-personal & shared splits" },
+  { label: "Unlimited AI logging" },
+  { label: "Multiple spaces — Personal, Business & Family" },
+  { label: "Full history forever" },
+  { label: "AI Search — ask anything about your money" },
+  { label: "CSV Export" },
   { label: "PIN lock — keep sensitive spaces private" },
-  { label: "Full history, insights & CSV export" },
+  { label: "Priority support" },
 ];
 
 const TRIAL_UNLOCKS = [
@@ -41,11 +44,11 @@ const TRIAL_UNLOCKS = [
   "Export & full history enabled",
 ];
 
-type Screen = "main" | "trial-success" | "subscribe";
+type Screen = "main" | "trial-success" | "subscribe" | "downgrade-confirm";
 
-export default function PaywallView({ userId, onSuccess, onContinueFree, trialExpired }: PaywallViewProps) {
+export default function PaywallView({ userId, onSuccess, onContinueFree, trialExpired, trialStats }: PaywallViewProps) {
   const [screen, setScreen] = useState<Screen>("main");
-  const [plan, setPlan] = useState<"monthly" | "yearly">("monthly");
+  const [plan, setPlan] = useState<"monthly" | "yearly">("yearly");
   const [loading, setLoading] = useState(false);
 
   async function handleStartTrial() {
@@ -59,7 +62,8 @@ export default function PaywallView({ userId, onSuccess, onContinueFree, trialEx
     finally { setLoading(false); }
   }
 
-  async function handleSubscribe() {
+  async function handleSubscribe(selectedPlan?: "monthly" | "yearly") {
+    const p = selectedPlan ?? plan;
     setLoading(true);
     try {
       const loaded = await loadRazorpayScript();
@@ -68,7 +72,7 @@ export default function PaywallView({ userId, onSuccess, onContinueFree, trialEx
       const res = await fetch("/api/razorpay/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan }),
+        body: JSON.stringify({ plan: p }),
       });
       const { orderId, amount, currency, keyId, error } = await res.json();
       if (error || !orderId) { alert("Could not create order. Try again."); setLoading(false); return; }
@@ -76,7 +80,7 @@ export default function PaywallView({ userId, onSuccess, onContinueFree, trialEx
       new window.Razorpay({
         key: keyId, amount, currency,
         name: "JustLog",
-        description: plan === "yearly" ? "Pro Annual — ₹499/year" : "Pro Monthly — ₹49/month",
+        description: p === "yearly" ? "JustLog Pro Annual — ₹599/year" : "JustLog Pro Monthly — ₹79/month",
         image: "/logo.svg",
         order_id: orderId,
         handler: async (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
@@ -87,7 +91,7 @@ export default function PaywallView({ userId, onSuccess, onContinueFree, trialEx
               orderId: response.razorpay_order_id,
               paymentId: response.razorpay_payment_id,
               signature: response.razorpay_signature,
-              userId, plan,
+              userId, plan: p,
             }),
           });
           const result = await verify.json();
@@ -104,7 +108,7 @@ export default function PaywallView({ userId, onSuccess, onContinueFree, trialEx
   const safeTop = "calc(env(safe-area-inset-top, 0px) + 16px)";
   const safeBottom = "calc(env(safe-area-inset-bottom, 0px) + 28px)";
 
-  /* ── Trial success / filler screen ── */
+  /* ── Trial success screen ── */
   if (screen === "trial-success") {
     return (
       <div
@@ -112,7 +116,6 @@ export default function PaywallView({ userId, onSuccess, onContinueFree, trialEx
         style={{ background: "var(--md-surface)", paddingTop: safeTop, paddingBottom: safeBottom }}
       >
         <div className="flex-1 flex flex-col items-center justify-center text-center gap-0">
-          {/* Icon */}
           <div className="w-20 h-20 rounded-full flex items-center justify-center mb-6"
             style={{ background: "rgba(200,49,255,0.08)" }}>
             <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="var(--md-primary)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -120,15 +123,22 @@ export default function PaywallView({ userId, onSuccess, onContinueFree, trialEx
               <polyline points="22 4 12 14.01 9 11.01"/>
             </svg>
           </div>
-
           <h1 className="text-[26px] font-bold tracking-tight mb-2" style={{ color: "var(--md-on-surface)" }}>
-            Pro trial started!
+            Pro trial started! 🎉
           </h1>
-          <p className="text-[14px] mb-8" style={{ color: "var(--md-on-surface-variant)" }}>
-            7 days free · No card needed · Cancel anytime
+          <p className="text-[14px] mb-2" style={{ color: "var(--md-on-surface-variant)" }}>
+            Enjoy 7 days of full access
           </p>
-
-          {/* CTA */}
+          <div className="flex flex-col gap-2 mb-8 text-left w-full">
+            {TRIAL_UNLOCKS.map((u) => (
+              <div key={u} className="flex items-center gap-2">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--md-primary)" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span className="text-[13px]" style={{ color: "var(--md-on-surface-variant)" }}>{u}</span>
+              </div>
+            ))}
+          </div>
           <div className="flex flex-col gap-3 w-full">
             <button
               onClick={onSuccess}
@@ -147,6 +157,124 @@ export default function PaywallView({ userId, onSuccess, onContinueFree, trialEx
     );
   }
 
+  /* ── Downgrade confirmation ── */
+  if (screen === "downgrade-confirm") {
+    return (
+      <div
+        className="flex flex-col h-full w-full overflow-y-auto no-scrollbar px-6"
+        style={{ background: "var(--md-surface)", paddingTop: safeTop, paddingBottom: safeBottom }}
+      >
+        <div className="flex-1 flex flex-col justify-center gap-5">
+          <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: "rgba(255,107,53,0.1)" }}>
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#FF6B35" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
+          <div>
+            <h2 className="text-[22px] font-bold mb-2" style={{ color: "var(--md-on-surface)" }}>You&apos;ll lose access to:</h2>
+            <div className="flex flex-col gap-2 mb-4">
+              {["Spaces beyond Personal", "Transactions older than 30 days", "AI Search", "CSV Export"].map((item) => (
+                <div key={item} className="flex items-center gap-2">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#FF6B35" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                  <span className="text-[14px]" style={{ color: "var(--md-on-surface)" }}>{item}</span>
+                </div>
+              ))}
+            </div>
+            <p className="text-[14px]" style={{ color: "var(--md-on-surface-variant)" }}>Are you sure you want to downgrade?</p>
+          </div>
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={() => setScreen("main")}
+              className="w-full py-4 rounded-[16px] text-[15px] font-semibold active:opacity-80"
+              style={{ background: "var(--md-primary)", color: "#fff" }}
+            >
+              Keep Pro
+            </button>
+            <button
+              onClick={onContinueFree}
+              className="w-full py-3.5 rounded-[16px] text-[14px] font-medium text-center active:opacity-60"
+              style={{ border: "1.5px solid var(--md-outline-variant)", color: "var(--md-on-surface-variant)" }}
+            >
+              Yes, downgrade to Free
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── Trial expired screen (undismissable) ── */
+  if (trialExpired) {
+    return (
+      <div
+        className="flex flex-col h-full w-full overflow-y-auto no-scrollbar px-6"
+        style={{ background: "var(--md-surface)", paddingTop: safeTop, paddingBottom: safeBottom }}
+      >
+        <div className="flex-1 flex flex-col justify-center gap-6">
+          {/* Header */}
+          <div>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full mb-3" style={{ background: "rgba(255,107,53,0.1)" }}>
+              <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#FF6B35" strokeWidth={2.5} strokeLinecap="round">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              <span className="text-[11px] font-semibold" style={{ color: "#FF6B35" }}>Free trial ended</span>
+            </div>
+            <h1 className="text-[26px] font-bold tracking-tight mb-2" style={{ color: "var(--md-on-surface)" }}>
+              Your free trial has ended
+            </h1>
+            {trialStats && (
+              <p className="text-[14px] leading-relaxed" style={{ color: "var(--md-on-surface-variant)" }}>
+                You logged <span className="font-semibold" style={{ color: "var(--md-on-surface)" }}>{trialStats.transactions} transactions</span> across{" "}
+                <span className="font-semibold" style={{ color: "var(--md-on-surface)" }}>{trialStats.spaces} space{trialStats.spaces !== 1 ? "s" : ""}</span> this week.{" "}
+                Don&apos;t lose your progress.
+              </p>
+            )}
+          </div>
+
+          {/* Plan options */}
+          <div className="flex flex-col gap-3">
+            {/* Monthly */}
+            <button
+              onClick={() => handleSubscribe("monthly")}
+              disabled={loading}
+              className="w-full py-4 px-5 rounded-[16px] text-left active:opacity-80"
+              style={{ background: "var(--md-primary)", color: "#fff", opacity: loading ? 0.7 : 1 }}
+            >
+              <div className="text-[15px] font-semibold">Continue Pro — ₹79/month</div>
+              <div className="text-[12px] mt-0.5" style={{ opacity: 0.8 }}>Full access, billed monthly</div>
+            </button>
+
+            {/* Annual */}
+            <button
+              onClick={() => handleSubscribe("yearly")}
+              disabled={loading}
+              className="w-full py-4 px-5 rounded-[16px] text-left active:opacity-80 relative"
+              style={{ border: "2px solid var(--md-primary)", color: "var(--md-on-surface)", opacity: loading ? 0.7 : 1 }}
+            >
+              <span className="absolute -top-3 right-4 text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ background: "var(--md-primary)", color: "#fff" }}>
+                ⭐ Best Value
+              </span>
+              <div className="text-[15px] font-semibold">Best Value — ₹599/year</div>
+              <div className="text-[12px] mt-0.5" style={{ color: "var(--md-on-surface-variant)" }}>₹49/month · Save 37% · Save ₹360/year</div>
+            </button>
+          </div>
+
+          {/* Downgrade link */}
+          <button
+            onClick={() => setScreen("downgrade-confirm")}
+            className="text-center text-[13px] active:opacity-60"
+            style={{ color: "var(--md-on-surface-variant)" }}
+          >
+            Downgrade to Free plan →
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   /* ── Subscribe screen ── */
   if (screen === "subscribe") {
     return (
@@ -154,7 +282,6 @@ export default function PaywallView({ userId, onSuccess, onContinueFree, trialEx
         className="flex flex-col h-full w-full overflow-y-auto no-scrollbar"
         style={{ background: "var(--md-surface)", paddingTop: safeTop, paddingBottom: safeBottom }}
       >
-        {/* Back */}
         <button
           onClick={() => setScreen("main")}
           className="flex items-center gap-2 px-4 mb-6 active:opacity-60"
@@ -185,7 +312,7 @@ export default function PaywallView({ userId, onSuccess, onContinueFree, trialEx
                 boxShadow: plan === "monthly" ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
               }}
             >
-              <div className="font-semibold">₹49 / month</div>
+              <div className="font-semibold">₹79 / month</div>
               <div className="text-[11px] opacity-60">billed monthly</div>
             </button>
             <button
@@ -197,11 +324,11 @@ export default function PaywallView({ userId, onSuccess, onContinueFree, trialEx
                 boxShadow: plan === "yearly" ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
               }}
             >
-              <span className="absolute -top-2.5 right-3 text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "#FF6B35", color: "#fff" }}>
-                Save 15%
+              <span className="absolute -top-2.5 right-3 text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "var(--md-primary)", color: "#fff" }}>
+                ⭐ Save 37%
               </span>
-              <div className="font-semibold">₹499 / year</div>
-              <div className="text-[11px] opacity-60">₹41.6 / month</div>
+              <div className="font-semibold">₹599 / year</div>
+              <div className="text-[11px] opacity-60">₹49/month · Best Value</div>
             </button>
           </div>
 
@@ -218,10 +345,9 @@ export default function PaywallView({ userId, onSuccess, onContinueFree, trialEx
           </div>
         </div>
 
-        {/* CTA */}
         <div className="px-5 flex flex-col gap-3">
           <button
-            onClick={handleSubscribe}
+            onClick={() => handleSubscribe()}
             disabled={loading}
             className="w-full py-4 rounded-[16px] text-[15px] font-semibold flex items-center justify-center gap-2 active:opacity-80"
             style={{ background: "var(--md-primary)", color: "#fff", opacity: loading ? 0.7 : 1 }}
@@ -233,10 +359,10 @@ export default function PaywallView({ userId, onSuccess, onContinueFree, trialEx
                 </svg>
                 Opening checkout…
               </>
-            ) : `Pay ${plan === "yearly" ? "₹499 / year" : "₹49 / month"}`}
+            ) : `Pay ${plan === "yearly" ? "₹599 / year" : "₹79 / month"}`}
           </button>
           <p className="text-[11px] text-center" style={{ color: "var(--md-outline)" }}>
-            Secured by Razorpay · One-time payment · No auto-renewal
+            Cancel anytime · Secured by Razorpay 🔒
           </p>
         </div>
       </div>
@@ -267,31 +393,12 @@ export default function PaywallView({ userId, onSuccess, onContinueFree, trialEx
 
       {/* Hero */}
       <div className="px-5 mb-8">
-        {trialExpired ? (
-          <>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full mb-3" style={{ background: "rgba(255,107,53,0.1)" }}>
-              <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#FF6B35" strokeWidth={2.5} strokeLinecap="round">
-                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-              </svg>
-              <span className="text-[11px] font-semibold" style={{ color: "#FF6B35" }}>Pro trial ended</span>
-            </div>
-            <h1 className="text-[26px] font-bold tracking-tight leading-tight mb-2" style={{ color: "var(--md-on-surface)" }}>
-              Keep going with Pro
-            </h1>
-            <p className="text-[14px] leading-relaxed" style={{ color: "var(--md-on-surface-variant)" }}>
-              Your data is safe. Subscribe to pick up where you left off.
-            </p>
-          </>
-        ) : (
-          <>
-            <h1 className="text-[28px] font-bold tracking-tight leading-tight mb-2.5" style={{ color: "var(--md-on-surface)" }}>
-              Log money the<br />way you talk
-            </h1>
-            <p className="text-[14px] leading-relaxed" style={{ color: "var(--md-on-surface-variant)" }}>
-              Hindi, Hinglish, or English — just say what happened. AI does the rest.
-            </p>
-          </>
-        )}
+        <h1 className="text-[28px] font-bold tracking-tight leading-tight mb-2.5" style={{ color: "var(--md-on-surface)" }}>
+          Log money the<br />way you talk
+        </h1>
+        <p className="text-[14px] leading-relaxed" style={{ color: "var(--md-on-surface-variant)" }}>
+          Hindi, Hinglish, or English — just say what happened. AI does the rest.
+        </p>
       </div>
 
       {/* Features */}
@@ -306,56 +413,29 @@ export default function PaywallView({ userId, onSuccess, onContinueFree, trialEx
         ))}
       </div>
 
-      {/* CTAs */}
+      {/* CTAs — only 2 buttons */}
       <div className="px-5 flex flex-col gap-4 mt-auto">
+        <button
+          onClick={handleStartTrial}
+          disabled={loading}
+          className="w-full rounded-[16px] flex flex-col items-center justify-center active:opacity-80"
+          style={{ background: "var(--md-primary)", color: "#fff", opacity: loading ? 0.7 : 1, padding: "14px 16px 12px" }}
+        >
+          {loading ? (
+            <div className="flex items-center gap-2 py-1">
+              <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                <circle cx="12" cy="12" r="10" strokeOpacity={0.25}/><path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round"/>
+              </svg>
+              <span className="text-[15px] font-semibold">Starting…</span>
+            </div>
+          ) : (
+            <>
+              <span className="text-[15px] font-semibold">Try Pro free — 7 days</span>
+              <span className="text-[12px] mt-0.5" style={{ opacity: 0.8 }}>No card needed · Cancel anytime</span>
+            </>
+          )}
+        </button>
 
-        {/* Primary — trial (new users) or subscribe (trial expired) */}
-        {!trialExpired ? (
-          <button
-            onClick={handleStartTrial}
-            disabled={loading}
-            className="w-full rounded-[16px] flex flex-col items-center justify-center active:opacity-80"
-            style={{ background: "var(--md-primary)", color: "#fff", opacity: loading ? 0.7 : 1, padding: "14px 16px 12px" }}
-          >
-            {loading ? (
-              <div className="flex items-center gap-2 py-1">
-                <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-                  <circle cx="12" cy="12" r="10" strokeOpacity={0.25}/><path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round"/>
-                </svg>
-                <span className="text-[15px] font-semibold">Starting…</span>
-              </div>
-            ) : (
-              <>
-                <span className="text-[15px] font-semibold">Try Pro free — 7 days</span>
-                <span className="text-[12px] mt-0.5" style={{ opacity: 0.8 }}>No card needed · Cancel anytime</span>
-              </>
-            )}
-          </button>
-        ) : (
-          <button
-            onClick={() => setScreen("subscribe")}
-            className="w-full py-4 rounded-[16px] text-[15px] font-semibold active:opacity-80"
-            style={{ background: "var(--md-primary)", color: "#fff" }}
-          >
-            Subscribe to Pro
-          </button>
-        )}
-
-        {/* Secondary — subscribe (new users) */}
-        {!trialExpired && (
-          <button
-            onClick={() => setScreen("subscribe")}
-            className="w-full py-1 flex items-center justify-center gap-1.5 active:opacity-60"
-            style={{ color: "var(--md-on-surface-variant)" }}
-          >
-            <span className="text-[13px]">Or subscribe directly · ₹49/month</span>
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
-          </button>
-        )}
-
-        {/* Tertiary — free plan */}
         {onContinueFree && (
           <button
             onClick={onContinueFree}

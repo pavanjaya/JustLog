@@ -22,8 +22,8 @@ export async function POST(req: NextRequest) {
   try { body = await req.json(); } catch { body = {}; }
 
   const plan = body.plan ?? "monthly";
-  // ₹49/month or ₹499/year — amount in paise
-  const amount = plan === "yearly" ? 49900 : 4900;
+  // ₹79/month or ₹599/year — amount in paise
+  const amount = plan === "yearly" ? 59900 : 7900;
   const currency = "INR";
 
   const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });

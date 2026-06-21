@@ -48,7 +48,7 @@ export default function SwitchPlanSheet({ userId, onSuccess, onClose }: SwitchPl
         amount,
         currency,
         name: "JustLog",
-        description: "Pro Annual — ₹499/year",
+        description: "Pro Annual — ₹599/year",
         image: "/logo.svg",
         order_id: orderId,
         handler: async (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
@@ -114,7 +114,7 @@ export default function SwitchPlanSheet({ userId, onSuccess, onClose }: SwitchPl
             {/* Current */}
             <div className="flex-1 rounded-[14px] p-3.5" style={{ background: "var(--md-surface-container-low)", border: "1px solid var(--md-outline-variant)" }}>
               <div className="text-[11px] font-semibold mb-1" style={{ color: "var(--md-on-surface-variant)" }}>CURRENT</div>
-              <div className="text-[16px] font-bold" style={{ color: "var(--md-on-surface)" }}>₹49</div>
+              <div className="text-[16px] font-bold" style={{ color: "var(--md-on-surface)" }}>₹79</div>
               <div className="text-[11px]" style={{ color: "var(--md-on-surface-variant)" }}>per month</div>
               <div className="text-[11px] mt-1" style={{ color: "var(--md-on-surface-variant)" }}>₹588 / year</div>
             </div>
@@ -132,7 +132,7 @@ export default function SwitchPlanSheet({ userId, onSuccess, onClose }: SwitchPl
                 <div className="text-[11px] font-semibold" style={{ color: "#1a6b1f" }}>ANNUAL</div>
                 <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "#FF6B35", color: "#fff" }}>-15%</span>
               </div>
-              <div className="text-[16px] font-bold" style={{ color: "#1a6b1f" }}>₹499</div>
+              <div className="text-[16px] font-bold" style={{ color: "#1a6b1f" }}>₹599</div>
               <div className="text-[11px]" style={{ color: "#1a6b1f" }}>per year</div>
               <div className="text-[11px] mt-1 font-semibold" style={{ color: "#1a6b1f" }}>Save ₹89</div>
             </div>
@@ -169,7 +169,7 @@ export default function SwitchPlanSheet({ userId, onSuccess, onClose }: SwitchPl
                 </svg>
                 Opening checkout…
               </>
-            ) : "Pay ₹499 · Switch to Annual"}
+            ) : "Pay ₹599 · Switch to Annual"}
           </button>
 
           <p className="text-[11px] text-center mt-3" style={{ color: "var(--md-outline)" }}>
