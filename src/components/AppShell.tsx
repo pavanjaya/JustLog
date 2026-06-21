@@ -137,15 +137,30 @@ export default function AppShell() {
     }
   }, [supabase, loadSpaces]);
 
-  const loadSubscription = useCallback(async (_userId?: string) => {
+  const loadSubscription = useCallback(async () => {
+    // Read cached status first for instant render (no paywall flash on refresh)
+    const cached = localStorage.getItem("jl_sub");
+    if (cached) {
+      try {
+        const c = JSON.parse(cached);
+        if (c.validUntil) setSubValidUntil(new Date(c.validUntil));
+        if (c.plan) setSubPlan(c.plan);
+        setSubStatus(c.status);
+      } catch { /* ignore bad cache */ }
+    }
+
+    // Then verify from server and update
     try {
       const res = await fetch("/api/subscription/status");
       const data = await res.json();
+      const status: SubStatus = data.status === "trialing" ? "trialing" : data.status === "active" ? "active" : "none";
       if (data.validUntil) setSubValidUntil(new Date(data.validUntil));
       if (data.plan) setSubPlan(data.plan);
-      setSubStatus(data.status === "trialing" ? "trialing" : data.status === "active" ? "active" : "none");
+      setSubStatus(status);
+      // Cache the result
+      localStorage.setItem("jl_sub", JSON.stringify({ status, validUntil: data.validUntil, plan: data.plan }));
     } catch {
-      // On error keep current status — don't reset to none
+      // On network error, keep cached status — don't reset to none
     }
   }, []);
 
@@ -209,6 +224,7 @@ export default function AppShell() {
         setSpaceLoading(false);
       } else {
         setSpaceLoading(false);
+        localStorage.removeItem("jl_sub");
         setSubStatus("none");
         router.replace("/login");
       }
@@ -308,20 +324,20 @@ export default function AppShell() {
   }
 
   function handleTrialSuccess() {
-    // Trial just started — set optimistic state, DB record already created
-    setSubStatus("trialing");
     const trialEnd = new Date();
     trialEnd.setDate(trialEnd.getDate() + 7);
+    setSubStatus("trialing");
     setSubValidUntil(trialEnd);
+    localStorage.setItem("jl_sub", JSON.stringify({ status: "trialing", validUntil: trialEnd.toISOString(), plan: "trial" }));
   }
 
   async function handleSubscribeSuccess() {
-    // Payment verified — DB already updated by verify route, set optimistic state
-    setSubStatus("active");
-    setSubPlan("monthly");
     const monthEnd = new Date();
     monthEnd.setDate(monthEnd.getDate() + 30);
+    setSubStatus("active");
+    setSubPlan("monthly");
     setSubValidUntil(monthEnd);
+    localStorage.setItem("jl_sub", JSON.stringify({ status: "active", validUntil: monthEnd.toISOString(), plan: "monthly" }));
   }
 
   const isPro = subStatus === "active" || subStatus === "trialing";
@@ -456,7 +472,7 @@ export default function AppShell() {
               userId={user.id}
               onSuccess={handleTrialSuccess}
               onPaymentSuccess={() => { handleSubscribeSuccess(); showToast("Welcome to Pro! 🎉"); }}
-              onContinueFree={isTrialExpired ? undefined : () => setSubStatus("free")}
+              onContinueFree={isTrialExpired ? undefined : () => { setSubStatus("free"); localStorage.setItem("jl_sub", JSON.stringify({ status: "free" })); }}
               trialExpired={isTrialExpired}
               trialStats={isTrialExpired ? { transactions: transactions.length, spaces: spaces.length } : undefined}
             />

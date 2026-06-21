@@ -376,20 +376,9 @@ export default function PaywallView({ userId, onSuccess, onPaymentSuccess, onCon
       className="flex flex-col h-full w-full overflow-y-auto no-scrollbar"
       style={{ background: "var(--md-surface)", paddingTop: safeTop, paddingBottom: safeBottom }}
     >
-      {/* Top row: Logo + close */}
-      <div className="px-5 mb-7 flex items-center justify-between">
+      {/* Top row: Logo */}
+      <div className="px-5 mb-7">
         <img src="/logo.svg" alt="JustLog" className="h-8" />
-        {onContinueFree && (
-          <button
-            onClick={onContinueFree}
-            className="w-8 h-8 flex items-center justify-center rounded-full active:opacity-60"
-            style={{ background: "var(--md-surface-container-low)" }}
-          >
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--md-on-surface-variant)" strokeWidth={2.5} strokeLinecap="round">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-        )}
       </div>
 
       {/* Hero */}
