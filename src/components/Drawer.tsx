@@ -86,9 +86,14 @@ export default function Drawer({ open, view, onClose, onNavigate, onDeleteAll, u
                       FREE
                     </span>
                   )}
-                  {subStatus === "none" && (
+                  {subStatus === "none" && validUntil && (
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(255,107,53,0.12)", color: "#FF6B35" }}>
                       Trial ended
+                    </span>
+                  )}
+                  {subStatus === "none" && !validUntil && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "var(--md-surface-container-highest)", color: "var(--md-on-surface-variant)" }}>
+                      FREE
                     </span>
                   )}
                 </div>
