@@ -394,7 +394,7 @@ export default function AppShell() {
         user={user}
         subStatus={subStatus}
         validUntil={subValidUntil}
-        onUpgrade={() => setSubStatus("none")}
+        onUpgrade={() => subStatus === "trialing" ? setShowSubPage(true) : setSubStatus("none")}
       />
 
       <SpaceSwitcher
