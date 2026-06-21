@@ -140,14 +140,6 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
         const perm = await SpeechRecognition.requestPermissions();
         if (perm.speechRecognition !== "granted") { setListening(false); return; }
 
-        await SpeechRecognition.start({
-          language: "en-IN",
-          maxResults: 1,
-          prompt: "Speak your entry...",
-          partialResults: true,
-          popup: false,
-        });
-
         const stopNative = async () => {
           if (nativeTimeoutRef.current) clearTimeout(nativeTimeoutRef.current);
           nativeListenerRef.current?.remove();
@@ -156,6 +148,15 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
           setListening(false);
         };
 
+        // partialResults: false means the listener fires exactly once with the final result
+        await SpeechRecognition.start({
+          language: "en-IN",
+          maxResults: 1,
+          prompt: "Speak your entry...",
+          partialResults: false,
+          popup: false,
+        });
+
         const listener = await SpeechRecognition.addListener("partialResults", (data: { matches?: string[] }) => {
           if (data.matches?.length) {
             const transcript = data.matches[0].trim();
@@ -163,9 +164,8 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
             onChange(combined);
             const el = textareaRef.current;
             if (el) requestAnimationFrame(() => autoGrow(el));
-            // Stop as soon as we have a result — recognition is done
-            stopNative();
           }
+          stopNative();
         });
         nativeListenerRef.current = listener;
 
