@@ -83,7 +83,7 @@ function SubscriptionCard({ subStatus, validUntil, subPlan, onUpgrade, onManage 
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-on-surface-variant)" }}><path d="M9 18l6-6-6-6"/></svg>
         </button>
         <div className="px-4 pb-4">
-          <button onClick={onUpgrade} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
+          <button onClick={onManage} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
             Upgrade to Pro · ₹79/month
           </button>
         </div>
@@ -95,7 +95,7 @@ function SubscriptionCard({ subStatus, validUntil, subPlan, onUpgrade, onManage 
     <div className="mx-4 mb-3 p-4 rounded-2xl" style={{ background: "rgba(255,107,53,0.06)", border: "1px solid rgba(255,107,53,0.2)" }}>
       <div className="text-sm font-semibold mb-1" style={{ color: "var(--md-on-surface)" }}>No active plan</div>
       <div className="text-xs mb-3" style={{ color: "var(--md-on-surface-variant)" }}>Your trial has ended. Upgrade to keep logging.</div>
-      <button onClick={onUpgrade} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
+      <button onClick={onManage} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
         Upgrade to Pro · ₹79/month
       </button>
     </div>
