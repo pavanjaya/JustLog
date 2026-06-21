@@ -317,16 +317,13 @@ export default function AppShell() {
   }
 
   async function handleSubscribeSuccess() {
-    if (user) {
-      await loadSubscription(user.id);
-    } else {
-      const monthEnd = new Date();
-      monthEnd.setDate(monthEnd.getDate() + 30);
-      setSubValidUntil(monthEnd);
-      setSubStatus("active");
-    }
-    // Ensure paywall is dismissed regardless of what loadSubscription returns
-    setSubStatus((prev) => prev === "none" ? "trialing" : prev);
+    // Immediately update UI to active so user isn't stuck on paywall/trial
+    const monthEnd = new Date();
+    monthEnd.setDate(monthEnd.getDate() + 30);
+    setSubValidUntil(monthEnd);
+    setSubStatus("active");
+    // Re-fetch in background to sync accurate data from DB
+    if (user) loadSubscription(user.id);
   }
 
   const isPro = subStatus === "active" || subStatus === "trialing";
