@@ -31,7 +31,12 @@ export default function LoginPage() {
         const googleUser = await GoogleAuth.signIn();
         const idToken = googleUser.authentication.idToken;
         const { error } = await supabase.auth.signInWithIdToken({ provider: "google", token: idToken });
-        if (error) console.error("Supabase sign in error:", error);
+        if (error) {
+          console.error("Supabase sign in error:", error);
+          setLoading(false);
+        } else {
+          window.location.href = "/";
+        }
       } catch (e) {
         console.error("Google sign in error:", e);
         setLoading(false);
