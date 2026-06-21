@@ -117,8 +117,8 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
   async function toggleVoice() {
     if (listening) {
       if (isNative()) {
-        if (nativeTimeoutRef.current) clearTimeout(nativeTimeoutRef.current);
-        nativeListenerRef.current?.remove();
+        // nativeListenerRef.current.remove() is the full cleanup fn set during start
+        await nativeListenerRef.current?.remove();
         nativeListenerRef.current = null;
         const { SpeechRecognition } = await import("@capacitor-community/speech-recognition");
         await SpeechRecognition.stop().catch(() => {});
@@ -140,37 +140,45 @@ export default function BottomInput({ value, onChange, onSend, disabled, transac
         const perm = await SpeechRecognition.requestPermissions();
         if (perm.speechRecognition !== "granted") { setListening(false); return; }
 
-        const stopNative = async () => {
+        let lastTranscript = "";
+
+        const cleanup = async () => {
           if (nativeTimeoutRef.current) clearTimeout(nativeTimeoutRef.current);
           nativeListenerRef.current?.remove();
           nativeListenerRef.current = null;
-          await SpeechRecognition.stop().catch(() => {});
+          partialListener.remove();
+          stateListener.remove();
           setListening(false);
         };
 
-        // partialResults: false means the listener fires exactly once with the final result
         await SpeechRecognition.start({
           language: "en-IN",
           maxResults: 1,
           prompt: "Speak your entry...",
-          partialResults: false,
+          partialResults: true,
           popup: false,
         });
 
-        const listener = await SpeechRecognition.addListener("partialResults", (data: { matches?: string[] }) => {
+        // Track latest transcript as user speaks
+        const partialListener = await SpeechRecognition.addListener("partialResults", (data: { matches?: string[] }) => {
           if (data.matches?.length) {
-            const transcript = data.matches[0].trim();
-            const combined = prevText ? `${prevText}, ${transcript}` : transcript;
+            lastTranscript = data.matches[0].trim();
+            const combined = prevText ? `${prevText}, ${lastTranscript}` : lastTranscript;
             onChange(combined);
             const el = textareaRef.current;
             if (el) requestAnimationFrame(() => autoGrow(el));
           }
-          stopNative();
         });
-        nativeListenerRef.current = listener;
+
+        // Android fires listeningState "stopped" when recognition ends naturally
+        const stateListener = await SpeechRecognition.addListener("listeningState", (state: { status: string }) => {
+          if (state.status === "stopped") cleanup();
+        });
+
+        nativeListenerRef.current = { remove: cleanup };
 
         // Auto-stop after 15s as fallback
-        nativeTimeoutRef.current = setTimeout(stopNative, 15000);
+        nativeTimeoutRef.current = setTimeout(cleanup, 15000);
 
       } catch (e) {
         console.error("Native speech error:", e);
