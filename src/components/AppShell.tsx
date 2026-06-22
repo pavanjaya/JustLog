@@ -43,6 +43,7 @@ export default function AppShell() {
   const [pendingSpace, setPendingSpace] = useState<Space | null>(null);
   const [unlockedSpaces, setUnlockedSpaces] = useState<Set<string>>(new Set());
   const [onboardingDone, setOnboardingDone] = useState(true);
+  const [subChecked, setSubChecked] = useState(false); // true once server has responded
   const ensureDefaultSpaceRunning = useRef(false);
   const personalSpaceId = useRef<string | null>(null);
   const [spaceLoading, setSpaceLoading] = useState(true);
@@ -179,6 +180,8 @@ export default function AppShell() {
     } catch {
       // Network error — keep current state
       setSubStatus((prev) => prev === "loading" ? "none" : prev);
+    } finally {
+      setSubChecked(true);
     }
   }, []);
 
@@ -417,7 +420,7 @@ export default function AppShell() {
           </div>
         </div>
       )}
-      {splashDone && !onboardingDone && subStatus !== "loading" && subStatus !== "trialing" && subStatus !== "active" && (
+      {splashDone && subChecked && !onboardingDone && subStatus !== "trialing" && subStatus !== "active" && (
         <OnboardingScreen onDone={() => {
           localStorage.setItem("jl_onboarded", "1");
           setOnboardingDone(true);
@@ -485,7 +488,7 @@ export default function AppShell() {
             <div className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "var(--md-primary)", borderTopColor: "transparent" }} />
           </div>
         )}
-        {(subStatus === "none") && user && (
+        {subChecked && (subStatus === "none") && user && (
           <div className="flex-1 w-full">
             <PaywallView
               userId={user.id}
