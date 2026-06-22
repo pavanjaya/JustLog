@@ -21,7 +21,7 @@ export async function GET() {
     .maybeSingle();
 
   if (data) {
-    const validUntil = new Date(data.valid_until);
+    const validUntil = new Date(data.valid_until.replace(" ", "T"));
     const isActive = validUntil > new Date() && data.status !== "cancelled";
 
     if (isActive) {
