@@ -57,6 +57,8 @@ export async function POST(req: NextRequest) {
     payment_id: paymentId,
     order_id: orderId,
     valid_until: validUntil.toISOString(),
+    onboarded: true,
+    free_chosen: false,
   });
 
   if (error) {
