@@ -88,6 +88,7 @@ export default function SearchView({ transactions, onDeleteTransaction, onBulkDe
   }
 
   async function startVoiceSearch() {
+    if (!isPro) { onUpgrade?.(); return; }
     if (voiceListening) {
       if (isNative()) {
         const { SpeechRecognition } = await import("@capacitor-community/speech-recognition");
