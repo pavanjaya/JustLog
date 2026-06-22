@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { Transaction, Space } from "@/types";
 import TxItem from "@/components/TxItem";
 import { apiUrl } from "@/lib/api";
@@ -549,7 +550,7 @@ export default function HomeView({ transactions, allTransactions, hiddenCount = 
         const payers = extractPayers(allTxs);
         const hasPayers = payers.length > 0;
 
-        return (
+        return createPortal(
           <>
             <div className="fixed inset-0 z-[600]" style={{ background: "rgba(0,0,0,0.4)" }} onClick={() => setShowSplitSheet(false)} />
             <div className="fixed bottom-0 left-0 right-0 z-[700] max-w-[430px] mx-auto rounded-t-[28px] flex flex-col" style={{ background: "var(--md-surface)", paddingBottom: "calc(env(safe-area-inset-bottom,0px) + 24px)", maxHeight: "80vh" }}>
@@ -612,7 +613,8 @@ export default function HomeView({ transactions, allTransactions, hiddenCount = 
                 </div>
               )}
             </div>
-          </>
+          </>,
+          document.body
         );
       })()}
     </div>
