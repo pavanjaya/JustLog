@@ -238,6 +238,25 @@ export default function SettingsView({
     return transactions.filter(tx => new Date(tx.created_at) >= start && new Date(tx.created_at) <= now);
   }
 
+  function getSplitSummary(txs: typeof transactions) {
+    if (!activeSpace || activeSpace.people_count <= 1) return null;
+    const totalExpense = txs.filter(t => t.type === "expense").reduce((s, t) => s + t.amount, 0);
+    const perHead = Math.round(totalExpense / activeSpace.people_count);
+    const map: Record<string, number> = {};
+    txs.filter(t => t.type === "income").forEach(t => {
+      const m = t.description.match(/(?:from|by)\s+([a-zA-Z]+(?:\s+[a-zA-Z]+)?)/i);
+      const n = m ? m[1].trim().toLowerCase() : null;
+      if (n) map[n] = (map[n] || 0) + t.amount;
+    });
+    const payers = Object.entries(map).map(([key, paid]) => ({
+      name: key.replace(/\b\w/g, c => c.toUpperCase()),
+      paid,
+      owes: perHead - paid,
+    }));
+    const unnamedCount = Math.max(0, activeSpace.people_count - payers.length);
+    return { perHead, payers, unnamedCount, totalExpense };
+  }
+
   function handleExportCSV() {
     const txs = getFilteredTransactions();
     if (!txs.length) { onToast("No transactions in this period"); return; }
@@ -246,7 +265,21 @@ export default function SettingsView({
       const d = new Date(tx.created_at).toLocaleDateString("en-IN");
       return `${d},${tx.type},${tx.category},"${tx.description}",${tx.amount}`;
     });
-    const csv = [header, ...rows].join("\n");
+    const split = getSplitSummary(txs);
+    const splitRows: string[] = [];
+    if (split) {
+      splitRows.push("");
+      splitRows.push("--- Split Summary ---,,,,");
+      splitRows.push(`People,${activeSpace!.people_count},,Per head,${split.perHead}`);
+      split.payers.forEach(p => {
+        const label = p.owes <= 0 ? `gets back ${Math.abs(p.owes)}` : `owes ${p.owes}`;
+        splitRows.push(`${p.name} (paid ${p.paid}),,,${label},`);
+      });
+      if (split.unnamedCount > 0) {
+        splitRows.push(`${split.unnamedCount} ${split.unnamedCount === 1 ? "person" : "people"},,,owes ${split.perHead} each,`);
+      }
+    }
+    const csv = [header, ...rows, ...splitRows].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -275,6 +308,33 @@ export default function SettingsView({
     const totalIncome = txs.filter(t => t.type === "income").reduce((s, t) => s + t.amount, 0);
     const totalExpense = txs.filter(t => t.type === "expense").reduce((s, t) => s + t.amount, 0);
     const balance = totalIncome - totalExpense;
+
+    const split = getSplitSummary(txs);
+    const splitSection = split ? (() => {
+      const payerRows = split.payers.map(p => {
+        const settled = p.owes <= 0;
+        const label = settled ? `gets back ₹${Math.abs(p.owes).toLocaleString("en-IN")}` : `owes ₹${p.owes.toLocaleString("en-IN")}`;
+        const color = settled ? "#16a34a" : "#dc2626";
+        return `<tr>
+          <td style="font-weight:500">${p.name}</td>
+          <td style="color:#666">Paid ₹${p.paid.toLocaleString("en-IN")}</td>
+          <td style="text-align:right;font-weight:600;color:${color}">${label}</td>
+        </tr>`;
+      }).join("");
+      const unnamedRow = split.unnamedCount > 0 ? `<tr>
+        <td style="color:#666">${split.unnamedCount} ${split.unnamedCount === 1 ? "person" : "people"}</td>
+        <td style="color:#666">Not tracked</td>
+        <td style="text-align:right;font-weight:600;color:#dc2626">owes ₹${split.perHead.toLocaleString("en-IN")} each</td>
+      </tr>` : "";
+      return `<div class="split-block">
+        <div class="split-header">
+          <span>Split Summary</span>
+          <span style="font-size:12px;color:#666">${activeSpace!.people_count} people · ₹${split.perHead.toLocaleString("en-IN")} per head</span>
+        </div>
+        <table><thead><tr><th>Person</th><th>Contributed</th><th style="text-align:right">Settlement</th></tr></thead>
+        <tbody>${payerRows}${unnamedRow}</tbody></table>
+      </div>`;
+    })() : "";
 
     const monthSections = Object.entries(grouped).map(([month, txs]) => {
       const mIncome = txs.filter(t => t.type === "income").reduce((s, t) => s + t.amount, 0);
@@ -318,6 +378,8 @@ export default function SettingsView({
         td { padding:7px 8px; border-bottom:1px solid #f3f4f6; font-size:12px; }
         tr:last-child td { border-bottom:none; }
         .footer { margin-top:24px; padding-top:12px; border-top:1px solid #e5e7eb; font-size:11px; color:#999; text-align:center; }
+        .split-block { margin-bottom:20px; background:#f5f3ff; border-radius:10px; padding:12px 16px; }
+        .split-header { display:flex; justify-content:space-between; align-items:center; padding:4px 0 10px; font-weight:600; font-size:13px; color:#7c3aed; border-bottom:1px solid #e5e7eb; margin-bottom:8px; }
         @media print { body { padding:16px; } }
       </style></head><body>
       <div class="header">
@@ -329,6 +391,7 @@ export default function SettingsView({
         <div class="summary-card"><div class="label">Total Expense</div><div class="value" style="color:#dc2626">₹${totalExpense.toLocaleString("en-IN")}</div></div>
         <div class="summary-card"><div class="label">Balance</div><div class="value" style="color:${balance >= 0 ? "#16a34a" : "#dc2626"}">${balance < 0 ? "−" : ""}₹${Math.abs(balance).toLocaleString("en-IN")}</div></div>
       </div>
+      ${splitSection}
       ${monthSections}
       <div class="footer">Exported from JustLog · justlog.app</div>
     </body></html>`;
