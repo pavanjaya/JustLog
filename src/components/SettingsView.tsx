@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useCurrency } from "@/lib/CurrencyContext";
+import { CURRENCIES } from "@/lib/currency";
 import type { User } from "@supabase/supabase-js";
 import type { Space, Transaction } from "@/types";
 import { createClient } from "@/lib/supabase/client";
@@ -172,6 +174,7 @@ export default function SettingsView({
 }: SettingsViewProps) {
   const router = useRouter();
   const supabase = createClient();
+  const { currency, setCurrencyCode } = useCurrency();
   const name = user?.user_metadata?.full_name ?? user?.email?.split("@")[0] ?? "You";
   const email = user?.email ?? "";
   const avatar = user?.user_metadata?.avatar_url as string | undefined;
@@ -433,6 +436,24 @@ export default function SettingsView({
       {/* Group 2 — preferences */}
       <SettingsGroup>
         <SettingsItem icon={<IconMoon />} label="Dark Mode" onClick={toggleDarkMode} rightSlot={<Toggle on={darkMode} />} />
+        <SettingsItem
+          icon={<span className="text-base">💱</span>}
+          label="Currency"
+          onClick={() => {}}
+          rightSlot={
+            <select
+              value={currency.code}
+              onChange={e => setCurrencyCode(e.target.value)}
+              onClick={e => e.stopPropagation()}
+              className="text-sm font-medium rounded-lg px-2 py-1 border-0 outline-none bg-transparent"
+              style={{ color: "var(--md-primary)", cursor: "pointer" }}
+            >
+              {CURRENCIES.map(c => (
+                <option key={c.code} value={c.code}>{c.symbol} {c.code}</option>
+              ))}
+            </select>
+          }
+        />
         <SettingsItem icon={<IconBell />} label="Notifications" onClick={() => onToast("Notifications coming soon")} rightSlot={<Toggle on={false} />} last />
       </SettingsGroup>
 

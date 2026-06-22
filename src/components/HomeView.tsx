@@ -13,7 +13,9 @@ function isAndroid() {
 }
 import AiBubble from "@/components/AiBubble";
 import BottomInput from "@/components/BottomInput";
-import { fmtCompact, fmtFull, getGreeting } from "@/lib/format";
+import { getGreeting } from "@/lib/format";
+import { fmtCompact, fmtFull } from "@/lib/currency";
+import { useCurrency } from "@/lib/CurrencyContext";
 import { useCountUp } from "@/lib/useCountUp";
 
 interface HomeViewProps {
@@ -34,6 +36,7 @@ interface HomeViewProps {
 type AiState = "idle" | "loading" | "success" | "error" | "clarify";
 
 export default function HomeView({ transactions, allTransactions, hiddenCount = 0, onAddTransactions, onDeleteTransaction, onBulkDelete, onEditTransaction, onSeeAll, userName = "there", activeSpace, logDisabled, onUpgrade }: HomeViewProps) {
+  const { currency } = useCurrency();
   const [input, setInput] = useState("");
   const [aiState, setAiState] = useState<AiState>("idle");
   const [newTxs, setNewTxs] = useState<Transaction[]>([]);
@@ -256,7 +259,7 @@ export default function HomeView({ transactions, allTransactions, hiddenCount = 
         <div className="mb-4">
           <div className="text-xs font-medium mb-1" style={{ color: "var(--md-on-surface-variant)" }}>Total Balance</div>
           <div className="text-3xl font-bold tracking-tight" style={{ color: balance >= 0 ? "#1B5E20" : "#B71C1C" }}>
-            {animatedBalance < 0 ? "−" : ""}{fmtFull(Math.abs(animatedBalance))}
+            {animatedBalance < 0 ? "−" : ""}{fmtFull(Math.abs(animatedBalance), currency)}
           </div>
         </div>
 
@@ -270,7 +273,7 @@ export default function HomeView({ transactions, allTransactions, hiddenCount = 
               </div>
               <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#2E7D32" }}>Total Income</span>
             </div>
-            <div className="text-lg font-bold" style={{ color: "#1B5E20" }}>{fmtCompact(animatedIncome)}</div>
+            <div className="text-lg font-bold" style={{ color: "#1B5E20" }}>{fmtCompact(animatedIncome, currency)}</div>
           </div>
 
           <div className="rounded-2xl px-4 py-3" style={{ background: "#FFF5F5", border: "1px solid #FFCDD2" }}>
@@ -282,7 +285,7 @@ export default function HomeView({ transactions, allTransactions, hiddenCount = 
               </div>
               <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "#C62828" }}>Total Spend</span>
             </div>
-            <div className="text-lg font-bold" style={{ color: "#B71C1C" }}>{fmtCompact(animatedExpense)}</div>
+            <div className="text-lg font-bold" style={{ color: "#B71C1C" }}>{fmtCompact(animatedExpense, currency)}</div>
           </div>
         </div>
 
@@ -296,7 +299,7 @@ export default function HomeView({ transactions, allTransactions, hiddenCount = 
               Per head
             </span>
             <span className="text-sm font-semibold" style={{ color: "var(--md-primary)" }}>
-              {fmtFull(Math.round(totalExpense / activeSpace.people_count))}
+              {fmtFull(Math.round(totalExpense / activeSpace.people_count), currency)}
             </span>
             <span className="text-xs ml-auto" style={{ color: "var(--md-outline)" }}>
               ÷ {activeSpace.people_count} people
@@ -339,7 +342,7 @@ export default function HomeView({ transactions, allTransactions, hiddenCount = 
                     <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
                   </div>
                   <span className="text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>
-                    ₹{clarifyPerson.amount.toLocaleString("en-IN")} with {clarifyPerson.name}
+                    {fmtFull(clarifyPerson.amount, currency)} with {clarifyPerson.name}
                   </span>
                 </div>
                 <button onClick={() => { setClarifyPerson(null); setAiState("idle"); }} style={{ color: "var(--md-on-surface-variant)", padding: "2px 6px", fontSize: 13 }}>✕</button>
@@ -374,7 +377,7 @@ export default function HomeView({ transactions, allTransactions, hiddenCount = 
                     <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
                   </div>
                   <span className="text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>
-                    ₹{clarifyAmount.toLocaleString("en-IN")}
+                    {fmtFull(clarifyAmount, currency)}
                   </span>
                 </div>
                 <button onClick={() => { setClarifyAmount(null); setAiState("idle"); }} style={{ color: "var(--md-on-surface-variant)", padding: "2px 6px", fontSize: 13 }}>✕</button>

@@ -2,7 +2,9 @@
 
 import { useState, useRef } from "react";
 import type { Transaction, Category } from "@/types";
-import { getCategoryMeta, fmtFull } from "@/lib/format";
+import { getCategoryMeta } from "@/lib/format";
+import { fmtFull } from "@/lib/currency";
+import { useCurrency } from "@/lib/CurrencyContext";
 import CategoryIcon from "@/components/CategoryIcon";
 
 const CATEGORIES: Category[] = [
@@ -25,6 +27,7 @@ interface TxItemProps {
 }
 
 export default function TxItem({ tx, index = 0, showDate = false, onDelete, onEdit, selectMode = false, selected = false, onSelect, onEnterSelectMode }: TxItemProps) {
+  const { currency } = useCurrency();
   const meta = getCategoryMeta(tx.category);
   const date = new Date(tx.created_at);
   const [showDelete, setShowDelete] = useState(false);
@@ -155,7 +158,7 @@ export default function TxItem({ tx, index = 0, showDate = false, onDelete, onEd
           {/* Actions or amount */}
           {selectMode ? (
             <div className="text-sm font-semibold flex-shrink-0 tabular-nums" style={{ color: tx.type === "income" ? "#1B7A3E" : "var(--md-on-surface)", opacity: selected ? 1 : 0.5 }}>
-              {tx.type === "income" ? "+" : "−"}{fmtFull(tx.amount)}
+              {tx.type === "income" ? "+" : "−"}{fmtFull(tx.amount, currency)}
             </div>
           ) : showDelete ? (
             <div className="flex items-center gap-2">
@@ -172,7 +175,7 @@ export default function TxItem({ tx, index = 0, showDate = false, onDelete, onEd
             </div>
           ) : (
             <div className="text-sm font-semibold flex-shrink-0 tabular-nums" style={{ color: tx.type === "income" ? "#1B7A3E" : "var(--md-on-surface)" }}>
-              {tx.type === "income" ? "+" : "−"}{fmtFull(tx.amount)}
+              {tx.type === "income" ? "+" : "−"}{fmtFull(tx.amount, currency)}
             </div>
           )}
         </div>

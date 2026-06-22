@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
+import { CurrencyProvider } from "@/lib/CurrencyContext";
 
 const geist = Geist({
   subsets: ["latin"],
@@ -26,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`h-full ${geist.variable}`}>
-      <body className="h-full font-sans">{children}</body>
+      <body className="h-full font-sans"><CurrencyProvider>{children}</CurrencyProvider></body>
     </html>
   );
 }
