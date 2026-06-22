@@ -48,5 +48,5 @@ export async function GET() {
     });
   }
 
-  return NextResponse.json({ status: "none", existingUser: false, onboarded: false, freeChosen: false });
+  return NextResponse.json({ status: "none", existingUser: false, onboarded: false, freeChosen: false, _debug_uid: user.id });
 }
