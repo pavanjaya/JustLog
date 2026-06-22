@@ -232,9 +232,7 @@ export default function AppShell() {
           setShowNamePrompt(true);
         }
         setSpaceLoading(true);
-        const [defaultSpace, allSpaces] = await ensureDefaultSpace(user.id);
-        const savedSpaceId = localStorage.getItem("jl_active_space");
-        const space = (savedSpaceId && allSpaces.find((s) => s.id === savedSpaceId)) || defaultSpace;
+        const [space, allSpaces] = await ensureDefaultSpace(user.id);
         setActiveSpace(space);
         await Promise.all([
           loadTransactions(space.id, allSpaces),
@@ -285,7 +283,6 @@ export default function AppShell() {
       setUnlockedSpaces((prev) => { const next = new Set(prev); next.delete(activeSpace.id); return next; });
     }
     setActiveSpace(space);
-    localStorage.setItem("jl_active_space", space.id);
     setTransactions([]);
     setSpaceLoading(true);
     setView("home");
