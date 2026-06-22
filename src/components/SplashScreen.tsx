@@ -14,7 +14,8 @@ export default function SplashScreen({ onDone }: Props) {
     const t2 = setTimeout(() => setPhase("out"), 1400);
     const t3 = setTimeout(() => onDone(), 1900);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
-  }, [onDone]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div
