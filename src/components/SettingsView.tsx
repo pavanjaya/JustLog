@@ -1,11 +1,12 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import type { Space, Transaction } from "@/types";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import PinPad from "@/components/PinPad";
+import { loadReminderSettings, saveReminderSettings, requestNotificationPermission, scheduleReminder, cancelReminder } from "@/lib/notifications";
 
 function daysLeft(date: Date) {
   return Math.max(0, Math.ceil((date.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
@@ -193,6 +194,10 @@ export default function SettingsView({
   const [spacePeopleCount, setSpacePeopleCount] = useState(1);
   const [showPinPad, setShowPinPad] = useState(false);
   const [showExportSheet, setShowExportSheet] = useState(false);
+  const [showReminderSheet, setShowReminderSheet] = useState(false);
+  const [reminder, setReminder] = useState(loadReminderSettings);
+  const [reminderHour, setReminderHour] = useState(loadReminderSettings().hour);
+  const [reminderMinute, setReminderMinute] = useState(loadReminderSettings().minute);
   const [showDeleteLinkedSheet, setShowDeleteLinkedSheet] = useState(false);
   const [exportRange, setExportRange] = useState<"this-month" | "last-month" | "3-months" | "all">("this-month");
   const fileRef = useRef<HTMLInputElement>(null);
@@ -404,6 +409,35 @@ export default function SettingsView({
     setShowExportSheet(false);
   }
 
+  async function toggleReminder() {
+    if (reminder.enabled) {
+      await cancelReminder();
+      const next = { ...reminder, enabled: false };
+      setReminder(next);
+      saveReminderSettings(next);
+      onToast("Reminder off");
+    } else {
+      const granted = await requestNotificationPermission();
+      if (!granted) { onToast("Allow notifications in device settings"); return; }
+      await scheduleReminder(reminderHour, reminderMinute);
+      const next = { enabled: true, hour: reminderHour, minute: reminderMinute };
+      setReminder(next);
+      saveReminderSettings(next);
+      onToast("Daily reminder set");
+    }
+  }
+
+  async function saveReminderTime() {
+    if (reminder.enabled) {
+      await scheduleReminder(reminderHour, reminderMinute);
+    }
+    const next = { enabled: reminder.enabled, hour: reminderHour, minute: reminderMinute };
+    setReminder(next);
+    saveReminderSettings(next);
+    setShowReminderSheet(false);
+    if (reminder.enabled) onToast("Reminder updated");
+  }
+
   function toggleDarkMode() {
     const next = !darkMode;
     setDarkMode(next);
@@ -496,7 +530,7 @@ export default function SettingsView({
       {/* Group 2 — preferences */}
       <SettingsGroup>
         <SettingsItem icon={<IconMoon />} label="Dark Mode" onClick={toggleDarkMode} rightSlot={<Toggle on={darkMode} />} />
-        <SettingsItem icon={<IconBell />} label="Notifications" onClick={() => onToast("Notifications coming soon")} rightSlot={<Toggle on={false} />} last />
+        <SettingsItem icon={<IconBell />} label="Daily Reminder" sublabel={reminder.enabled ? `${String(reminder.hour).padStart(2,"0")}:${String(reminder.minute).padStart(2,"0")} every day` : "Off"} onClick={() => setShowReminderSheet(true)} rightSlot={<Toggle on={reminder.enabled} />} last />
       </SettingsGroup>
 
       {/* Group 3 — legal + info */}
@@ -838,6 +872,78 @@ export default function SettingsView({
         </div>
       </>
     )}
+    {showReminderSheet && (
+      <>
+        <div className="fixed inset-0 z-[800]" style={{ background: "rgba(0,0,0,0.4)" }} onClick={() => setShowReminderSheet(false)} />
+        <div className="fixed bottom-0 left-0 right-0 z-[900] max-w-[430px] mx-auto rounded-t-[28px] p-6 flex flex-col gap-5" style={{ background: "var(--md-surface)", paddingBottom: "calc(env(safe-area-inset-bottom,0px) + 24px)" }}>
+          <div className="w-9 h-1 rounded-full mx-auto mb-1" style={{ background: "var(--md-outline-variant)" }} />
+          <div>
+            <div className="text-[17px] font-semibold mb-1" style={{ color: "var(--md-on-surface)" }}>Daily Reminder</div>
+            <div className="text-sm" style={{ color: "var(--md-on-surface-variant)" }}>Get a nudge to log your expenses every day</div>
+          </div>
+
+          {/* Time picker */}
+          <div className="flex items-center gap-3">
+            <div className="flex-1">
+              <div className="text-xs font-medium mb-1.5" style={{ color: "var(--md-on-surface-variant)" }}>Hour</div>
+              <select
+                value={reminderHour}
+                onChange={e => setReminderHour(Number(e.target.value))}
+                className="w-full px-4 py-3 rounded-2xl text-sm outline-none"
+                style={{ background: "var(--md-surface-container-low)", color: "var(--md-on-surface)", border: "none" }}
+              >
+                {Array.from({ length: 24 }, (_, i) => (
+                  <option key={i} value={i}>{String(i).padStart(2, "0")}</option>
+                ))}
+              </select>
+            </div>
+            <div className="text-2xl font-bold mt-4" style={{ color: "var(--md-on-surface-variant)" }}>:</div>
+            <div className="flex-1">
+              <div className="text-xs font-medium mb-1.5" style={{ color: "var(--md-on-surface-variant)" }}>Minute</div>
+              <select
+                value={reminderMinute}
+                onChange={e => setReminderMinute(Number(e.target.value))}
+                className="w-full px-4 py-3 rounded-2xl text-sm outline-none"
+                style={{ background: "var(--md-surface-container-low)", color: "var(--md-on-surface)", border: "none" }}
+              >
+                {[0, 15, 30, 45].map(m => (
+                  <option key={m} value={m}>{String(m).padStart(2, "0")}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              onClick={toggleReminder}
+              className="flex-1 py-3.5 rounded-2xl text-sm font-semibold"
+              style={{ background: reminder.enabled ? "var(--md-error)" : "var(--md-surface-container-low)", color: reminder.enabled ? "#fff" : "var(--md-on-surface)" }}
+            >
+              {reminder.enabled ? "Turn Off" : "Turn On"}
+            </button>
+            {reminder.enabled && (
+              <button
+                onClick={saveReminderTime}
+                className="flex-1 py-3.5 rounded-2xl text-sm font-semibold"
+                style={{ background: "var(--md-on-surface)", color: "#fff" }}
+              >
+                Save Time
+              </button>
+            )}
+            {!reminder.enabled && (
+              <button
+                onClick={async () => { await toggleReminder(); setShowReminderSheet(false); }}
+                className="flex-1 py-3.5 rounded-2xl text-sm font-semibold"
+                style={{ background: "var(--md-on-surface)", color: "#fff" }}
+              >
+                Enable
+              </button>
+            )}
+          </div>
+        </div>
+      </>
+    )}
+
     {showExportSheet && (
       <>
         <div className="fixed inset-0 z-[800]" style={{ background: "rgba(0,0,0,0.4)" }} onClick={() => setShowExportSheet(false)} />
