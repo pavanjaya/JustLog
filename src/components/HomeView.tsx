@@ -589,19 +589,21 @@ export default function HomeView({ transactions, allTransactions, hiddenCount = 
                     </div>
                   );
                 })}
-                {/* Unnamed remainder */}
-                {Array.from({ length: Math.max(0, activeSpace.people_count - payers.length) }).map((_, i) => {
-                  const personNum = payers.length + i + 1;
+                {/* Unnamed remainder — grouped */}
+                {(() => {
+                  const unnamedCount = Math.max(0, activeSpace.people_count - payers.length);
+                  if (unnamedCount === 0) return null;
                   return (
-                    <div key={`anon-${i}`} className="flex items-center gap-3 px-4 py-3 rounded-2xl" style={{ background: "var(--md-surface-container-low)" }}>
+                    <div className="flex items-center gap-3 px-4 py-3 rounded-2xl" style={{ background: "var(--md-surface-container-low)" }}>
                       <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0" style={{ background: "var(--md-surface-container)", color: "var(--md-on-surface-variant)" }}>
-                        {personNum}
+                        {unnamedCount}
                       </div>
-                      <span className="flex-1 text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>Person {personNum}</span>
-                      <span className="text-sm font-semibold" style={{ color: "#B71C1C" }}>owes {fmtFull(perHead)}</span>
+                      <span className="flex-1 text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>
+                        {unnamedCount === 1 ? "1 person" : `${unnamedCount} people`} owe {fmtFull(perHead)} each
+                      </span>
                     </div>
                   );
-                })}
+                })()}
               </div>
 
               {!hasPayers && (
