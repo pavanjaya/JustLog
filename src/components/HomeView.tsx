@@ -552,7 +552,7 @@ export default function HomeView({ transactions, allTransactions, hiddenCount = 
         return (
           <>
             <div className="fixed inset-0 z-[400]" style={{ background: "rgba(0,0,0,0.4)" }} onClick={() => setShowSplitSheet(false)} />
-            <div className="fixed bottom-0 left-0 right-0 z-[500] max-w-[430px] mx-auto rounded-t-[28px] flex flex-col" style={{ background: "var(--md-surface)", paddingBottom: "calc(env(safe-area-inset-bottom,0px) + 24px)" }}>
+            <div className="fixed bottom-0 left-0 right-0 z-[500] max-w-[430px] mx-auto rounded-t-[28px] flex flex-col" style={{ background: "var(--md-surface)", paddingBottom: "calc(env(safe-area-inset-bottom,0px) + 24px)", maxHeight: "80vh" }}>
               <div className="w-9 h-1 rounded-full mx-auto mt-3 mb-1" style={{ background: "var(--md-outline-variant)" }} />
 
               {/* Header */}
@@ -568,7 +568,7 @@ export default function HomeView({ transactions, allTransactions, hiddenCount = 
               </div>
 
               {/* Rows */}
-              <div className="px-4 flex flex-col gap-2 mb-4">
+              <div className="px-4 flex flex-col gap-2 mb-4 overflow-y-auto">
                 {/* Named payers */}
                 {payers.map((p, i) => {
                   const owes = perHead - p.paid;
