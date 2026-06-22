@@ -14,37 +14,34 @@ export async function GET() {
 
   const { data } = await admin
     .from("subscriptions")
-    .select("status, valid_until, plan, onboarded, free_chosen")
+    .select("status, current_period_end, onboarded, free_chosen")
     .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
+    .order("updated_at", { ascending: false })
     .limit(1)
     .maybeSingle();
 
   if (data) {
-    const validUntil = new Date(data.valid_until);
+    const validUntil = new Date(data.current_period_end);
     const isActive = validUntil > new Date() && data.status !== "cancelled";
 
     if (isActive) {
       return NextResponse.json({
         status: data.status === "trialing" ? "trialing" : "active",
-        plan: data.plan ?? "monthly",
-        validUntil: data.valid_until,
+        validUntil: data.current_period_end,
         existingUser: true,
         onboarded: true,
         freeChosen: false,
       });
     }
 
-    // Expired or free_chosen
     return NextResponse.json({
       status: data.free_chosen ? "free" : "none",
-      validUntil: data.valid_until,
+      validUntil: data.current_period_end,
       existingUser: true,
       onboarded: data.onboarded ?? true,
       freeChosen: data.free_chosen ?? false,
     });
   }
 
-  // No subscription row — brand new user
   return NextResponse.json({ status: "none", existingUser: false, onboarded: false, freeChosen: false });
 }

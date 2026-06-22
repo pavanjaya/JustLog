@@ -7,7 +7,6 @@ export async function POST() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  // Check if user already had a trial or subscription
   const admin = createAdmin(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -17,23 +16,31 @@ export async function POST() {
     .from("subscriptions")
     .select("status")
     .eq("user_id", user.id)
-    .single();
+    .maybeSingle();
 
-  if (existing) {
+  if (existing && existing.status === "trialing") {
     return NextResponse.json({ error: "Trial already used" }, { status: 400 });
   }
 
   const trialEnd = new Date();
   trialEnd.setDate(trialEnd.getDate() + 7);
 
-  await admin.from("subscriptions").insert({
-    user_id: user.id,
-    plan: "trial",
-    status: "trialing",
-    valid_until: trialEnd.toISOString(),
-    onboarded: true,
-    free_chosen: false,
-  });
+  if (existing) {
+    await admin.from("subscriptions").update({
+      status: "trialing",
+      current_period_end: trialEnd.toISOString(),
+      onboarded: true,
+      free_chosen: false,
+    }).eq("user_id", user.id);
+  } else {
+    await admin.from("subscriptions").insert({
+      user_id: user.id,
+      status: "trialing",
+      current_period_end: trialEnd.toISOString(),
+      onboarded: true,
+      free_chosen: false,
+    });
+  }
 
   return NextResponse.json({ success: true, validUntil: trialEnd.toISOString() });
 }

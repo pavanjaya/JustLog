@@ -48,18 +48,15 @@ export async function POST(req: NextRequest) {
   validUntil.setDate(validUntil.getDate() + (isYearly ? 365 : 30));
 
   // Delete all old subscriptions for this user and insert a fresh active one
-  await supabase.from("subscriptions").delete().eq("user_id", userId);
-
-  const { error } = await supabase.from("subscriptions").insert({
+  const { error } = await supabase.from("subscriptions").upsert({
     user_id: userId,
-    plan: plan ?? "monthly",
     status: "active",
-    payment_id: paymentId,
-    order_id: orderId,
-    valid_until: validUntil.toISOString(),
+    razorpay_payment_id: paymentId,
+    razorpay_order_id: orderId,
+    current_period_end: validUntil.toISOString(),
     onboarded: true,
     free_chosen: false,
-  });
+  }, { onConflict: "user_id" });
 
   if (error) {
     console.error("Supabase insert error:", error);

@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createAdmin } from "@supabase/supabase-js";
 
-// Called when user completes onboarding or chooses "Continue Free"
 export async function POST(req: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -19,8 +18,6 @@ export async function POST(req: Request) {
     .from("subscriptions")
     .select("id")
     .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(1)
     .maybeSingle();
 
   if (existing) {
@@ -29,12 +26,10 @@ export async function POST(req: Request) {
       .update({ onboarded: true, ...(freeChosen ? { free_chosen: true } : {}) })
       .eq("id", existing.id);
   } else {
-    // No subscription row yet — create a placeholder so we can store onboarded flag
     await admin.from("subscriptions").insert({
       user_id: user.id,
-      plan: "free",
       status: "free",
-      valid_until: new Date(0).toISOString(), // epoch = effectively expired
+      current_period_end: new Date(0).toISOString(),
       onboarded: true,
       free_chosen: freeChosen ?? false,
     });
