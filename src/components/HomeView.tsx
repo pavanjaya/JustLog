@@ -33,7 +33,26 @@ interface HomeViewProps {
 
 type AiState = "idle" | "loading" | "success" | "error" | "clarify";
 
+function extractPayers(transactions: Transaction[]): { name: string; paid: number }[] {
+  const map: Record<string, number> = {};
+  transactions
+    .filter(tx => tx.type === "income")
+    .forEach(tx => {
+      const m = tx.description.match(/(?:from|by)\s+([a-zA-Z]+(?:\s+[a-zA-Z]+)?)/i);
+      const name = m ? m[1].trim() : null;
+      if (name) {
+        const key = name.toLowerCase();
+        map[key] = (map[key] || 0) + tx.amount;
+      }
+    });
+  return Object.entries(map).map(([, paid], i) => ({
+    name: Object.keys(map)[i].replace(/\b\w/g, c => c.toUpperCase()),
+    paid,
+  }));
+}
+
 export default function HomeView({ transactions, allTransactions, hiddenCount = 0, onAddTransactions, onDeleteTransaction, onBulkDelete, onEditTransaction, onSeeAll, userName = "there", activeSpace, logDisabled, onUpgrade }: HomeViewProps) {
+  const [showSplitSheet, setShowSplitSheet] = useState(false);
   const [input, setInput] = useState("");
   const [aiState, setAiState] = useState<AiState>("idle");
   const [newTxs, setNewTxs] = useState<Transaction[]>([]);
@@ -288,20 +307,19 @@ export default function HomeView({ transactions, allTransactions, hiddenCount = 
 
         {/* Per head split — shown when space has people_count > 1 */}
         {activeSpace && activeSpace.people_count > 1 && totalExpense > 0 && (
-          <div className="mt-3 flex items-center gap-2 px-4 py-2.5 rounded-2xl" style={{ background: "rgba(200,49,255,0.06)", border: "1px solid rgba(200,49,255,0.12)" }}>
+          <button onClick={() => setShowSplitSheet(true)} className="mt-3 w-full flex items-center gap-2 px-4 py-2.5 rounded-2xl active:opacity-70 transition-opacity" style={{ background: "rgba(200,49,255,0.06)", border: "1px solid rgba(200,49,255,0.12)" }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-primary)", flexShrink: 0 }}>
               <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
             </svg>
-            <span className="text-xs" style={{ color: "var(--md-on-surface-variant)" }}>
-              Per head
-            </span>
+            <span className="text-xs" style={{ color: "var(--md-on-surface-variant)" }}>Per head</span>
             <span className="text-sm font-semibold" style={{ color: "var(--md-primary)" }}>
               {fmtFull(Math.round(totalExpense / activeSpace.people_count))}
             </span>
-            <span className="text-xs ml-auto" style={{ color: "var(--md-outline)" }}>
+            <span className="text-xs ml-auto flex items-center gap-1" style={{ color: "var(--md-outline)" }}>
               ÷ {activeSpace.people_count} people
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
             </span>
-          </div>
+          </button>
         )}
       </div>
 
@@ -524,6 +542,73 @@ export default function HomeView({ transactions, allTransactions, hiddenCount = 
           </div>
         </>
       )}
+
+      {/* Split Sheet */}
+      {showSplitSheet && activeSpace && (() => {
+        const perHead = Math.round(totalExpense / activeSpace.people_count);
+        const payers = extractPayers(allTxs);
+        const hasPayers = payers.length > 0;
+
+        return (
+          <>
+            <div className="fixed inset-0 z-[400]" style={{ background: "rgba(0,0,0,0.4)" }} onClick={() => setShowSplitSheet(false)} />
+            <div className="fixed bottom-0 left-0 right-0 z-[500] max-w-[430px] mx-auto rounded-t-[28px] flex flex-col" style={{ background: "var(--md-surface)", paddingBottom: "calc(env(safe-area-inset-bottom,0px) + 24px)" }}>
+              <div className="w-9 h-1 rounded-full mx-auto mt-3 mb-1" style={{ background: "var(--md-outline-variant)" }} />
+
+              {/* Header */}
+              <div className="px-6 pt-3 pb-4">
+                <div className="text-[17px] font-semibold mb-0.5" style={{ color: "var(--md-on-surface)" }}>Split Summary</div>
+                <div className="text-sm" style={{ color: "var(--md-on-surface-variant)" }}>{activeSpace.name} · {activeSpace.people_count} people · {fmtFull(perHead)} each</div>
+              </div>
+
+              {/* Total */}
+              <div className="mx-4 mb-3 px-4 py-3 rounded-2xl flex items-center justify-between" style={{ background: "var(--md-surface-container-low)" }}>
+                <span className="text-sm" style={{ color: "var(--md-on-surface-variant)" }}>Total expenses</span>
+                <span className="text-base font-bold" style={{ color: "#B71C1C" }}>{fmtFull(totalExpense)}</span>
+              </div>
+
+              {/* Rows */}
+              <div className="px-4 flex flex-col gap-2 mb-4">
+                {hasPayers ? payers.map((p, i) => {
+                  const owes = perHead - p.paid;
+                  const settled = owes <= 0;
+                  const extra = p.paid - perHead;
+                  return (
+                    <div key={i} className="flex items-center gap-3 px-4 py-3 rounded-2xl" style={{ background: "var(--md-surface-container-low)" }}>
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0" style={{ background: "rgba(200,49,255,0.12)", color: "var(--md-primary)" }}>
+                        {p.name.charAt(0)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>{p.name}</div>
+                        <div className="text-xs mt-0.5" style={{ color: "var(--md-on-surface-variant)" }}>Paid {fmtFull(p.paid)}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-semibold" style={{ color: settled ? "#2E7D32" : "#B71C1C" }}>
+                          {settled ? `gets back ${fmtFull(extra)}` : `owes ${fmtFull(owes)}`}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }) : Array.from({ length: activeSpace.people_count }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-3 px-4 py-3 rounded-2xl" style={{ background: "var(--md-surface-container-low)" }}>
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0" style={{ background: "rgba(200,49,255,0.12)", color: "var(--md-primary)" }}>
+                      {i + 1}
+                    </div>
+                    <span className="flex-1 text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>Person {i + 1}</span>
+                    <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>{fmtFull(i === activeSpace.people_count - 1 ? totalExpense - perHead * (activeSpace.people_count - 1) : perHead)}</span>
+                  </div>
+                ))}
+              </div>
+
+              {!hasPayers && (
+                <div className="mx-4 mb-4 px-4 py-3 rounded-2xl text-xs text-center" style={{ color: "var(--md-on-surface-variant)", background: "var(--md-surface-container-lowest)" }}>
+                  Log income as "5k from Rohit" to see who paid what
+                </div>
+              )}
+            </div>
+          </>
+        );
+      })()}
     </div>
   );
 }
