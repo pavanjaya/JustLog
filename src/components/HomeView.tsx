@@ -569,7 +569,8 @@ export default function HomeView({ transactions, allTransactions, hiddenCount = 
 
               {/* Rows */}
               <div className="px-4 flex flex-col gap-2 mb-4">
-                {hasPayers ? payers.map((p, i) => {
+                {/* Named payers */}
+                {payers.map((p, i) => {
                   const owes = perHead - p.paid;
                   const settled = owes <= 0;
                   const extra = p.paid - perHead;
@@ -582,22 +583,25 @@ export default function HomeView({ transactions, allTransactions, hiddenCount = 
                         <div className="text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>{p.name}</div>
                         <div className="text-xs mt-0.5" style={{ color: "var(--md-on-surface-variant)" }}>Paid {fmtFull(p.paid)}</div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-sm font-semibold" style={{ color: settled ? "#2E7D32" : "#B71C1C" }}>
-                          {settled ? `gets back ${fmtFull(extra)}` : `owes ${fmtFull(owes)}`}
-                        </div>
+                      <div className="text-sm font-semibold" style={{ color: settled ? "#2E7D32" : "#B71C1C" }}>
+                        {settled ? `gets back ${fmtFull(extra)}` : `owes ${fmtFull(owes)}`}
                       </div>
                     </div>
                   );
-                }) : Array.from({ length: activeSpace.people_count }).map((_, i) => (
-                  <div key={i} className="flex items-center gap-3 px-4 py-3 rounded-2xl" style={{ background: "var(--md-surface-container-low)" }}>
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0" style={{ background: "rgba(200,49,255,0.12)", color: "var(--md-primary)" }}>
-                      {i + 1}
+                })}
+                {/* Unnamed remainder */}
+                {Array.from({ length: Math.max(0, activeSpace.people_count - payers.length) }).map((_, i) => {
+                  const personNum = payers.length + i + 1;
+                  return (
+                    <div key={`anon-${i}`} className="flex items-center gap-3 px-4 py-3 rounded-2xl" style={{ background: "var(--md-surface-container-low)" }}>
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0" style={{ background: "var(--md-surface-container)", color: "var(--md-on-surface-variant)" }}>
+                        {personNum}
+                      </div>
+                      <span className="flex-1 text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>Person {personNum}</span>
+                      <span className="text-sm font-semibold" style={{ color: "#B71C1C" }}>owes {fmtFull(perHead)}</span>
                     </div>
-                    <span className="flex-1 text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>Person {i + 1}</span>
-                    <span className="text-sm font-semibold" style={{ color: "var(--md-on-surface)" }}>{fmtFull(i === activeSpace.people_count - 1 ? totalExpense - perHead * (activeSpace.people_count - 1) : perHead)}</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {!hasPayers && (
