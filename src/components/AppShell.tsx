@@ -170,8 +170,9 @@ export default function AppShell() {
       if (serverStatus !== "none") {
         localStorage.setItem("jl_sub", JSON.stringify({ status: serverStatus, validUntil: data.validUntil, plan: data.plan }));
       }
-      // If server confirms existing user, mark onboarding done so cache-clear doesn't re-show it
-      if (serverStatus === "trialing" || serverStatus === "active") {
+      // If a subscription row exists, user has been through onboarding before
+      // Restore the flag so a cache-clear never re-shows onboarding
+      if (data.existingUser) {
         localStorage.setItem("jl_onboarded", "1");
         setOnboardingDone(true);
       }

@@ -27,11 +27,12 @@ export async function GET() {
         status: data.status === "trialing" ? "trialing" : "active",
         plan: data.plan ?? "monthly",
         validUntil: data.valid_until,
+        existingUser: true,
       });
     }
     // Expired — return the validUntil so trial-expiry detection works
-    return NextResponse.json({ status: "none", validUntil: data.valid_until });
+    return NextResponse.json({ status: "none", validUntil: data.valid_until, existingUser: true });
   }
 
-  return NextResponse.json({ status: "none" });
+  return NextResponse.json({ status: "none", existingUser: false });
 }
