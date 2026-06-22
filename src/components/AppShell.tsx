@@ -154,31 +154,27 @@ export default function AppShell() {
     try {
       const res = await fetch("/api/subscription/status");
       const data = await res.json();
-      const serverStatus: SubStatus = data.status === "trialing" ? "trialing" : data.status === "active" ? "active" : "none";
 
-      // Never downgrade from an active/trialing cache to "none" due to server auth glitches.
-      // Only update if server returns a positive status, or if we had no status (loading/none).
-      setSubStatus((prev) => {
-        if (serverStatus === "trialing" || serverStatus === "active") return serverStatus; // server confirms paid — always trust
-        if (prev === "trialing" || prev === "active" || prev === "free") return prev; // keep user's choice / paid cache
-        return serverStatus; // loading/none — let server decide
-      });
+      // Server is the single source of truth for all status
+      const serverStatus: SubStatus =
+        data.status === "trialing" ? "trialing" :
+        data.status === "active" ? "active" :
+        data.status === "free" ? "free" : "none";
 
+      setSubStatus(serverStatus);
       if (data.validUntil) setSubValidUntil(new Date(data.validUntil));
       if (data.plan) setSubPlan(data.plan);
 
-      // Only update cache when server confirms a real status
-      if (serverStatus !== "none") {
-        localStorage.setItem("jl_sub", JSON.stringify({ status: serverStatus, validUntil: data.validUntil, plan: data.plan }));
-      }
-      // If a subscription row exists, user has been through onboarding before
-      // Restore the flag so a cache-clear never re-shows onboarding
-      if (data.existingUser) {
+      // localStorage is only a speed cache — always sync from server
+      localStorage.setItem("jl_sub", JSON.stringify({ status: serverStatus, validUntil: data.validUntil, plan: data.plan }));
+
+      // Onboarding flag comes from server — not localStorage
+      if (data.onboarded) {
         localStorage.setItem("jl_onboarded", "1");
         setOnboardingDone(true);
       }
     } catch {
-      // Network error — keep current state
+      // Network error — fall back to localStorage cache
       setSubStatus((prev) => prev === "loading" ? "none" : prev);
     } finally {
       setSubChecked(true);
@@ -424,6 +420,7 @@ export default function AppShell() {
         <OnboardingScreen onDone={() => {
           localStorage.setItem("jl_onboarded", "1");
           setOnboardingDone(true);
+          fetch("/api/subscription/onboard", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ freeChosen: false }) });
         }} />
       )}
       <Drawer
@@ -494,7 +491,11 @@ export default function AppShell() {
               userId={user.id}
               onSuccess={handleTrialSuccess}
               onPaymentSuccess={() => { handleSubscribeSuccess(); showToast("Welcome to Pro! 🎉"); }}
-              onContinueFree={isTrialExpired ? undefined : () => { setSubStatus("free"); localStorage.setItem("jl_sub", JSON.stringify({ status: "free" })); }}
+              onContinueFree={isTrialExpired ? undefined : () => {
+                setSubStatus("free");
+                localStorage.setItem("jl_sub", JSON.stringify({ status: "free" }));
+                fetch("/api/subscription/onboard", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ freeChosen: true }) });
+              }}
               trialExpired={isTrialExpired}
               trialStats={isTrialExpired ? { transactions: transactions.length, spaces: spaces.length } : undefined}
             />

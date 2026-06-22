@@ -14,7 +14,7 @@ export async function GET() {
 
   const { data } = await admin
     .from("subscriptions")
-    .select("status, valid_until, plan")
+    .select("status, valid_until, plan, onboarded, free_chosen")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(1)
@@ -22,17 +22,29 @@ export async function GET() {
 
   if (data) {
     const validUntil = new Date(data.valid_until);
-    if (validUntil > new Date() && data.status !== "cancelled") {
+    const isActive = validUntil > new Date() && data.status !== "cancelled";
+
+    if (isActive) {
       return NextResponse.json({
         status: data.status === "trialing" ? "trialing" : "active",
         plan: data.plan ?? "monthly",
         validUntil: data.valid_until,
         existingUser: true,
+        onboarded: true,
+        freeChosen: false,
       });
     }
-    // Expired — return the validUntil so trial-expiry detection works
-    return NextResponse.json({ status: "none", validUntil: data.valid_until, existingUser: true });
+
+    // Expired or free_chosen
+    return NextResponse.json({
+      status: data.free_chosen ? "free" : "none",
+      validUntil: data.valid_until,
+      existingUser: true,
+      onboarded: data.onboarded ?? true,
+      freeChosen: data.free_chosen ?? false,
+    });
   }
 
-  return NextResponse.json({ status: "none", existingUser: false });
+  // No subscription row — brand new user
+  return NextResponse.json({ status: "none", existingUser: false, onboarded: false, freeChosen: false });
 }
