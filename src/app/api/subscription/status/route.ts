@@ -12,17 +12,21 @@ export async function GET() {
     process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
-  const { data } = await admin
+  const { data, error } = await admin
     .from("subscriptions")
-    .select("status, valid_until, plan, onboarded, free_chosen")
+    .select("status, valid_until, plan")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
 
+  if (error) {
+    console.error("Subscription status error:", error);
+  }
+
   if (data) {
-    const validUntil = new Date(data.valid_until.replace(" ", "T"));
-    const isActive = validUntil > new Date() && data.status !== "cancelled";
+    const validUntil = new Date(String(data.valid_until).replace(" ", "T"));
+    const isActive = !isNaN(validUntil.getTime()) && validUntil > new Date() && data.status !== "cancelled";
 
     if (isActive) {
       return NextResponse.json({
@@ -36,11 +40,11 @@ export async function GET() {
     }
 
     return NextResponse.json({
-      status: data.free_chosen ? "free" : "none",
+      status: data.status === "free" ? "free" : "none",
       validUntil: data.valid_until,
       existingUser: true,
-      onboarded: data.onboarded ?? true,
-      freeChosen: data.free_chosen ?? false,
+      onboarded: true,
+      freeChosen: data.status === "free",
     });
   }
 
