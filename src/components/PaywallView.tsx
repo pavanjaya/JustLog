@@ -51,13 +51,14 @@ export default function PaywallView({ userId, onSuccess, onPaymentSuccess, onCon
   const [screen, setScreen] = useState<Screen>("main");
   const [plan, setPlan] = useState<"monthly" | "yearly">("yearly");
   const [loading, setLoading] = useState(false);
+  const [trialValidUntil, setTrialValidUntil] = useState("");
 
   async function handleStartTrial() {
     setLoading(true);
     try {
       const res = await fetch("/api/subscription/trial", { method: "POST" });
       const result = await res.json();
-      if (result.success) { onSuccess(result.validUntil); setScreen("trial-success"); }
+      if (result.success) { setTrialValidUntil(result.validUntil); onSuccess(result.validUntil); setScreen("trial-success"); }
       else alert("Could not start trial. Please try again.");
     } catch { alert("Something went wrong. Try again."); }
     finally { setLoading(false); }
@@ -142,7 +143,7 @@ export default function PaywallView({ userId, onSuccess, onPaymentSuccess, onCon
           </div>
           <div className="flex flex-col gap-3 w-full">
             <button
-              onClick={onSuccess}
+              onClick={() => onSuccess(trialValidUntil)}
               className="w-full py-4 rounded-[16px] text-[15px] font-semibold active:opacity-80 flex items-center justify-center gap-2"
               style={{ background: "var(--md-primary)", color: "#fff" }}
             >
