@@ -158,9 +158,9 @@ export default function AppShell() {
       // Never downgrade from an active/trialing cache to "none" due to server auth glitches.
       // Only update if server returns a positive status, or if we had no status (loading/none).
       setSubStatus((prev) => {
-        if (serverStatus === "trialing" || serverStatus === "active") return serverStatus;
-        if (prev === "loading" || prev === "none") return serverStatus; // first load or truly none
-        return prev; // keep cached trialing/active/free — don't let server "none" override
+        if (serverStatus === "trialing" || serverStatus === "active") return serverStatus; // server confirms paid — always trust
+        if (prev === "trialing" || prev === "active") return prev; // server glitch — keep paid cache
+        return serverStatus; // free/loading/none — let server decide
       });
 
       if (data.validUntil) setSubValidUntil(new Date(data.validUntil));
