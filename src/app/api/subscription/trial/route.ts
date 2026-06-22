@@ -14,7 +14,7 @@ export async function POST() {
 
   const { data: existing } = await admin
     .from("subscriptions")
-    .select("status")
+    .select("id, status")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -28,15 +28,17 @@ export async function POST() {
   if (existing) {
     await admin.from("subscriptions").update({
       status: "trialing",
-      current_period_end: trialEnd.toISOString(),
+      plan: "trial",
+      valid_until: trialEnd.toISOString(),
       onboarded: true,
       free_chosen: false,
-    }).eq("user_id", user.id);
+    }).eq("id", existing.id);
   } else {
     await admin.from("subscriptions").insert({
       user_id: user.id,
+      plan: "trial",
       status: "trialing",
-      current_period_end: trialEnd.toISOString(),
+      valid_until: trialEnd.toISOString(),
       onboarded: true,
       free_chosen: false,
     });

@@ -28,7 +28,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400, headers: CORS_HEADERS });
   }
 
-  // Verify Razorpay signature
   const expected = crypto
     .createHmac("sha256", keySecret)
     .update(`${orderId}|${paymentId}`)
@@ -47,16 +46,18 @@ export async function POST(req: NextRequest) {
   const validUntil = new Date();
   validUntil.setDate(validUntil.getDate() + (isYearly ? 365 : 30));
 
-  // Delete all old subscriptions for this user and insert a fresh active one
-  const { error } = await supabase.from("subscriptions").upsert({
+  await supabase.from("subscriptions").delete().eq("user_id", userId);
+
+  const { error } = await supabase.from("subscriptions").insert({
     user_id: userId,
+    plan: plan ?? "monthly",
     status: "active",
-    razorpay_payment_id: paymentId,
-    razorpay_order_id: orderId,
-    current_period_end: validUntil.toISOString(),
+    payment_id: paymentId,
+    order_id: orderId,
+    valid_until: validUntil.toISOString(),
     onboarded: true,
     free_chosen: false,
-  }, { onConflict: "user_id" });
+  });
 
   if (error) {
     console.error("Supabase insert error:", error);

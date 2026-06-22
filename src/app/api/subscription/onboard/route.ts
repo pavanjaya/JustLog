@@ -28,8 +28,9 @@ export async function POST(req: Request) {
   } else {
     await admin.from("subscriptions").insert({
       user_id: user.id,
+      plan: "free",
       status: "free",
-      current_period_end: new Date(0).toISOString(),
+      valid_until: new Date(0).toISOString(),
       onboarded: true,
       free_chosen: freeChosen ?? false,
     });
