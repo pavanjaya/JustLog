@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import type { User } from "@supabase/supabase-js";
 import type { Space, Transaction } from "@/types";
 import { createClient } from "@/lib/supabase/client";
@@ -161,6 +161,7 @@ interface SettingsViewProps {
   onUpgrade?: () => void;
   onBack?: () => void;
   onShowSubPage?: () => void;
+  openExportOnMount?: boolean;
 }
 
 type Sheet = "none" | "profile" | "spaces" | "about" | "privacy" | "terms" | "rename";
@@ -168,7 +169,7 @@ type Sheet = "none" | "profile" | "spaces" | "about" | "privacy" | "terms" | "re
 export default function SettingsView({
   user, spaces, transactions, activeSpace,
   onDeleteAll, onToast, onRenameSpace, onDeleteSpace, onDeleteSpaceData, onUpdateSpace,
-  subStatus = "active", validUntil, subPlan, onUpgrade, onBack, onShowSubPage,
+  subStatus = "active", validUntil, subPlan, onUpgrade, onBack, onShowSubPage, openExportOnMount = false,
 }: SettingsViewProps) {
   const router = useRouter();
   const supabase = createClient();
@@ -192,7 +193,8 @@ export default function SettingsView({
   const [spaceIncludePersonal, setSpaceIncludePersonal] = useState(false);
   const [spacePeopleCount, setSpacePeopleCount] = useState(1);
   const [showPinPad, setShowPinPad] = useState(false);
-  const [showExportSheet, setShowExportSheet] = useState(false);
+  const [showExportSheet, setShowExportSheet] = useState(openExportOnMount);
+  useEffect(() => { if (openExportOnMount) setShowExportSheet(true); }, [openExportOnMount]);
   const [showDeleteLinkedSheet, setShowDeleteLinkedSheet] = useState(false);
   const [exportRange, setExportRange] = useState<"this-month" | "last-month" | "3-months" | "all">("this-month");
   const fileRef = useRef<HTMLInputElement>(null);
@@ -426,7 +428,6 @@ export default function SettingsView({
 
       {/* Group 1 — data */}
       <SettingsGroup>
-        <SettingsItem icon={<IconExport />} label="Export Data" sublabel={isPro ? `${transactions.length} transactions` : "Pro only"} onClick={() => { if (!isPro) { onUpgrade?.(); return; } if (!transactions.length) { onToast("No transactions to export"); return; } setShowExportSheet(true); }} />
         <SettingsItem icon={<IconFolders />} label="Manage Spaces" sublabel={`${spaces.length} space${spaces.length !== 1 ? "s" : ""}`} onClick={() => setSheet("spaces")} last />
       </SettingsGroup>
 
