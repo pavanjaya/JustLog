@@ -31,6 +31,8 @@ export async function POST() {
     plan: "trial",
     status: "trialing",
     valid_until: trialEnd.toISOString(),
+    onboarded: true,
+    free_chosen: false,
   });
 
   return NextResponse.json({ success: true, validUntil: trialEnd.toISOString() });
