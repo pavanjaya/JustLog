@@ -517,7 +517,7 @@ export default function AppShell() {
                 onUpgrade={() => setSubStatus("none")}
               />
             )}
-            {view === "story" && <StoryView transactions={transactions} />}
+            {view === "story" && <StoryView transactions={transactions} isPro={isPro} onUpgrade={() => setSubStatus("none")} />}
             {view === "search" && <SearchView transactions={visibleTransactions} onDeleteTransaction={handleDeleteTransaction} onBulkDelete={handleBulkDelete} onEditTransaction={handleEditTransaction} isPro={isPro} onUpgrade={() => setSubStatus("none")} />}
             {view === "settings" && (
               <SettingsView

@@ -237,12 +237,14 @@ export default function SearchView({ transactions, onDeleteTransaction, onBulkDe
             value={query}
             onChange={(e) => { setQuery(e.target.value); queryRef.current = e.target.value; }}
             onKeyDown={(e) => e.key === "Enter" && runSearch(query)}
-            onFocus={() => setSearchFocused(true)}
+            onFocus={() => { if (!isPro) { onUpgrade?.(); return; } setSearchFocused(true); }}
+            onClick={() => { if (!isPro) { onUpgrade?.(); return; } }}
             type="text"
-            placeholder="Ask about your money..."
+            placeholder={isPro ? "Ask about your money..." : "🔒 AI search — Pro only"}
             autoComplete="off"
+            readOnly={!isPro}
             className="flex-1 border-none outline-none bg-transparent text-sm"
-            style={{ color: "var(--md-on-surface)" }}
+            style={{ color: isPro ? "var(--md-on-surface)" : "var(--md-outline)", cursor: isPro ? "text" : "pointer" }}
           />
           {query && (
             <button onClick={() => { setQuery(""); queryRef.current = ""; setResult(null); setSearchFocused(false); }} className="flex-shrink-0">
@@ -315,7 +317,14 @@ export default function SearchView({ transactions, onDeleteTransaction, onBulkDe
 
           {/* Time chip — secondary filter */}
           <button
-            onClick={() => setTimeFilter(prev => prev === "all" ? "this_month" : prev === "this_month" ? "last_month" : "all")}
+            onClick={() => {
+              if (!isPro) {
+                // free users cycle only this_month, skip last_month and all
+                setTimeFilter(prev => prev === "this_month" ? "all" : "this_month");
+                return;
+              }
+              setTimeFilter(prev => prev === "all" ? "this_month" : prev === "this_month" ? "last_month" : "all");
+            }}
             className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold flex-shrink-0 transition-all"
             style={{
               background: timeFilter !== "all" ? "var(--md-primary)" : "var(--md-surface-container-low)",
@@ -323,9 +332,16 @@ export default function SearchView({ transactions, onDeleteTransaction, onBulkDe
             }}
           >
             {timeFilter === "all" ? "All time" : timeFilter === "this_month" ? "This month" : "Last month"}
-            <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="6 9 12 15 18 9"/>
-            </svg>
+            {!isPro && timeFilter === "all" && (
+              <svg viewBox="0 0 24 24" width="9" height="9" fill="none" stroke="currentColor" strokeWidth={2.5} className="ml-0.5">
+                <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+              </svg>
+            )}
+            {(isPro || timeFilter !== "all") && (
+              <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            )}
           </button>
         </div>
       )}

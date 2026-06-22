@@ -7,6 +7,8 @@ import CategoryIcon from "@/components/CategoryIcon";
 
 interface StoryViewProps {
   transactions: Transaction[];
+  isPro?: boolean;
+  onUpgrade?: () => void;
 }
 
 function txMonthKey(tx: Transaction) {
@@ -37,13 +39,18 @@ const CHART_COLORS = [
   "#95E1D3",
 ];
 
-export default function StoryView({ transactions }: StoryViewProps) {
+export default function StoryView({ transactions, isPro = false, onUpgrade }: StoryViewProps) {
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
 
   const sorted = useMemo(
     () => [...transactions].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()),
     [transactions]
   );
+
+  const currentMonthKey = useMemo(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  }, []);
 
   const months = useMemo(() => {
     const seen = new Set<string>();
@@ -164,6 +171,10 @@ export default function StoryView({ transactions }: StoryViewProps) {
 
   const trendMonths = useMemo(() => months.slice(0, 6).reverse(), [months]);
 
+  if (!isPro) {
+    return <StoryUpgradeScreen onUpgrade={onUpgrade} />;
+  }
+
   if (transactions.length === 0) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center gap-4 px-8" style={{ background: "#fff" }}>
@@ -193,6 +204,7 @@ export default function StoryView({ transactions }: StoryViewProps) {
 
       {/* Month filter pills */}
       <div className="flex gap-2 px-4 pb-4 overflow-x-auto no-scrollbar">
+        {/* "All time" locked for free users */}
         <FilterPill label="All time" active={!selectedMonth} onClick={() => setSelectedMonth(null)} />
         {months.map((m) => (
           <FilterPill key={m} label={formatMonthKey(m)} active={selectedMonth === m} onClick={() => setSelectedMonth(m)} />
@@ -276,7 +288,7 @@ export default function StoryView({ transactions }: StoryViewProps) {
           )}
 
           {/* ── Income vs Expense Trend chart ── */}
-          {trendMonths.length >= 1 && (
+          {isPro && trendMonths.length >= 1 && (
             <div className="px-4 mb-5">
               <div className="text-sm font-semibold mb-1" style={{ color: "var(--md-on-surface)" }}>Income vs Expenses</div>
               <div className="text-[11px] mb-3" style={{ color: "var(--md-outline)" }}>
@@ -287,7 +299,7 @@ export default function StoryView({ transactions }: StoryViewProps) {
           )}
 
           {/* ── Month-over-month comparison ── */}
-          {momComparison && (
+          {momComparison ? (
             <div className="px-4 mb-5">
               <div className="text-sm font-semibold mb-3" style={{ color: "var(--md-on-surface)" }}>
                 vs {formatMonthKey(momComparison.prev)}
@@ -297,7 +309,7 @@ export default function StoryView({ transactions }: StoryViewProps) {
                 <MomCard label="Expenses" curr={momComparison.c.expense} diff={momComparison.expDiff} positive={false} />
               </div>
             </div>
-          )}
+          ) : null}
 
           <div className="mx-4 mb-5" style={{ height: 1, background: "var(--md-outline-variant)" }} />
 
@@ -593,5 +605,62 @@ function FilterPill({ label, active, onClick }: { label: string; active: boolean
     >
       {label}
     </button>
+  );
+}
+
+// ─── Story upgrade screen (free users) ───────────────────────────────────────
+
+const STORY_FEATURES = [
+  { icon: "📊", title: "Savings rate & daily average", desc: "See exactly how much you save and spend per day" },
+  { icon: "📈", title: "Income vs expense trends", desc: "Monthly charts showing your financial trajectory" },
+  { icon: "🔁", title: "Month-over-month comparison", desc: "Know if you're improving or slipping" },
+  { icon: "🔥", title: "Logging streaks", desc: "Track your consistency and build good habits" },
+  { icon: "💡", title: "Smart insights", desc: "Personalised commentary on your spending patterns" },
+  { icon: "📅", title: "Full history browsing", desc: "Browse any month, any time" },
+];
+
+function StoryUpgradeScreen({ onUpgrade }: { onUpgrade?: () => void }) {
+  return (
+    <div className="flex-1 overflow-y-auto no-scrollbar pb-10" style={{ background: "#fff" }}>
+      {/* Header */}
+      <div className="px-6 pt-8 pb-6 text-center">
+        <div className="w-16 h-16 rounded-3xl mx-auto mb-4 flex items-center justify-center" style={{ background: "rgba(200,49,255,0.1)" }}>
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="var(--md-primary)" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+        </div>
+        <div className="text-[22px] font-bold mb-2" style={{ color: "var(--md-on-surface)" }}>Your Financial Story</div>
+        <div className="text-sm leading-relaxed" style={{ color: "var(--md-on-surface-variant)" }}>
+          Like a monthly review with a smart friend — charts, insights, and trends that actually make sense of your money.
+        </div>
+      </div>
+
+      {/* Feature list */}
+      <div className="px-4 flex flex-col gap-3 mb-8">
+        {STORY_FEATURES.map((f) => (
+          <div key={f.title} className="flex items-start gap-3 px-4 py-3.5 rounded-2xl" style={{ background: "var(--md-surface-container-low)" }}>
+            <span className="text-xl leading-none mt-0.5">{f.icon}</span>
+            <div>
+              <div className="text-[13px] font-semibold mb-0.5" style={{ color: "var(--md-on-surface)" }}>{f.title}</div>
+              <div className="text-[12px]" style={{ color: "var(--md-on-surface-variant)" }}>{f.desc}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* CTA */}
+      <div className="px-4">
+        <button
+          onClick={onUpgrade}
+          className="w-full py-4 rounded-2xl text-[15px] font-bold active:opacity-80"
+          style={{ background: "var(--md-primary)", color: "#fff" }}
+        >
+          Unlock Your Story — Go Pro
+        </button>
+        <div className="text-center mt-3 text-xs" style={{ color: "var(--md-outline)" }}>
+          ₹79/week or ₹599/year · Cancel anytime
+        </div>
+      </div>
+    </div>
   );
 }
