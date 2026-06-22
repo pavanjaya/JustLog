@@ -2,9 +2,7 @@
 
 import { useState, useMemo } from "react";
 import type { Transaction } from "@/types";
-import { getCategoryMeta } from "@/lib/format";
-import { fmtCompact, fmtFull } from "@/lib/currency";
-import { useCurrency } from "@/lib/CurrencyContext";
+import { getCategoryMeta, fmtCompact, fmtFull } from "@/lib/format";
 import CategoryIcon from "@/components/CategoryIcon";
 
 interface StoryViewProps {
@@ -42,7 +40,6 @@ const CHART_COLORS = [
 ];
 
 export default function StoryView({ transactions, isPro = false, onUpgrade }: StoryViewProps) {
-  const { currency } = useCurrency();
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
 
   const sorted = useMemo(
@@ -161,14 +158,14 @@ export default function StoryView({ transactions, isPro = false, onUpgrade }: St
       if (savingsRate >= 40) lines.push(`You saved ${savingsRate}% of your income — excellent discipline.`);
       else if (savingsRate >= 20) lines.push(`You're saving ${savingsRate}% of what you earn — solid progress.`);
       else if (savingsRate >= 0) lines.push(`Savings rate is ${savingsRate}%. There's room to grow.`);
-      else lines.push(`Spending exceeded income by ${fmtFull(Math.abs(netBalance), currency)} this period.`);
+      else lines.push(`Spending exceeded income by ${fmtFull(Math.abs(netBalance))} this period.`);
     }
     if (topCats.length > 0 && totalExpense > 0) {
       const top = topCats[0];
       const pct = Math.round((top[1] / totalExpense) * 100);
       if (pct > 40) lines.push(`${top[0]} dominated at ${pct}% of all spending — worth a closer look.`);
     }
-    if (dailyAvg !== null) lines.push(`You're averaging ${fmtCompact(dailyAvg, currency)} a day in expenses.`);
+    if (dailyAvg !== null) lines.push(`You're averaging ${fmtCompact(dailyAvg)} a day in expenses.`);
     return lines;
   }, [savingsRate, netBalance, topCats, totalExpense, dailyAvg]);
 
@@ -235,23 +232,23 @@ export default function StoryView({ transactions, isPro = false, onUpgrade }: St
               )}
               {/* Income */}
               {totalIncome > 0 && (
-                <MetricTile label="Income" value={fmtCompact(totalIncome, currency)} sub="earned" bg="#F0FBF4" color="#1B5E20" />
+                <MetricTile label="Income" value={fmtCompact(totalIncome)} sub="earned" bg="#F0FBF4" color="#1B5E20" />
               )}
               {/* Spent */}
               {totalExpense > 0 && (
-                <MetricTile label="Spent" value={fmtCompact(totalExpense, currency)} sub="expenses" bg="#FFF5F5" color="#B71C1C" />
+                <MetricTile label="Spent" value={fmtCompact(totalExpense)} sub="expenses" bg="#FFF5F5" color="#B71C1C" />
               )}
               {/* Balance */}
               <MetricTile
                 label="Balance"
-                value={(netBalance < 0 ? "−" : "") + fmtCompact(Math.abs(netBalance), currency)}
+                value={(netBalance < 0 ? "−" : "") + fmtCompact(Math.abs(netBalance))}
                 sub={netBalance >= 0 ? "saved" : "overspent"}
                 bg={netBalance >= 0 ? "rgba(200,49,255,0.07)" : "#FFF5F5"}
                 color={netBalance >= 0 ? "var(--md-primary)" : "#B71C1C"}
               />
               {/* Daily avg */}
               {dailyAvg !== null && (
-                <MetricTile label="Daily avg" value={fmtCompact(dailyAvg, currency)} sub="per day" bg="#FFF5F5" color="#B71C1C" />
+                <MetricTile label="Daily avg" value={fmtCompact(dailyAvg)} sub="per day" bg="#FFF5F5" color="#B71C1C" />
               )}
               {/* Streak */}
               {streak > 0 && (
@@ -286,7 +283,7 @@ export default function StoryView({ transactions, isPro = false, onUpgrade }: St
             <div className="px-4 mb-5">
               <div className="text-sm font-semibold mb-1" style={{ color: "var(--md-on-surface)" }}>Balance trajectory</div>
               <div className="text-[11px] mb-3" style={{ color: "var(--md-outline)" }}>Day by day</div>
-              <BalanceChart points={balancePoints} currency={currency} />
+              <BalanceChart points={balancePoints} />
             </div>
           )}
 
@@ -297,7 +294,7 @@ export default function StoryView({ transactions, isPro = false, onUpgrade }: St
               <div className="text-[11px] mb-3" style={{ color: "var(--md-outline)" }}>
                 {trendMonths.length === 1 ? "This month" : "Monthly trend"}
               </div>
-              <TrendChart months={trendMonths} agg={monthlyAgg} currency={currency} />
+              <TrendChart months={trendMonths} agg={monthlyAgg} />
             </div>
           )}
 
@@ -308,8 +305,8 @@ export default function StoryView({ transactions, isPro = false, onUpgrade }: St
                 vs {formatMonthKey(momComparison.prev)}
               </div>
               <div className="flex gap-2">
-                <MomCard label="Income" curr={momComparison.c.income} diff={momComparison.incDiff} positive currency={currency} />
-                <MomCard label="Expenses" curr={momComparison.c.expense} diff={momComparison.expDiff} positive={false} currency={currency} />
+                <MomCard label="Income" curr={momComparison.c.income} diff={momComparison.incDiff} positive />
+                <MomCard label="Expenses" curr={momComparison.c.expense} diff={momComparison.expDiff} positive={false} />
               </div>
             </div>
           ) : null}
@@ -348,7 +345,7 @@ export default function StoryView({ transactions, isPro = false, onUpgrade }: St
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1.5">
                           <span className="text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>{category}</span>
-                          <span className="text-xs font-semibold" style={{ color: "var(--md-on-surface)" }}>{fmtCompact(amount, currency)}</span>
+                          <span className="text-xs font-semibold" style={{ color: "var(--md-on-surface)" }}>{fmtCompact(amount)}</span>
                         </div>
                         <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "var(--md-outline-variant)" }}>
                           <div
@@ -378,7 +375,7 @@ export default function StoryView({ transactions, isPro = false, onUpgrade }: St
                     {biggestExpense.category} · {new Date(biggestExpense.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
                   </div>
                 </div>
-                <div className="text-sm font-bold flex-shrink-0" style={{ color: "#B71C1C" }}>−{fmtFull(biggestExpense.amount, currency)}</div>
+                <div className="text-sm font-bold flex-shrink-0" style={{ color: "#B71C1C" }}>−{fmtFull(biggestExpense.amount)}</div>
               </div>
             </div>
           )}
@@ -390,7 +387,7 @@ export default function StoryView({ transactions, isPro = false, onUpgrade }: St
 
 // ─── Balance Chart (day-wise trajectory) ─────────────────────────────────────
 
-function BalanceChart({ points, currency }: { points: { date: string; balance: number; tx: Transaction }[]; currency: import("@/lib/currency").CurrencyConfig }) {
+function BalanceChart({ points }: { points: { date: string; balance: number; tx: Transaction }[] }) {
   const [hovered, setHovered] = useState<number | null>(null);
   const balances = points.map((p) => p.balance);
   const minB = Math.min(...balances, 0);
@@ -417,7 +414,7 @@ function BalanceChart({ points, currency }: { points: { date: string; balance: n
             {new Date(sel.date).toLocaleDateString("en-IN", { day: "numeric", month: "short" })} · {sel.tx.description}
           </span>
           <span className="text-xs font-semibold" style={{ color: sel.balance >= 0 ? "var(--md-primary)" : "#EF4444" }}>
-            {sel.balance >= 0 ? "" : "−"}{fmtFull(Math.abs(sel.balance), currency)}
+            {sel.balance >= 0 ? "" : "−"}{fmtFull(Math.abs(sel.balance))}
           </span>
         </div>
       ) : (
@@ -496,7 +493,7 @@ function DonutChart({ cats, total }: { cats: [string, number][]; total: number }
 
 // ─── Trend Chart (Income vs Expense dual-line) ────────────────────────────────
 
-function TrendChart({ months, agg, currency }: { months: string[]; agg: Record<string, { income: number; expense: number }>; currency: import("@/lib/currency").CurrencyConfig }) {
+function TrendChart({ months, agg }: { months: string[]; agg: Record<string, { income: number; expense: number }> }) {
   const [hovered, setHovered] = useState<number | null>(null);
   const W = 320, H = 110, PAD_X = 8, PAD_Y = 12;
 
@@ -529,8 +526,8 @@ function TrendChart({ months, agg, currency }: { months: string[]; agg: Record<s
       {hovered !== null && (
         <div className="flex gap-4 mb-2">
           <span className="text-xs font-medium" style={{ color: "var(--md-on-surface)" }}>{formatMonthShort(months[hovered])}</span>
-          <span className="text-xs" style={{ color: "#22C55E" }}>↑ {fmtCompact(incomes[hovered], currency)}</span>
-          <span className="text-xs" style={{ color: "#EF4444" }}>↓ {fmtCompact(expenses[hovered], currency)}</span>
+          <span className="text-xs" style={{ color: "#22C55E" }}>↑ {fmtCompact(incomes[hovered])}</span>
+          <span className="text-xs" style={{ color: "#EF4444" }}>↓ {fmtCompact(expenses[hovered])}</span>
         </div>
       )}
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: H }}>
@@ -570,7 +567,7 @@ function TrendChart({ months, agg, currency }: { months: string[]; agg: Record<s
 
 // ─── Month-over-month card ────────────────────────────────────────────────────
 
-function MomCard({ label, curr, diff, positive, currency }: { label: string; curr: number; diff: number | null; positive: boolean; currency: import("@/lib/currency").CurrencyConfig }) {
+function MomCard({ label, curr, diff, positive }: { label: string; curr: number; diff: number | null; positive: boolean }) {
   const up = diff !== null && diff > 0;
   const neutral = diff === null || diff === 0;
   const goodChange = positive ? up : !up;
@@ -578,7 +575,7 @@ function MomCard({ label, curr, diff, positive, currency }: { label: string; cur
   return (
     <div className="flex-1 rounded-2xl px-3 py-3" style={{ background: "var(--md-surface-container-low)" }}>
       <div className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: "var(--md-on-surface-variant)" }}>{label}</div>
-      <div className="text-base font-bold" style={{ color: "var(--md-on-surface)" }}>{fmtCompact(curr, currency)}</div>
+      <div className="text-base font-bold" style={{ color: "var(--md-on-surface)" }}>{fmtCompact(curr)}</div>
       {!neutral && (
         <div className="flex items-center gap-1 mt-1">
           <svg viewBox="0 0 10 10" width={8} height={8} style={{ transform: up ? "none" : "rotate(180deg)" }}>
