@@ -26,7 +26,6 @@ export default function AppShell() {
   const router = useRouter();
   const [view, setView] = useState<View>("home");
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [openExportFromDrawer, setOpenExportFromDrawer] = useState(false);
   const [spaceSwitcherOpen, setSpaceSwitcherOpen] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [spaces, setSpaces] = useState<Space[]>([]);
@@ -429,8 +428,6 @@ export default function AppShell() {
         subStatus={subStatus}
         validUntil={subValidUntil}
         onUpgrade={() => subStatus === "trialing" ? setShowSubPage(true) : setSubStatus("none")}
-        isPro={isPro}
-        onExport={() => { setView("settings"); setOpenExportFromDrawer(true); }}
       />
 
       <SpaceSwitcher
@@ -534,10 +531,8 @@ export default function AppShell() {
                 validUntil={subValidUntil ?? undefined}
                 subPlan={subPlan}
                 onUpgrade={() => setSubStatus("none")}
-                onBack={() => { setView("home"); setOpenExportFromDrawer(false); }}
+                onBack={() => setView("home")}
                 onShowSubPage={() => setShowSubPage(true)}
-                openExportOnMount={openExportFromDrawer}
-                key={openExportFromDrawer ? "export" : "normal"}
                 onRenameSpace={async (id, name) => {
                   await supabase.from("spaces").update({ name }).eq("id", id);
                   setSpaces((prev) => prev.map((s) => s.id === id ? { ...s, name } : s));
