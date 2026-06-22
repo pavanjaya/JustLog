@@ -327,7 +327,7 @@ export default function SettingsView({
       <div class="summary">
         <div class="summary-card"><div class="label">Total Income</div><div class="value" style="color:#16a34a">₹${totalIncome.toLocaleString("en-IN")}</div></div>
         <div class="summary-card"><div class="label">Total Expense</div><div class="value" style="color:#dc2626">₹${totalExpense.toLocaleString("en-IN")}</div></div>
-        <div class="summary-card"><div class="label">Balance</div><div class="value" style="color:${balance >= 0 ? "#16a34a" : "#dc2626"}">₹${Math.abs(balance).toLocaleString("en-IN")}</div></div>
+        <div class="summary-card"><div class="label">Balance</div><div class="value" style="color:${balance >= 0 ? "#16a34a" : "#dc2626"}">${balance < 0 ? "−" : ""}₹${Math.abs(balance).toLocaleString("en-IN")}</div></div>
       </div>
       ${monthSections}
       <div class="footer">Exported from JustLog · justlog.app</div>
