@@ -54,6 +54,7 @@ function extractPayers(transactions: Transaction[]): { name: string; paid: numbe
 
 export default function HomeView({ transactions, allTransactions, hiddenCount = 0, onAddTransactions, onDeleteTransaction, onBulkDelete, onEditTransaction, onSeeAll, userName = "there", activeSpace, logDisabled, onUpgrade }: HomeViewProps) {
   const [showSplitSheet, setShowSplitSheet] = useState(false);
+  useEffect(() => { setShowSplitSheet(false); }, [activeSpace?.id]);
   const [input, setInput] = useState("");
   const [aiState, setAiState] = useState<AiState>("idle");
   const [newTxs, setNewTxs] = useState<Transaction[]>([]);
