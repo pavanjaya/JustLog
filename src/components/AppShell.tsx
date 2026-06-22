@@ -159,8 +159,8 @@ export default function AppShell() {
       // Only update if server returns a positive status, or if we had no status (loading/none).
       setSubStatus((prev) => {
         if (serverStatus === "trialing" || serverStatus === "active") return serverStatus; // server confirms paid — always trust
-        if (prev === "trialing" || prev === "active") return prev; // server glitch — keep paid cache
-        return serverStatus; // free/loading/none — let server decide
+        if (prev === "trialing" || prev === "active" || prev === "free") return prev; // keep user's choice / paid cache
+        return serverStatus; // loading/none — let server decide
       });
 
       if (data.validUntil) setSubValidUntil(new Date(data.validUntil));
