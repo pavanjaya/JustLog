@@ -341,12 +341,11 @@ export default function AppShell() {
     if (data) setTransactions((prev) => [...prev, ...(data as Transaction[])]);
   }
 
-  function handleTrialSuccess() {
-    const trialEnd = new Date();
-    trialEnd.setDate(trialEnd.getDate() + 7);
+  function handleTrialSuccess(validUntil: string) {
+    const trialEnd = new Date(validUntil);
     setSubStatus("trialing");
     setSubValidUntil(trialEnd);
-    localStorage.setItem("jl_sub", JSON.stringify({ status: "trialing", validUntil: trialEnd.toISOString(), plan: "trial" }));
+    localStorage.setItem("jl_sub", JSON.stringify({ status: "trialing", validUntil: validUntil, plan: "trial" }));
   }
 
   async function handleSubscribeSuccess() {

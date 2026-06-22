@@ -4,7 +4,7 @@ import { useState } from "react";
 
 interface PaywallViewProps {
   userId: string;
-  onSuccess: () => void; // trial started
+  onSuccess: (validUntil: string) => void; // trial started
   onPaymentSuccess?: () => void; // direct payment from paywall
   onContinueFree?: () => void;
   trialExpired?: boolean;
@@ -57,7 +57,7 @@ export default function PaywallView({ userId, onSuccess, onPaymentSuccess, onCon
     try {
       const res = await fetch("/api/subscription/trial", { method: "POST" });
       const result = await res.json();
-      if (result.success) setScreen("trial-success");
+      if (result.success) { onSuccess(result.validUntil); setScreen("trial-success"); }
       else alert("Could not start trial. Please try again.");
     } catch { alert("Something went wrong. Try again."); }
     finally { setLoading(false); }
