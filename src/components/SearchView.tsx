@@ -315,34 +315,22 @@ export default function SearchView({ transactions, onDeleteTransaction, onBulkDe
             ))}
           </div>
 
-          {/* Time chip — secondary filter */}
-          <button
-            onClick={() => {
-              if (!isPro) {
-                // free users cycle only this_month, skip last_month and all
-                setTimeFilter(prev => prev === "this_month" ? "all" : "this_month");
-                return;
-              }
-              setTimeFilter(prev => prev === "all" ? "this_month" : prev === "this_month" ? "last_month" : "all");
-            }}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold flex-shrink-0 transition-all"
-            style={{
-              background: timeFilter !== "all" ? "var(--md-primary)" : "var(--md-surface-container-low)",
-              color: timeFilter !== "all" ? "#fff" : "var(--md-on-surface-variant)",
-            }}
-          >
-            {timeFilter === "all" ? "All time" : timeFilter === "this_month" ? "This month" : "Last month"}
-            {!isPro && timeFilter === "all" && (
-              <svg viewBox="0 0 24 24" width="9" height="9" fill="none" stroke="currentColor" strokeWidth={2.5} className="ml-0.5">
-                <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
-              </svg>
-            )}
-            {(isPro || timeFilter !== "all") && (
+          {/* Time chip — Pro only */}
+          {isPro && (
+            <button
+              onClick={() => setTimeFilter(prev => prev === "all" ? "this_month" : prev === "this_month" ? "last_month" : "all")}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold flex-shrink-0 transition-all"
+              style={{
+                background: timeFilter !== "all" ? "var(--md-primary)" : "var(--md-surface-container-low)",
+                color: timeFilter !== "all" ? "#fff" : "var(--md-on-surface-variant)",
+              }}
+            >
+              {timeFilter === "all" ? "All time" : timeFilter === "this_month" ? "This month" : "Last month"}
               <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="6 9 12 15 18 9"/>
               </svg>
-            )}
-          </button>
+            </button>
+          )}
         </div>
       )}
 
