@@ -170,6 +170,11 @@ export default function AppShell() {
       if (serverStatus !== "none") {
         localStorage.setItem("jl_sub", JSON.stringify({ status: serverStatus, validUntil: data.validUntil, plan: data.plan }));
       }
+      // If server confirms existing user, mark onboarding done so cache-clear doesn't re-show it
+      if (serverStatus === "trialing" || serverStatus === "active") {
+        localStorage.setItem("jl_onboarded", "1");
+        setOnboardingDone(true);
+      }
     } catch {
       // Network error — keep current state
       setSubStatus((prev) => prev === "loading" ? "none" : prev);
@@ -412,7 +417,7 @@ export default function AppShell() {
           </div>
         </div>
       )}
-      {splashDone && !onboardingDone && (
+      {splashDone && !onboardingDone && subStatus !== "loading" && subStatus !== "trialing" && subStatus !== "active" && (
         <OnboardingScreen onDone={() => {
           localStorage.setItem("jl_onboarded", "1");
           setOnboardingDone(true);
