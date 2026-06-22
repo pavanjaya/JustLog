@@ -96,7 +96,7 @@ export default function PaywallView({ userId, onSuccess, onPaymentSuccess, onCon
             }),
           });
           const result = await verify.json();
-          if (result.success) (onPaymentSuccess ?? onSuccess)();
+          if (result.success) { if (onPaymentSuccess) onPaymentSuccess(); else onSuccess(result.validUntil ?? new Date(Date.now() + 30 * 86400000).toISOString()); }
           else alert("Payment verified but activation failed. Contact support.");
         },
         prefill: {},
