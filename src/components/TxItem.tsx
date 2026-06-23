@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import type { Transaction, Category } from "@/types";
 import { getCategoryMeta, fmtFull } from "@/lib/format";
 import CategoryIcon from "@/components/CategoryIcon";
+import ConfirmSheet from "@/components/ConfirmSheet";
 
 const CATEGORIES: Category[] = [
   "Salary", "Business", "Transfer", "Refund",
@@ -28,6 +29,7 @@ export default function TxItem({ tx, index = 0, showDate = false, onDelete, onEd
   const meta = getCategoryMeta(tx.category);
   const date = new Date(tx.created_at);
   const [showDelete, setShowDelete] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [sheetClosing, setSheetClosing] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -65,8 +67,8 @@ export default function TxItem({ tx, index = 0, showDate = false, onDelete, onEd
     }
   }
 
-  function handleDelete(e: React.MouseEvent) {
-    e.stopPropagation();
+  function handleDelete() {
+    setConfirmDelete(false);
     setShowDelete(false);
     setDeleting(true);
     setTimeout(() => onDelete?.(tx.id), 240);
@@ -164,7 +166,7 @@ export default function TxItem({ tx, index = 0, showDate = false, onDelete, onEd
                   <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
                 </svg>
               </button>
-              <button onClick={handleDelete} className="flex items-center justify-center w-8 h-8 rounded-full flex-shrink-0 active:scale-90 transition-transform" style={{ background: "var(--md-error)", color: "#fff" }}>
+              <button onClick={(e) => { e.stopPropagation(); setShowDelete(false); setConfirmDelete(true); }} className="flex items-center justify-center w-8 h-8 rounded-full flex-shrink-0 active:scale-90 transition-transform" style={{ background: "var(--md-error)", color: "#fff" }}>
                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
                 </svg>
@@ -177,6 +179,16 @@ export default function TxItem({ tx, index = 0, showDate = false, onDelete, onEd
           )}
         </div>
       </div>
+
+      <ConfirmSheet
+        open={confirmDelete}
+        title="Delete entry?"
+        message={`"${tx.description}" — ${tx.type === "income" ? "+" : "−"}₹${tx.amount.toLocaleString("en-IN")} will be removed permanently.`}
+        confirmLabel="Delete"
+        danger
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmDelete(false)}
+      />
 
       {/* Edit bottom sheet */}
       {editOpen && (

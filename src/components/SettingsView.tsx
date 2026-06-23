@@ -6,6 +6,7 @@ import type { Space, Transaction } from "@/types";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import PinPad from "@/components/PinPad";
+import ConfirmSheet from "@/components/ConfirmSheet";
 import { loadReminderSettings, saveReminderSettings, requestNotificationPermission, scheduleReminder, cancelReminder } from "@/lib/notifications";
 
 function daysLeft(date: Date) {
@@ -755,7 +756,7 @@ export default function SettingsView({
                         onClick={() => { onUpdateSpace?.(spaceActionTarget.id, { archived: false }); setSheet("none"); setSpaceActionTarget(null); onToast(`"${spaceActionTarget.name}" restored`); }}
                       />
                     ) : confirmAction === "archive" ? (
-                      <div className="px-4 py-4"><ConfirmBox message={`Archive "${spaceActionTarget.name}"? It will be hidden from your space list. Data stays safe.`} confirmLabel="Yes, Archive" onConfirm={() => { onUpdateSpace?.(spaceActionTarget.id, { archived: true }); setConfirmAction(null); setSheet("none"); setSpaceActionTarget(null); onToast(`"${spaceActionTarget.name}" archived`); }} onCancel={() => setConfirmAction(null)} /></div>
+                      <ListRow icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>} label="Archive Space" sublabel="Hide from list, data stays safe" onClick={() => setConfirmAction("archive")} />
                     ) : (
                       <ListRow
                         icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>}
@@ -765,16 +766,10 @@ export default function SettingsView({
                       />
                     )
                   )}
-                  {confirmAction === "clear" ? (
-                    <div className="px-4 py-4"><ConfirmBox message={`Clear all transactions in "${spaceActionTarget.name}"?`} confirmLabel="Yes, Clear" onConfirm={() => { onDeleteSpaceData(spaceActionTarget.id); setConfirmAction(null); setSpaceActionTarget(null); onToast(`"${spaceActionTarget.name}" cleared`); }} onCancel={() => setConfirmAction(null)} /></div>
-                  ) : (
-                    <ListRow icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>} label="Clear All Transactions" sublabel="Removes all entries, keeps the space" onClick={() => setConfirmAction("clear")} />
-                  )}
-                  {confirmAction === "delete" ? (
-                    <div className="px-4 py-4"><ConfirmBox message={`Delete "${spaceActionTarget.name}"? All data will be lost.`} confirmLabel="Yes, Delete" danger onConfirm={() => { onDeleteSpace(spaceActionTarget.id); setConfirmAction(null); setSpaceActionTarget(null); onToast(`"${spaceActionTarget.name}" deleted`); }} onCancel={() => setConfirmAction(null)} /></div>
-                  ) : spaces.length > 1 && spaceActionTarget.name !== "Personal" ? (
+                  <ListRow icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>} label="Clear All Transactions" sublabel="Removes all entries, keeps the space" onClick={() => setConfirmAction("clear")} />
+                  {spaces.length > 1 && spaceActionTarget.name !== "Personal" && (
                     <ListRow icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>} label="Delete Space" danger onClick={() => confirmDeleteSpace(spaceActionTarget)} />
-                  ) : null}
+                  )}
                 </div>
               </>
             )}
@@ -1043,6 +1038,34 @@ export default function SettingsView({
         onClose={() => setShowPinPad(false)}
       />
     )}
+
+    {/* Global confirm sheets */}
+    <ConfirmSheet
+      open={confirmAction === "archive" && !!spaceActionTarget}
+      title={`Archive "${spaceActionTarget?.name}"?`}
+      message="It will be hidden from your space list. All data stays safe and can be restored anytime."
+      confirmLabel="Archive"
+      onConfirm={() => { onUpdateSpace?.(spaceActionTarget!.id, { archived: true }); setConfirmAction(null); setSheet("none"); setSpaceActionTarget(null); onToast(`"${spaceActionTarget?.name}" archived`); }}
+      onCancel={() => setConfirmAction(null)}
+    />
+    <ConfirmSheet
+      open={confirmAction === "clear" && !!spaceActionTarget}
+      title={`Clear "${spaceActionTarget?.name}"?`}
+      message="All transactions will be removed. The space itself will remain."
+      confirmLabel="Clear All"
+      danger
+      onConfirm={() => { onDeleteSpaceData(spaceActionTarget!.id); setConfirmAction(null); setSpaceActionTarget(null); onToast(`"${spaceActionTarget?.name}" cleared`); }}
+      onCancel={() => setConfirmAction(null)}
+    />
+    <ConfirmSheet
+      open={confirmAction === "delete" && !!spaceActionTarget}
+      title={`Delete "${spaceActionTarget?.name}"?`}
+      message="This space and all its transactions will be permanently deleted."
+      confirmLabel="Delete Space"
+      danger
+      onConfirm={() => { onDeleteSpace(spaceActionTarget!.id); setConfirmAction(null); setSpaceActionTarget(null); onToast(`"${spaceActionTarget?.name}" deleted`); }}
+      onCancel={() => setConfirmAction(null)}
+    />
     </>
   );
 }
