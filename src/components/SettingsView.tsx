@@ -189,7 +189,7 @@ export default function SettingsView({
   const [renamingInSheet, setRenamingInSheet] = useState(false);
   const [renameVal, setRenameVal] = useState("");
   const [spaceActionTarget, setSpaceActionTarget] = useState<Space | null>(null);
-  const [confirmAction, setConfirmAction] = useState<null | "clear" | "delete">(null);
+  const [confirmAction, setConfirmAction] = useState<null | "clear" | "delete" | "archive">(null);
   const [spaceIncludePersonal, setSpaceIncludePersonal] = useState(false);
   const [spacePeopleCount, setSpacePeopleCount] = useState(1);
   const [showPinPad, setShowPinPad] = useState(false);
