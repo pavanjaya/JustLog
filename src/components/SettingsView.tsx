@@ -694,6 +694,21 @@ export default function SettingsView({
                   </div>
                 </div>
                 <div className="flex flex-col">
+                  {spaceActionTarget.archived ? (
+                    /* Archived space — only show Unarchive + Delete */
+                    <>
+                      <ListRow
+                        icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>}
+                        label="Unarchive Space"
+                        sublabel="Restore to active spaces"
+                        onClick={() => { onUpdateSpace?.(spaceActionTarget.id, { archived: false }); setSheet("none"); setSpaceActionTarget(null); onToast(`"${spaceActionTarget.name}" restored`); }}
+                      />
+                      {spaces.length > 1 && (
+                        <ListRow icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>} label="Delete Space" danger onClick={() => confirmDeleteSpace(spaceActionTarget)} />
+                      )}
+                    </>
+                  ) : (
+                  <>
                   {spaceActionTarget.name !== "Personal" && (
                     <ListRow icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>} label="Rename" onClick={() => { setRenameVal(spaceActionTarget.name); setRenamingInSheet(true); }} />
                   )}
@@ -770,6 +785,8 @@ export default function SettingsView({
                   {spaces.length > 1 && spaceActionTarget.name !== "Personal" && (
                     <ListRow icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>} label="Delete Space" danger onClick={() => confirmDeleteSpace(spaceActionTarget)} />
                   )}
+                </>
+                )}
                 </div>
               </>
             )}
