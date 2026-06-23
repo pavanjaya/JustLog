@@ -41,6 +41,13 @@ Rules:
 - SALARY vs TRANSFER: "salary", "stipend", "paycheck" keywords = "Salary". "from [person name]" = "Transfer". NEVER mix these up.
 - DESCRIPTION: Extract a SHORT clean English title (2-4 words max). NEVER copy the full sentence. The user may speak in Hindi/Hinglish — extract only the key subject. Examples: "Aaj maine chai piya 50 rupees" → "Chai", "Aaj Ocean Ka Fees Maine Bhara 2000" → "Ocean School Fees", "Aaj Maine Aasheen Ka 2000 rs school fees bhara" → "Aasheen School Fees", "spent 500 on groceries today morning" → "Groceries". Always fix spelling mistakes. Use Title Case. Do NOT include amount, currency, or filler words like "aaj", "maine", "ka", "ne", "ke liye".
 - *** MOST IMPORTANT RULE ***: "from [human name]" patterns like "500 from Rohit", "from Amol", "from Dipesh", "4k from Priya" → category = "Transfer". This overrides EVERYTHING including income type detection. These are person-to-person money transfers, NOT salary.
+
+- *** GROUP PAYMENT RULE (DOUBLE ENTRY) ***: When someone paid for a group expense on behalf of others, create TWO entries:
+  Triggers: "[expense] by [name]", "[name] paid for [expense]", "[name] paid [expense]", "[name] ne [expense] bhara/diya", "[expense] paid by [name]"
+  Entry 1: type="income", category="Transfer", description="From [Name]", amount=X  (they paid upfront)
+  Entry 2: type="expense", category=<expense category>, description=<expense name>, amount=X  (the actual expense)
+  This is DIFFERENT from "from [name]" alone (which is income only). The trigger is when BOTH a person AND an expense item are present together.
+
 - CATEGORY PRIORITY (higher rules override lower ones):
   1. loan/borrowed/lent/gave loan/given to [person]/gave to [person]/paid to [person] OR "from [person name]" = "Transfer" (HIGHEST PRIORITY — overrides all other rules)
   2. chai/tea/coffee/food/lunch/dinner/breakfast/snack/restaurant/swiggy/zomato = "Food & Drinks"
@@ -70,7 +77,13 @@ Examples:
 "lent 5000 to Rahul" → [{"amount": 5000, "type": "expense", "category": "Transfer", "description": "Lent to Rahul"}]
 "lend to ashok 40k" → [{"amount": 40000, "type": "expense", "category": "Transfer", "description": "Lent to Ashok"}]
 "given to dipesh 2000" → [{"amount": 2000, "type": "expense", "category": "Transfer", "description": "Given to Dipesh"}]
-"4k from dipesh" → [{"amount": 4000, "type": "income", "category": "Transfer", "description": "From Dipesh"}]`;
+"4k from dipesh" → [{"amount": 4000, "type": "income", "category": "Transfer", "description": "From Dipesh"}]
+"petrol by vinay 5k" → [{"amount": 5000, "type": "income", "category": "Transfer", "description": "From Vinay"}, {"amount": 5000, "type": "expense", "category": "Transport", "description": "Petrol"}]
+"vinay paid for petrol 5k" → [{"amount": 5000, "type": "income", "category": "Transfer", "description": "From Vinay"}, {"amount": 5000, "type": "expense", "category": "Transport", "description": "Petrol"}]
+"vinay paid petrol 5k" → [{"amount": 5000, "type": "income", "category": "Transfer", "description": "From Vinay"}, {"amount": 5000, "type": "expense", "category": "Transport", "description": "Petrol"}]
+"dinner by rohit 2k" → [{"amount": 2000, "type": "income", "category": "Transfer", "description": "From Rohit"}, {"amount": 2000, "type": "expense", "category": "Food & Drinks", "description": "Dinner"}]
+"rohit ne petrol bhara 3k" → [{"amount": 3000, "type": "income", "category": "Transfer", "description": "From Rohit"}, {"amount": 3000, "type": "expense", "category": "Transport", "description": "Petrol"}]
+"vinay ne khana khilaya 1500" → [{"amount": 1500, "type": "income", "category": "Transfer", "description": "From Vinay"}, {"amount": 1500, "type": "expense", "category": "Food & Drinks", "description": "Khana"}]`;
 
 interface ParsedTx {
   amount: number;
@@ -125,12 +138,31 @@ function mockParse(text: string): ParsedTx[] {
   const results: ParsedTx[] = [];
 
   for (const seg of segments) {
-    const amountMatch = seg.match(/\d+(\.\d+)?/);
+    const amountMatch = seg.match(/(\d+(?:\.\d+)?)\s*[kK]|\b(\d+(?:\.\d+)?)\b/);
     if (!amountMatch) continue;
-    const amount = parseFloat(amountMatch[0]);
+    const raw = amountMatch[0];
+    const amount = /[kK]$/.test(raw) ? parseFloat(raw) * 1000 : parseFloat(raw);
     if (amount <= 0) continue;
 
     const lower = seg.toLowerCase();
+
+    // GROUP PAYMENT: "X by Name", "Name paid X", "Name ne X bhara/diya"
+    const byNameMatch = lower.match(/^(.+?)\s+by\s+([a-z]+)/);
+    const namePaidMatch = lower.match(/^([a-z]+)\s+(?:paid(?:\s+for)?|ne\s+\w+\s+(?:bhara|diya|khilaya))\s+(.+)/);
+    if (byNameMatch || namePaidMatch) {
+      const name = byNameMatch ? byNameMatch[2] : namePaidMatch![1];
+      const expenseWord = byNameMatch ? byNameMatch[1] : namePaidMatch![2].replace(/\d+[kK]?/g, "").trim();
+      const capName = name.charAt(0).toUpperCase() + name.slice(1);
+      let expCat = "Other";
+      for (const [keyword, cat] of Object.entries(CATEGORY_MAP)) {
+        if (expenseWord.includes(keyword)) { expCat = cat; break; }
+      }
+      const expDesc = expenseWord.split(" ").filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") || "Expense";
+      results.push({ amount, type: "income", category: "Transfer", description: `From ${capName}` });
+      results.push({ amount, type: "expense", category: expCat, description: expDesc });
+      continue;
+    }
+
     const isIncome = INCOME_KEYWORDS.some(k => lower.includes(k));
     let category = "Other";
     for (const [keyword, cat] of Object.entries(CATEGORY_MAP)) {
@@ -139,7 +171,7 @@ function mockParse(text: string): ParsedTx[] {
     if (lower.match(/from\s+[a-z]/)) category = "Transfer";
     else if (isIncome && category === "Other") category = "Salary";
 
-    const description = seg.replace(/\d+(\.\d+)?/g, "").replace(/[₹$]/g, "").trim()
+    const description = seg.replace(/\d+(?:\.\d+)?[kK]?/g, "").replace(/[₹$]/g, "").trim()
       .split(" ").filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") || "Transaction";
 
     results.push({ amount, type: isIncome ? "income" : "expense", category, description });
