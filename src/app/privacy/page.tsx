@@ -34,7 +34,7 @@ export default function PrivacyPage() {
           </div>
           <h1 style={{ fontSize: 36, fontWeight: 800, color: "#111", letterSpacing: "-0.8px", margin: "0 0 8px" }}>Your privacy matters.</h1>
           <p style={{ fontSize: 16, color: "#666", margin: "0 0 16px", lineHeight: 1.6 }}>We keep your financial data private, secure, and fully under your control.</p>
-          <p style={{ fontSize: 13, color: "#aaa" }}>Last updated: June 18, 2025 · Effective: June 18, 2025</p>
+          <p style={{ fontSize: 13, color: "#aaa" }}>Last updated: June 23, 2025 · Effective: June 23, 2025</p>
         </div>
       </div>
 
@@ -53,13 +53,13 @@ export default function PrivacyPage() {
           <Note>JustLog is a personal journal. We do not connect to your bank accounts, payment cards, or any financial institution. All data is entered manually by you.</Note>
           <List items={["Transaction descriptions and amounts you manually type", "Transaction categories (e.g. Food, Salary, Transport)", "Dates and times of logged entries", "Space/workspace names you create"]} />
           <Sub>1.3 Technical Data</Sub>
-          <List items={["Device type and browser (for app compatibility)", "Usage analytics (page views, feature usage — anonymised)"]} />
+          <List items={["Device type and browser (for app compatibility)"]} />
         </Section>
 
         <Section title="2. How We Use Your Information">
           <List items={[
             "To provide and operate the JustLog service",
-            "To process your text using AI (Claude by Anthropic) to parse transactions — your text is sent to Anthropic's API",
+            "To process your text using AI (Google Gemini) to parse transactions — your input text is sent to Google's API momentarily and is not stored or used for training",
             "To sync your data across devices",
             "To send transactional emails (account confirmation, password reset)",
             "To improve the App based on anonymised usage patterns",
@@ -81,9 +81,10 @@ export default function PrivacyPage() {
           <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 4 }}>
             {[
               { name: "Supabase", desc: "Database, authentication, and storage. Your account and transaction data is stored here." },
-              { name: "Anthropic (Claude API)", desc: "Parses your typed text into structured transactions. Anthropic does not train on API data by default." },
+              { name: "Google Gemini API", desc: "Parses your typed text into structured transactions. Your input is sent to Google's API momentarily. Google does not use API data for model training by default." },
+              { name: "Razorpay", desc: "Payment processing for subscriptions (India). We never store your payment card details — all payment data is handled securely by Razorpay." },
+              { name: "Stripe", desc: "Payment processing for international subscriptions. We never store your payment card details." },
               { name: "Vercel", desc: "App hosting and delivery. Processes request metadata for routing." },
-              { name: "Stripe (future)", desc: "Payment processing for subscriptions. We never store your payment card details." },
             ].map(({ name, desc }) => (
               <div key={name} style={{ background: "#fff", border: "1px solid #f0f0f0", borderRadius: 12, padding: "14px 16px" }}>
                 <div style={{ fontSize: 14, fontWeight: 600, color: "#111", marginBottom: 4 }}>{name}</div>
