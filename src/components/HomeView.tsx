@@ -185,7 +185,7 @@ export default function HomeView({ transactions, allTransactions, hiddenCount = 
         const res = await fetch(apiUrl("/api/log"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text }),
+          body: JSON.stringify({ text, isSplitSpace: (activeSpace?.people_count ?? 1) > 1 }),
         });
         if (!res.ok) throw new Error(`API error ${res.status}`);
         const data = await res.json();

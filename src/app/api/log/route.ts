@@ -106,7 +106,7 @@ function isValidTx(tx: unknown): tx is ParsedTx {
   );
 }
 
-function mockParse(text: string): ParsedTx[] {
+function mockParse(text: string, isSplitSpace = false): ParsedTx[] {
   const INCOME_KEYWORDS = ["salary", "income", "received", "from", "credit", "refund", "bonus", "freelance"];
   const CATEGORY_MAP: Record<string, string> = {
     coffee: "Food & Drinks", tea: "Food & Drinks", food: "Food & Drinks", lunch: "Food & Drinks",
@@ -146,9 +146,9 @@ function mockParse(text: string): ParsedTx[] {
 
     const lower = seg.toLowerCase();
 
-    // GROUP PAYMENT: "X by Name", "Name paid X", "Name ne X bhara/diya"
-    const byNameMatch = lower.match(/^(.+?)\s+by\s+([a-z]+)/);
-    const namePaidMatch = lower.match(/^([a-z]+)\s+(?:paid(?:\s+for)?|ne\s+\w+\s+(?:bhara|diya|khilaya))\s+(.+)/);
+    // GROUP PAYMENT: "X by Name", "Name paid X", "Name ne X bhara/diya" — only in split spaces
+    const byNameMatch = isSplitSpace ? lower.match(/^(.+?)\s+by\s+([a-z]+)/) : null;
+    const namePaidMatch = isSplitSpace ? lower.match(/^([a-z]+)\s+(?:paid(?:\s+for)?|ne\s+\w+\s+(?:bhara|diya|khilaya))\s+(.+)/) : null;
     if (byNameMatch || namePaidMatch) {
       const name = byNameMatch ? byNameMatch[2] : namePaidMatch![1];
       const expenseWord = byNameMatch ? byNameMatch[1] : namePaidMatch![2].replace(/\d+[kK]?/g, "").trim();
@@ -190,7 +190,7 @@ export async function OPTIONS() {
 }
 
 export async function POST(req: NextRequest) {
-  let body: { text?: string };
+  let body: { text?: string; isSplitSpace?: boolean };
   try {
     body = await req.json();
   } catch {
@@ -198,6 +198,7 @@ export async function POST(req: NextRequest) {
   }
 
   const text = body.text?.trim();
+  const isSplitSpace = body.isSplitSpace ?? false;
   if (!text) {
     return NextResponse.json({ error: "Missing text" }, { status: 400, headers: CORS_HEADERS });
   }
@@ -206,7 +207,7 @@ export async function POST(req: NextRequest) {
   const isMock = !apiKey;
 
   if (isMock) {
-    const transactions = mockParse(text);
+    const transactions = mockParse(text, isSplitSpace);
     if (transactions.length === 0) return NextResponse.json({ error: "Could not parse" }, { status: 422, headers: CORS_HEADERS });
     return NextResponse.json({ transactions }, { headers: CORS_HEADERS });
   }
@@ -214,7 +215,8 @@ export async function POST(req: NextRequest) {
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-    const result = await model.generateContent(`${SYSTEM_PROMPT}\n\nUser input: ${text}`);
+    const splitContext = isSplitSpace ? "\n\nCONTEXT: This is a GROUP/SPLIT space. Apply the GROUP PAYMENT RULE (double entry) when someone paid for a group expense." : "\n\nCONTEXT: This is a PERSONAL space. Do NOT apply double entry. Treat 'petrol by vinay' as a single expense only.";
+    const result = await model.generateContent(`${SYSTEM_PROMPT}${splitContext}\n\nUser input: ${text}`);
     const raw = result.response.text();
 
     const cleaned = raw.replace(/```json|```/g, "").trim();
