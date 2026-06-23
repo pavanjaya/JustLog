@@ -228,21 +228,43 @@ export async function POST(req: NextRequest) {
     }
 
     const arr = Array.isArray(parsed) ? parsed : [parsed];
-    const validTxs = arr.filter(isValidTx).map((tx) => {
+    const FOOD_SERVICE_KEYWORDS = ["watermelon", "watarmelon", "apple", "banana", "mango", "swiggy", "zomato", "amazon", "coffee", "tea", "chai", "grocery", "groceries", "petrol", "fuel", "rent", "bill", "medicine", "movie", "netflix", "uber", "ola", "lunch", "dinner", "breakfast", "food", "drink"];
+    const GROUP_PAYMENT_PATTERN = /^(.+?)\s+(?:paid\s+by|by)\s+([A-Z][a-z]+)$|^([A-Z][a-z]+)\s+(?:paid\s+(?:for\s+)?|ne\s+\w+\s+(?:bhara|diya|khilaya)\s*)(.+)$/;
+
+    const validTxs: ParsedTx[] = [];
+    for (const tx of arr) {
+      if (!isValidTx(tx)) continue;
+
       // Post-process: "From [Name]" descriptions are always person transfers
       if (/^From\s+[A-Z]/.test(tx.description)) {
-        return { ...tx, category: "Transfer" };
+        validTxs.push({ ...tx, category: "Transfer" });
+        continue;
       }
-      // Post-process: "Lent to", "Given to", "Paid to [person name]" are always Transfer expenses
-      // But NOT "To Watermelon", "To Swiggy" etc — only actual person names (no food/service keywords)
-      const FOOD_SERVICE_KEYWORDS = ["watermelon", "watarmelon", "apple", "banana", "mango", "swiggy", "zomato", "amazon", "coffee", "tea", "chai", "grocery", "groceries", "petrol", "fuel", "rent", "bill", "medicine", "movie", "netflix", "uber", "ola"];
+
+      // Post-process: "Lent to", "Given to", "Paid to [person name]"
       if (/^(Lent|Given|Paid)\s+[Tt]o\s+[A-Z]/.test(tx.description)) {
         const lowerDesc = tx.description.toLowerCase();
         const isFoodOrService = FOOD_SERVICE_KEYWORDS.some(kw => lowerDesc.includes(kw));
-        if (!isFoodOrService) return { ...tx, category: "Transfer", type: "expense" as const };
+        if (!isFoodOrService) { validTxs.push({ ...tx, category: "Transfer", type: "expense" }); continue; }
       }
-      return tx;
-    });
+
+      // Post-process: group payment double-entry (only in split spaces)
+      // Handles: "Lunch Paid By Pavan", "Petrol By Vinay", "Pavan Paid Lunch", etc.
+      if (isSplitSpace && tx.type === "expense") {
+        const desc = tx.description;
+        const byMatch = desc.match(/^(.+?)\s+(?:Paid\s+By|By)\s+([A-Z][a-z]+)$/i);
+        const paidMatch = desc.match(/^([A-Z][a-z]+)\s+(?:Paid(?:\s+For)?)\s+(.+)$/i);
+        if (byMatch || paidMatch) {
+          const name = byMatch ? byMatch[2] : paidMatch![1];
+          const expenseDesc = byMatch ? byMatch[1] : paidMatch![2];
+          validTxs.push({ amount: tx.amount, type: "income", category: "Transfer", description: `From ${name}` });
+          validTxs.push({ ...tx, description: expenseDesc });
+          continue;
+        }
+      }
+
+      validTxs.push(tx);
+    }
 
     if (validTxs.length === 0) {
       return NextResponse.json({ error: "No valid transactions found" }, { status: 422, headers: CORS_HEADERS });
