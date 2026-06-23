@@ -28,6 +28,7 @@ export interface Space {
   people_count: number;
   created_at: string;
   pin_hash?: string | null;
+  archived?: boolean;
 }
 
 export interface Transaction {

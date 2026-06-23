@@ -437,7 +437,7 @@ export default function AppShell() {
 
       <SpaceSwitcher
         open={spaceSwitcherOpen}
-        spaces={spaces}
+        spaces={spaces.filter(s => !s.archived)}
         activeSpaceId={activeSpace?.id ?? ""}
         onSwitch={handleSwitchSpace}
         onCreate={handleCreateSpace}

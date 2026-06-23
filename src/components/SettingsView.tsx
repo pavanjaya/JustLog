@@ -589,7 +589,7 @@ export default function SettingsView({
           <>
             <div className="text-base font-semibold mb-4" style={{ color: "var(--md-on-surface)" }}>Manage Spaces</div>
             <div className="flex flex-col gap-2 overflow-y-auto no-scrollbar" style={{ maxHeight: "55vh" }}>
-              {spaces.map((sp) => (
+              {spaces.filter(sp => !sp.archived).map((sp) => (
                 <button
                   key={sp.id}
                   onClick={() => { setSpaceActionTarget(sp); setSpaceIncludePersonal(sp.include_in_personal); setSpacePeopleCount(sp.people_count ?? 1); setRenamingInSheet(false); }}
@@ -617,6 +617,27 @@ export default function SettingsView({
                   <Chevron />
                 </button>
               ))}
+              {/* Archived spaces */}
+              {spaces.some(sp => sp.archived) && (
+                <>
+                  <div className="text-xs font-medium mt-3 mb-1 px-1" style={{ color: "var(--md-on-surface-variant)" }}>Archived</div>
+                  {spaces.filter(sp => sp.archived).map((sp) => (
+                    <button
+                      key={sp.id}
+                      onClick={() => { setSpaceActionTarget(sp); setSpaceIncludePersonal(sp.include_in_personal); setSpacePeopleCount(sp.people_count ?? 1); setRenamingInSheet(false); }}
+                      className="rounded-2xl px-4 py-3.5 flex items-center gap-3 text-left w-full opacity-50"
+                      style={{ background: "var(--md-surface-container-low)" }}
+                    >
+                      <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "var(--md-surface-container)" }}>
+                        <SpaceIcon icon={sp.icon} size={16} color="var(--md-on-surface-variant)" />
+                      </div>
+                      <span className="flex-1 text-sm font-medium" style={{ color: "var(--md-on-surface)" }}>{sp.name}</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: "var(--md-surface-container)", color: "var(--md-on-surface-variant)" }}>Archived</span>
+                      <Chevron />
+                    </button>
+                  ))}
+                </>
+              )}
             </div>
           </>
         )}
@@ -725,6 +746,23 @@ export default function SettingsView({
                     )
                   )}
 
+                  {spaceActionTarget.name !== "Personal" && (
+                    spaceActionTarget.archived ? (
+                      <ListRow
+                        icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>}
+                        label="Unarchive Space"
+                        sublabel="Restore to active spaces"
+                        onClick={() => { onUpdateSpace?.(spaceActionTarget.id, { archived: false }); setSheet("none"); setSpaceActionTarget(null); onToast(`"${spaceActionTarget.name}" restored`); }}
+                      />
+                    ) : (
+                      <ListRow
+                        icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>}
+                        label="Archive Space"
+                        sublabel="Hide from list, data stays safe"
+                        onClick={() => { onUpdateSpace?.(spaceActionTarget.id, { archived: true }); setSheet("none"); setSpaceActionTarget(null); onToast(`"${spaceActionTarget.name}" archived`); }}
+                      />
+                    )
+                  )}
                   {confirmAction === "clear" ? (
                     <div className="px-4 py-4"><ConfirmBox message={`Clear all transactions in "${spaceActionTarget.name}"?`} confirmLabel="Yes, Clear" onConfirm={() => { onDeleteSpaceData(spaceActionTarget.id); setConfirmAction(null); setSpaceActionTarget(null); onToast(`"${spaceActionTarget.name}" cleared`); }} onCancel={() => setConfirmAction(null)} /></div>
                   ) : (
