@@ -754,12 +754,14 @@ export default function SettingsView({
                         sublabel="Restore to active spaces"
                         onClick={() => { onUpdateSpace?.(spaceActionTarget.id, { archived: false }); setSheet("none"); setSpaceActionTarget(null); onToast(`"${spaceActionTarget.name}" restored`); }}
                       />
+                    ) : confirmAction === "archive" ? (
+                      <div className="px-4 py-4"><ConfirmBox message={`Archive "${spaceActionTarget.name}"? It will be hidden from your space list. Data stays safe.`} confirmLabel="Yes, Archive" onConfirm={() => { onUpdateSpace?.(spaceActionTarget.id, { archived: true }); setConfirmAction(null); setSheet("none"); setSpaceActionTarget(null); onToast(`"${spaceActionTarget.name}" archived`); }} onCancel={() => setConfirmAction(null)} /></div>
                     ) : (
                       <ListRow
                         icon={<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>}
                         label="Archive Space"
                         sublabel="Hide from list, data stays safe"
-                        onClick={() => { onUpdateSpace?.(spaceActionTarget.id, { archived: true }); setSheet("none"); setSpaceActionTarget(null); onToast(`"${spaceActionTarget.name}" archived`); }}
+                        onClick={() => setConfirmAction("archive")}
                       />
                     )
                   )}
