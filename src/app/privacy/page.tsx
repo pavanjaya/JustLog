@@ -105,15 +105,29 @@ export default function PrivacyPage() {
           <p style={{ ...body, marginTop: 12 }}>We respond to all requests within <b>30 days</b> as required under SPDI Rule 5(7).</p>
         </Section>
 
-        <Section title="6. Data Retention">
+        <Section title="6. Administrative Access">
+          <p style={body}>As the operator of JustLog, we have administrative access to the database for maintenance, security, and bug resolution purposes. This access is:</p>
+          <List items={[
+            "Used only when necessary — such as investigating a reported issue or ensuring system integrity",
+            "Never used to read, browse, or monitor individual user entries or financial data",
+            "Subject to the same confidentiality obligations as this Privacy Policy",
+          ]} />
+          <p style={{ ...body, marginTop: 12 }}>Your transaction data is isolated per account using Row Level Security (RLS). No other user — or any unauthorised party — can access your entries through the app.</p>
+        </Section>
+
+        <Section title="7. Data Retention">
           <p style={body}>We retain your data as long as your account is active. If you delete your account, all personal data is permanently deleted within <b>30 days</b>.</p>
         </Section>
 
-        <Section title="7. Children's Privacy">
+        <Section title="8. Children's Privacy">
           <p style={body}>JustLog is not intended for users under 13 years of age. We do not knowingly collect data from children.</p>
         </Section>
 
-        <Section title="8. Grievance Officer">
+        <Section title="9. Changes to This Policy">
+          <p style={body}>We may update this Privacy Policy from time to time. We will notify you of significant changes via email or an in-app notice. Continued use of the App after changes constitutes acceptance of the updated Policy.</p>
+        </Section>
+
+        <Section title="10. Grievance Officer">
           <p style={{ ...body, marginBottom: 12 }}>In accordance with the IT Act, 2000 and SPDI Rules:</p>
           <div style={{ background: "#fff", border: "1.5px solid rgba(200,49,255,0.15)", borderRadius: 14, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 8 }}>
             {[["Name", "Pavan Jaya"], ["Email", "jangidpavan@gmail.com"], ["Address", "India"], ["Response time", "Within 30 days"]].map(([k, v]) => (
@@ -125,7 +139,7 @@ export default function PrivacyPage() {
           </div>
         </Section>
 
-        <Section title="9. Contact Us">
+        <Section title="11. Contact Us">
           <p style={body}>For any privacy questions, email <a href="mailto:jangidpavan@gmail.com" style={{ color: "#C831FF", textDecoration: "none", fontWeight: 500 }}>jangidpavan@gmail.com</a>.</p>
         </Section>
 
