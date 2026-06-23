@@ -248,9 +248,9 @@ export async function POST(req: NextRequest) {
         if (!isFoodOrService) { validTxs.push({ ...tx, category: "Transfer", type: "expense" }); continue; }
       }
 
-      // Post-process: group payment double-entry (only in split spaces)
+      // Post-process: group payment double-entry
       // Handles: "Lunch Paid By Pavan", "Petrol By Vinay", "Pavan Paid Lunch", etc.
-      if (isSplitSpace && tx.type === "expense") {
+      if (tx.type === "expense") {
         const desc = tx.description;
         const byMatch = desc.match(/^(.+?)\s+(?:Paid\s+By|By)\s+([A-Z][a-z]+)$/i);
         const paidMatch = desc.match(/^([A-Z][a-z]+)\s+(?:Paid(?:\s+For)?)\s+(.+)$/i);
