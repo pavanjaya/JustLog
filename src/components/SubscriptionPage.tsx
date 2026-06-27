@@ -98,7 +98,7 @@ export default function SubscriptionPage({
       new window.Razorpay({
         key: keyId, amount, currency,
         name: "JustLog",
-        description: plan === "yearly" ? "JustLog Pro Annual — ₹599/year" : "JustLog Pro Monthly — ₹79/month",
+        description: plan === "yearly" ? "JustLog Pro Annual — ₹299/year" : "JustLog Pro Monthly — ₹79/month",
         image: "/logo.svg",
         order_id: orderId,
         handler: async (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
@@ -229,7 +229,7 @@ export default function SubscriptionPage({
               className="w-full py-3.5 rounded-[14px] text-[14px] font-semibold active:opacity-80 relative"
               style={{ border: "2px solid var(--md-primary)", color: "var(--md-primary)", opacity: payLoading && payPlan === "yearly" ? 0.7 : 1 }}
             >
-              {payLoading && payPlan === "yearly" ? "Opening checkout…" : "Best Value — ₹599/year · Save 37% ⭐"}
+              {payLoading && payPlan === "yearly" ? "Opening checkout…" : "Best Value — ₹299/year · Save 68% ⭐"}
             </button>
           </div>
         )}
