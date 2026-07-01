@@ -10,6 +10,7 @@ interface TopBarProps {
   activeSpace?: Space;
   avatarUrl?: string;
   userInitial?: string;
+  hasBanner?: boolean;
 }
 
 function getStatusBarHeight(): number {
@@ -19,7 +20,7 @@ function getStatusBarHeight(): number {
   return 0;
 }
 
-export default function TopBar({ onNavigate, onAvatarClick, onSpaceClick, activeSpace, avatarUrl, userInitial = "?" }: TopBarProps) {
+export default function TopBar({ onNavigate, onAvatarClick, onSpaceClick, activeSpace, avatarUrl, userInitial = "?", hasBanner = false }: TopBarProps) {
   const [statusBarHeight, setStatusBarHeight] = useState(0);
 
   useEffect(() => {
@@ -29,7 +30,7 @@ export default function TopBar({ onNavigate, onAvatarClick, onSpaceClick, active
   return (
     <div
       className="flex-shrink-0 flex items-center px-4 gap-2"
-      style={{ background: "#fff", paddingTop: `${statusBarHeight + 12}px`, paddingBottom: "12px", minHeight: "56px" }}
+      style={{ background: "#fff", paddingTop: `${(hasBanner ? 0 : statusBarHeight) + 12}px`, paddingBottom: "12px", minHeight: "56px" }}
     >
       {/* Logo + Space switcher — left side */}
       <div className="flex items-center gap-2 flex-1 min-w-0">

@@ -481,6 +481,7 @@ export default function AppShell() {
           activeSpace={activeSpace ?? undefined}
           avatarUrl={avatarUrl}
           userInitial={userInitial}
+          hasBanner={subStatus === "trialing" && trialDaysLeft > 0 && !trialBannerDismissed && view === "home"}
         />
       )}
 
