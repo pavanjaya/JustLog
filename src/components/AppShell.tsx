@@ -165,6 +165,7 @@ export default function AppShell() {
 
       setSubStatus(serverStatus);
       if (data.validUntil) setSubValidUntil(new Date(data.validUntil));
+      else if (!data.existingUser) setSubValidUntil(null); // new user: clear any stale cache
       if (data.plan) setSubPlan(data.plan);
 
       // localStorage is only a speed cache — always sync from server
