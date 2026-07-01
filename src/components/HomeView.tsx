@@ -29,6 +29,7 @@ interface HomeViewProps {
   userName?: string;
   activeSpace?: Space | null;
   logDisabled?: boolean;
+  spaceLocked?: boolean;
   onUpgrade?: () => void;
 }
 
@@ -52,7 +53,7 @@ function extractPayers(transactions: Transaction[]): { name: string; paid: numbe
   }));
 }
 
-export default function HomeView({ transactions, allTransactions, hiddenCount = 0, onAddTransactions, onDeleteTransaction, onBulkDelete, onEditTransaction, onSeeAll, userName = "there", activeSpace, logDisabled, onUpgrade }: HomeViewProps) {
+export default function HomeView({ transactions, allTransactions, hiddenCount = 0, onAddTransactions, onDeleteTransaction, onBulkDelete, onEditTransaction, onSeeAll, userName = "there", activeSpace, logDisabled, spaceLocked, onUpgrade }: HomeViewProps) {
   const [showSplitSheet, setShowSplitSheet] = useState(false);
   useEffect(() => { setShowSplitSheet(false); }, [activeSpace?.id]);
   const [input, setInput] = useState("");
@@ -264,6 +265,16 @@ export default function HomeView({ transactions, allTransactions, hiddenCount = 
     <div className="flex-1 flex flex-col overflow-hidden relative" style={{ background: "#fff" }}>
       {aiState === "clarify" && (
         <div className="absolute inset-0 z-10" onClick={dismissClarify} />
+      )}
+      {/* Read-only banner for locked spaces */}
+      {spaceLocked && (
+        <div className="flex items-center justify-between px-4 py-2.5 flex-shrink-0" style={{ background: "rgba(255,107,53,0.08)", borderBottom: "1px solid rgba(255,107,53,0.2)" }}>
+          <div className="flex items-center gap-2">
+            <span className="text-[13px]">🔒</span>
+            <span className="text-[12px] font-medium" style={{ color: "#FF6B35" }}>Read-only — upgrade to log in this space</span>
+          </div>
+          <button onClick={onUpgrade} className="text-[11px] font-semibold underline" style={{ color: "#FF6B35" }}>Upgrade</button>
+        </div>
       )}
       {/* Greeting + summary cards */}
       <div className="flex-shrink-0 px-4 pt-5 pb-3">

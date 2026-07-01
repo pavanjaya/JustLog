@@ -364,12 +364,12 @@ export default function AppShell() {
   const trialDaysLeft = subValidUntil && subStatus === "trialing"
     ? Math.max(0, Math.ceil((subValidUntil.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
     : 0;
-  const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-  const visibleTransactions = isPro
-    ? transactions
-    : transactions.filter(tx => new Date(tx.created_at) > cutoff);
-  const hiddenTransactionCount = isPro ? 0 : transactions.filter(tx => new Date(tx.created_at) <= cutoff).length;
+  const visibleTransactions = transactions; // all transactions always visible
+  const hiddenTransactionCount = 0;
   const freeMonthlyLimitHit = false;
+  // Free users can log only in Personal space (first space); other spaces are read-only
+  const isPersonalSpace = activeSpace?.id === spaces[0]?.id;
+  const spaceIsLocked = !isPro && !isPersonalSpace && !!activeSpace;
   const userName = user?.user_metadata?.full_name?.split(" ")[0] ?? user?.email?.split("@")[0] ?? user?.phone?.slice(-4);
   const avatarUrl = user?.user_metadata?.avatar_url as string | undefined;
   const userInitial = (user?.user_metadata?.full_name ?? user?.email ?? user?.phone ?? "?").charAt(0).toUpperCase();
@@ -444,7 +444,7 @@ export default function AppShell() {
         onSwitch={handleSwitchSpace}
         onCreate={handleCreateSpace}
         onClose={() => setSpaceSwitcherOpen(false)}
-        isPro={isPro}
+        isPro={true}
         onUpgrade={() => setUpgradeSheet({ open: true, feature: "Multiple Spaces" })}
       />
 
@@ -520,15 +520,16 @@ export default function AppShell() {
                 transactions={visibleTransactions}
                 allTransactions={transactions}
                 hiddenCount={hiddenTransactionCount}
-                onAddTransactions={freeMonthlyLimitHit ? undefined : handleAddTransactions}
+                onAddTransactions={spaceIsLocked || freeMonthlyLimitHit ? undefined : handleAddTransactions}
                 onDeleteTransaction={handleDeleteTransaction}
                 onBulkDelete={handleBulkDelete}
                 onEditTransaction={handleEditTransaction}
                 onSeeAll={() => setView("search")}
                 userName={userName}
                 activeSpace={activeSpace}
-                logDisabled={freeMonthlyLimitHit}
-                onUpgrade={() => setSubStatus("none")}
+                logDisabled={spaceIsLocked || freeMonthlyLimitHit}
+                spaceLocked={spaceIsLocked}
+                onUpgrade={() => setUpgradeSheet({ open: true, feature: "Logging in this space" })}
               />
             )}
             {view === "story" && <StoryView transactions={transactions} isPro={isPro} onUpgrade={() => setUpgradeSheet({ open: true })} />}
