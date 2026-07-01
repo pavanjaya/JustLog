@@ -364,15 +364,14 @@ export default function AppShell() {
   const trialDaysLeft = subValidUntil && subStatus === "trialing"
     ? Math.max(0, Math.ceil((subValidUntil.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
     : 0;
-  // Free users can log only in Personal space (first space); other spaces are read-only
+  // Free/expired: Personal space 30-day history, other spaces read-only. Pro: full access everywhere.
   const isPersonalSpace = activeSpace?.id === spaces[0]?.id;
   const spaceIsLocked = !isPro && !isPersonalSpace && !!activeSpace;
   const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-  // Pro: all history. Free in Personal: 30 days. Free in other spaces: all history (read-only).
-  const visibleTransactions = isPro || spaceIsLocked
+  const visibleTransactions = isPro
     ? transactions
     : transactions.filter(tx => new Date(tx.created_at) > cutoff);
-  const hiddenTransactionCount = isPro || spaceIsLocked ? 0 : transactions.filter(tx => new Date(tx.created_at) <= cutoff).length;
+  const hiddenTransactionCount = isPro ? 0 : transactions.filter(tx => new Date(tx.created_at) <= cutoff).length;
   const freeMonthlyLimitHit = false;
   const userName = user?.user_metadata?.full_name?.split(" ")[0] ?? user?.email?.split("@")[0] ?? user?.phone?.slice(-4);
   const avatarUrl = user?.user_metadata?.avatar_url as string | undefined;

@@ -476,10 +476,10 @@ export default function HomeView({ transactions, allTransactions, hiddenCount = 
                   </div>
                   <div className="flex-1 text-left">
                     <div className="text-[13px] font-semibold" style={{ color: "var(--md-primary)" }}>
-                      {hiddenCount} older transaction{hiddenCount !== 1 ? "s" : ""} not shown
+                      {hiddenCount} older transaction{hiddenCount !== 1 ? "s" : ""} safely saved
                     </div>
                     <div className="text-[11px] leading-relaxed" style={{ color: "var(--md-on-surface-variant)" }}>
-                      Free plan shows last 30 days only. Upgrade to Pro for full history.
+                      Your data is safe — upgrade to Pro to access full history.
                     </div>
                   </div>
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--md-on-surface-variant)" }}><path d="M9 18l6-6-6-6"/></svg>
