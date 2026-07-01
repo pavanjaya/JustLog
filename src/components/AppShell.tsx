@@ -19,6 +19,7 @@ import OnboardingScreen from "@/components/OnboardingScreen";
 import SubscriptionPage from "@/components/SubscriptionPage";
 import SwitchPlanSheet from "@/components/SwitchPlanSheet";
 import PinPad from "@/components/PinPad";
+import UpgradeSheet from "@/components/UpgradeSheet";
 
 type SubStatus = "loading" | "active" | "trialing" | "none" | "free";
 
@@ -48,6 +49,7 @@ export default function AppShell() {
   const personalSpaceId = useRef<string | null>(null);
   const [spaceLoading, setSpaceLoading] = useState(true);
   const [trialBannerDismissed, setTrialBannerDismissed] = useState(false);
+  const [upgradeSheet, setUpgradeSheet] = useState<{ open: boolean; feature?: string }>({ open: false });
   const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: "", visible: false });
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const supabase = createClient();
@@ -432,7 +434,7 @@ export default function AppShell() {
         user={user}
         subStatus={subStatus}
         validUntil={subValidUntil}
-        onUpgrade={() => subStatus === "trialing" ? setShowSubPage(true) : setSubStatus("none")}
+        onUpgrade={() => subStatus === "trialing" ? setShowSubPage(true) : setUpgradeSheet({ open: true })}
       />
 
       <SpaceSwitcher
@@ -443,7 +445,7 @@ export default function AppShell() {
         onCreate={handleCreateSpace}
         onClose={() => setSpaceSwitcherOpen(false)}
         isPro={isPro}
-        onUpgrade={() => setSubStatus("none")}
+        onUpgrade={() => setUpgradeSheet({ open: true, feature: "Multiple Spaces" })}
       />
 
       {/* Trial banner */}
@@ -463,7 +465,7 @@ export default function AppShell() {
       {freeMonthlyLimitHit && view === "home" && (
         <div className="flex items-center justify-between px-4 py-2.5" style={{ background: "#FF6B35" }}>
           <span className="text-[12px] font-medium text-white">You&apos;ve used all 50 free transactions this month</span>
-          <button onClick={() => setSubStatus("none")} className="text-[12px] font-semibold text-white underline ml-2 flex-shrink-0">Upgrade</button>
+          <button onClick={() => setUpgradeSheet({ open: true })} className="text-[12px] font-semibold text-white underline ml-2 flex-shrink-0">Upgrade</button>
         </div>
       )}
 
@@ -529,8 +531,8 @@ export default function AppShell() {
                 onUpgrade={() => setSubStatus("none")}
               />
             )}
-            {view === "story" && <StoryView transactions={transactions} isPro={isPro} onUpgrade={() => setSubStatus("none")} />}
-            {view === "search" && <SearchView transactions={visibleTransactions} onDeleteTransaction={handleDeleteTransaction} onBulkDelete={handleBulkDelete} onEditTransaction={handleEditTransaction} isPro={isPro} onUpgrade={() => setSubStatus("none")} hiddenCount={hiddenTransactionCount} />}
+            {view === "story" && <StoryView transactions={transactions} isPro={isPro} onUpgrade={() => setUpgradeSheet({ open: true })} />}
+            {view === "search" && <SearchView transactions={visibleTransactions} onDeleteTransaction={handleDeleteTransaction} onBulkDelete={handleBulkDelete} onEditTransaction={handleEditTransaction} isPro={isPro} onUpgrade={() => setUpgradeSheet({ open: true, feature: "AI Search" })} hiddenCount={hiddenTransactionCount} />}
             {view === "settings" && (
               <SettingsView
                 user={user}
@@ -542,7 +544,7 @@ export default function AppShell() {
                 subStatus={subStatus}
                 validUntil={subValidUntil ?? undefined}
                 subPlan={subPlan}
-                onUpgrade={() => setSubStatus("none")}
+                onUpgrade={() => setUpgradeSheet({ open: true })}
                 onBack={() => setView("home")}
                 onShowSubPage={() => setShowSubPage(true)}
                 onRenameSpace={async (id, name) => {
@@ -605,6 +607,13 @@ export default function AppShell() {
           onClose={() => setShowSwitchSheet(false)}
         />
       )}
+
+      <UpgradeSheet
+        open={upgradeSheet.open}
+        feature={upgradeSheet.feature}
+        onUpgrade={() => { setUpgradeSheet({ open: false }); setSubStatus("none"); }}
+        onClose={() => setUpgradeSheet({ open: false })}
+      />
 
       {showSubPage && (
         <SubscriptionPage

@@ -23,7 +23,7 @@ export async function POST(req: Request) {
   if (existing) {
     await admin
       .from("subscriptions")
-      .update({ onboarded: true, ...(freeChosen ? { free_chosen: true } : {}) })
+      .update({ onboarded: true, ...(freeChosen ? { free_chosen: true, status: "free" } : {}) })
       .eq("id", existing.id);
   } else {
     await admin.from("subscriptions").insert({
