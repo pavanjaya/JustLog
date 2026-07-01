@@ -218,6 +218,20 @@ export default function PaywallView({ userId, onSuccess, onPaymentSuccess, onCon
         className="flex flex-col h-full w-full overflow-y-auto no-scrollbar px-6"
         style={{ background: "var(--md-surface)", paddingTop: safeTop, paddingBottom: safeBottom }}
       >
+        {/* Profile icon */}
+        {(avatarUrl || userInitial !== "?") && (
+          <div className="flex justify-end mb-4">
+            <div className="flex flex-col items-end gap-1">
+              <div
+                className="rounded-full flex items-center justify-center text-[13px] font-semibold overflow-hidden"
+                style={{ width: 36, height: 36, background: "var(--md-primary-container)", color: "var(--md-on-primary-container)" }}
+              >
+                {avatarUrl ? <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" /> : userInitial}
+              </div>
+              {userEmail && <span className="text-[10px]" style={{ color: "var(--md-outline)" }}>{userEmail}</span>}
+            </div>
+          </div>
+        )}
         <div className="flex-1 flex flex-col justify-center gap-6">
           {/* Header */}
           <div>
@@ -267,14 +281,24 @@ export default function PaywallView({ userId, onSuccess, onPaymentSuccess, onCon
             </button>
           </div>
 
-          {/* Downgrade link — only for new users, not expired trials */}
-          {!trialExpired && <button
-            onClick={() => setScreen("downgrade-confirm")}
-            className="text-center text-[13px] active:opacity-60"
-            style={{ color: "var(--md-on-surface-variant)" }}
-          >
-            Downgrade to Free plan →
-          </button>}
+          {/* Continue free / Downgrade link */}
+          {trialExpired ? (
+            onContinueFree && <button
+              onClick={onContinueFree}
+              className="text-center text-[13px] active:opacity-60"
+              style={{ color: "var(--md-on-surface-variant)" }}
+            >
+              Continue with Free plan →
+            </button>
+          ) : (
+            <button
+              onClick={() => setScreen("downgrade-confirm")}
+              className="text-center text-[13px] active:opacity-60"
+              style={{ color: "var(--md-on-surface-variant)" }}
+            >
+              Downgrade to Free plan →
+            </button>
+          )}
         </div>
       </div>
     );
