@@ -658,7 +658,7 @@ function StoryUpgradeScreen({ onUpgrade }: { onUpgrade?: () => void }) {
           Unlock Your Story — Go Pro
         </button>
         <div className="text-center mt-3 text-xs" style={{ color: "var(--md-outline)" }}>
-          ₹79/week or ₹599/year · Cancel anytime
+          ₹79/month or ₹299/year · Cancel anytime
         </div>
       </div>
     </div>

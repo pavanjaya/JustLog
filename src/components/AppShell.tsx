@@ -491,18 +491,21 @@ export default function AppShell() {
               userId={user.id}
               onSuccess={handleTrialSuccess}
               onPaymentSuccess={() => { handleSubscribeSuccess(); showToast("Welcome to Pro! 🎉"); }}
-              onContinueFree={isTrialExpired ? undefined : () => {
+              onContinueFree={() => {
                 setSubStatus("free");
                 localStorage.setItem("jl_sub", JSON.stringify({ status: "free" }));
                 fetch("/api/subscription/onboard", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ freeChosen: true }) });
               }}
               trialExpired={isTrialExpired}
               trialStats={isTrialExpired ? { transactions: transactions.length, spaces: spaces.length } : undefined}
+              avatarUrl={avatarUrl}
+              userInitial={userInitial}
+              userEmail={user.email}
             />
           </div>
         )}
 
-        {spaceLoading && (
+        {subStatus !== "loading" && spaceLoading && (
           <div className="flex-1 flex items-center justify-center">
             <div className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "var(--md-primary)", borderTopColor: "transparent" }} />
           </div>

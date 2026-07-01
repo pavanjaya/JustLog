@@ -46,7 +46,7 @@ function SubscriptionCard({ subStatus, validUntil, subPlan, onManage, onStartTri
         {subPlan !== "yearly" && (
           <div className="px-4 pb-4">
             <button onClick={onManage} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
-              Switch to Annual · Save 37% ⭐
+              Switch to Annual · Save 68% ⭐
             </button>
           </div>
         )}

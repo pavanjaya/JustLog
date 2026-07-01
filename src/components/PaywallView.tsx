@@ -9,6 +9,9 @@ interface PaywallViewProps {
   onContinueFree?: () => void;
   trialExpired?: boolean;
   trialStats?: { transactions: number; spaces: number };
+  avatarUrl?: string;
+  userInitial?: string;
+  userEmail?: string;
 }
 
 declare global {
@@ -47,7 +50,7 @@ const TRIAL_UNLOCKS = [
 
 type Screen = "main" | "trial-success" | "subscribe" | "downgrade-confirm";
 
-export default function PaywallView({ userId, onSuccess, onPaymentSuccess, onContinueFree, trialExpired, trialStats }: PaywallViewProps) {
+export default function PaywallView({ userId, onSuccess, onPaymentSuccess, onContinueFree, trialExpired, trialStats, avatarUrl, userInitial = "?", userEmail }: PaywallViewProps) {
   const [screen, setScreen] = useState<Screen>("main");
   const [plan, setPlan] = useState<"monthly" | "yearly">("yearly");
   const [loading, setLoading] = useState(false);
@@ -82,7 +85,7 @@ export default function PaywallView({ userId, onSuccess, onPaymentSuccess, onCon
       new window.Razorpay({
         key: keyId, amount, currency,
         name: "JustLog",
-        description: p === "yearly" ? "JustLog Pro Annual — ₹599/year" : "JustLog Pro Monthly — ₹79/month",
+        description: p === "yearly" ? "JustLog Pro Annual — ₹299/year" : "JustLog Pro Monthly — ₹79/month",
         image: "/logo.svg",
         order_id: orderId,
         handler: async (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
@@ -259,19 +262,19 @@ export default function PaywallView({ userId, onSuccess, onPaymentSuccess, onCon
               <span className="absolute -top-3 right-4 text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ background: "var(--md-primary)", color: "#fff" }}>
                 ⭐ Best Value
               </span>
-              <div className="text-[15px] font-semibold">Best Value — ₹599/year</div>
-              <div className="text-[12px] mt-0.5" style={{ color: "var(--md-on-surface-variant)" }}>₹49/month · Save 37% · Save ₹360/year</div>
+              <div className="text-[15px] font-semibold">Best Value — ₹299/year</div>
+              <div className="text-[12px] mt-0.5" style={{ color: "var(--md-on-surface-variant)" }}>₹25/month · Save 68% · Save ₹649/year</div>
             </button>
           </div>
 
-          {/* Downgrade link */}
-          <button
+          {/* Downgrade link — only for new users, not expired trials */}
+          {!trialExpired && <button
             onClick={() => setScreen("downgrade-confirm")}
             className="text-center text-[13px] active:opacity-60"
             style={{ color: "var(--md-on-surface-variant)" }}
           >
             Downgrade to Free plan →
-          </button>
+          </button>}
         </div>
       </div>
     );
@@ -327,10 +330,10 @@ export default function PaywallView({ userId, onSuccess, onPaymentSuccess, onCon
               }}
             >
               <span className="absolute -top-2.5 right-3 text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "var(--md-primary)", color: "#fff" }}>
-                ⭐ Save 37%
+                ⭐ Save 68%
               </span>
-              <div className="font-semibold">₹599 / year</div>
-              <div className="text-[11px] opacity-60">₹49/month · Best Value</div>
+              <div className="font-semibold">₹299 / year</div>
+              <div className="text-[11px] opacity-60">₹25/month · Best Value</div>
             </button>
           </div>
 
@@ -361,7 +364,7 @@ export default function PaywallView({ userId, onSuccess, onPaymentSuccess, onCon
                 </svg>
                 Opening checkout…
               </>
-            ) : `Pay ${plan === "yearly" ? "₹599 / year" : "₹79 / month"}`}
+            ) : `Pay ${plan === "yearly" ? "₹299 / year" : "₹79 / month"}`}
           </button>
           <p className="text-[11px] text-center" style={{ color: "var(--md-outline)" }}>
             Cancel anytime · Secured by Razorpay 🔒
@@ -377,9 +380,24 @@ export default function PaywallView({ userId, onSuccess, onPaymentSuccess, onCon
       className="flex flex-col h-full w-full overflow-y-auto no-scrollbar"
       style={{ background: "var(--md-surface)", paddingTop: safeTop, paddingBottom: safeBottom }}
     >
-      {/* Top row: Logo */}
-      <div className="px-5 mb-7">
+      {/* Top row: Logo + Profile */}
+      <div className="px-5 mb-7 flex items-center justify-between">
         <img src="/logo.svg" alt="JustLog" className="h-8" />
+        {(avatarUrl || userInitial !== "?") && (
+          <div className="flex flex-col items-end gap-1">
+            <div
+              className="rounded-full flex items-center justify-center text-[13px] font-semibold overflow-hidden flex-shrink-0"
+              style={{ width: 36, height: 36, background: "var(--md-primary-container)", color: "var(--md-on-primary-container)" }}
+            >
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+              ) : userInitial}
+            </div>
+            {userEmail && (
+              <span className="text-[10px]" style={{ color: "var(--md-outline)" }}>{userEmail}</span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Hero */}
