@@ -91,9 +91,15 @@ function SubscriptionCard({ subStatus, validUntil, subPlan, onManage, onStartTri
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "var(--md-surface-container-highest)", color: "var(--md-on-surface-variant)" }}>FREE</span>
           </div>
           <div className="text-xs mb-3" style={{ color: "var(--md-on-surface-variant)" }}>1 space · 30 days history · No AI search</div>
-          <button onClick={onStartTrial} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
-            Try Pro free — 7 days
-          </button>
+          {trialUsed ? (
+            <button onClick={onManage} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
+              Upgrade to Pro · ₹79/month
+            </button>
+          ) : (
+            <button onClick={onStartTrial} className="w-full py-2.5 rounded-xl text-xs font-semibold" style={{ background: "var(--md-primary)", color: "#fff" }}>
+              Try Pro free — 7 days
+            </button>
+          )}
         </div>
       </div>
     );
