@@ -448,7 +448,7 @@ export default function AppShell() {
 
       {/* Trial banner */}
       {subStatus === "trialing" && trialDaysLeft > 0 && !trialBannerDismissed && view === "home" && (
-        <div className="flex items-center justify-between px-4 py-2.5" style={{ background: "var(--md-primary)" }}>
+        <div className="flex items-center justify-between px-4 py-2.5" style={{ background: "var(--md-primary)", paddingTop: "calc(env(safe-area-inset-top, 0px) + 10px)" }}>
           <span className="text-[13px] font-medium text-white">⚡ Pro Trial — {trialDaysLeft} day{trialDaysLeft !== 1 ? "s" : ""} remaining</span>
           <div className="flex items-center gap-3">
             <button onClick={() => setShowSubPage(true)} className="text-[12px] font-semibold text-white underline">Upgrade</button>
