@@ -284,7 +284,7 @@ export default function PaywallView({ userId, onSuccess, onPaymentSuccess, onCon
           {/* Continue free / Downgrade link */}
           {trialExpired ? (
             onContinueFree && <button
-              onClick={onContinueFree}
+              onClick={() => setScreen("downgrade-confirm")}
               className="text-center text-[13px] active:opacity-60"
               style={{ color: "var(--md-on-surface-variant)" }}
             >
