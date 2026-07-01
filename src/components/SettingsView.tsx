@@ -169,6 +169,7 @@ interface SettingsViewProps {
   onUpgrade?: () => void;
   onBack?: () => void;
   onShowSubPage?: () => void;
+  onStartTrialPage?: () => void;
 }
 
 type Sheet = "none" | "profile" | "spaces" | "about" | "privacy" | "terms" | "rename";
@@ -176,7 +177,7 @@ type Sheet = "none" | "profile" | "spaces" | "about" | "privacy" | "terms" | "re
 export default function SettingsView({
   user, spaces, transactions, activeSpace,
   onDeleteAll, onToast, onRenameSpace, onDeleteSpace, onDeleteSpaceData, onUpdateSpace,
-  subStatus = "active", validUntil, subPlan, onUpgrade, onBack, onShowSubPage,
+  subStatus = "active", validUntil, subPlan, onUpgrade, onBack, onShowSubPage, onStartTrialPage,
 }: SettingsViewProps) {
   const router = useRouter();
   const supabase = createClient();
@@ -525,7 +526,7 @@ export default function SettingsView({
         validUntil={validUntil}
         subPlan={subPlan}
         onManage={() => onShowSubPage?.()}
-        onStartTrial={() => onShowSubPage?.()}
+        onStartTrial={() => onStartTrialPage?.()}
       />
 
       {/* Group 1 — data */}

@@ -34,6 +34,7 @@ export default function AppShell() {
   const [user, setUser] = useState<User | null>(null);
   const [subStatus, setSubStatus] = useState<SubStatus>("loading");
   const [showSubPage, setShowSubPage] = useState(false);
+  const [showTrialPage, setShowTrialPage] = useState(false);
   const [showSwitchSheet, setShowSwitchSheet] = useState(false);
   const [subValidUntil, setSubValidUntil] = useState<Date | null>(null);
   const [subPlan, setSubPlan] = useState<string>("monthly");
@@ -473,7 +474,7 @@ export default function AppShell() {
         </div>
       )}
 
-      {view !== "settings" && subStatus !== "none" && (
+      {view !== "settings" && subStatus !== "none" && !showTrialPage && (
         <TopBar
           onNavigate={setView}
           onAvatarClick={() => setDrawerOpen(true)}
@@ -492,17 +493,19 @@ export default function AppShell() {
             <div className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "var(--md-primary)", borderTopColor: "transparent" }} />
           </div>
         )}
-        {subChecked && (subStatus === "none") && user && (
+        {subChecked && (subStatus === "none" || showTrialPage) && user && (
           <div className="flex-1 w-full">
             <PaywallView
               userId={user.id}
               onSuccess={handleTrialSuccess}
               onPaymentSuccess={() => { handleSubscribeSuccess(); showToast("Welcome to Pro! 🎉"); }}
               onContinueFree={() => {
+                setShowTrialPage(false);
                 setSubStatus("free");
                 localStorage.setItem("jl_sub", JSON.stringify({ status: "free" }));
                 fetch("/api/subscription/onboard", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ freeChosen: true }) });
               }}
+              onClose={showTrialPage ? () => setShowTrialPage(false) : undefined}
               trialExpired={isTrialExpired}
               trialStats={isTrialExpired ? { transactions: transactions.length, spaces: spaces.length } : undefined}
               avatarUrl={avatarUrl}
@@ -553,6 +556,7 @@ export default function AppShell() {
                 onUpgrade={() => setUpgradeSheet({ open: true })}
                 onBack={() => setView("home")}
                 onShowSubPage={() => setShowSubPage(true)}
+                onStartTrialPage={() => setShowTrialPage(true)}
                 onRenameSpace={async (id, name) => {
                   await supabase.from("spaces").update({ name }).eq("id", id);
                   setSpaces((prev) => prev.map((s) => s.id === id ? { ...s, name } : s));

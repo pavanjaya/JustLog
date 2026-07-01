@@ -7,6 +7,7 @@ interface PaywallViewProps {
   onSuccess: (validUntil: string) => void; // trial started
   onPaymentSuccess?: () => void; // direct payment from paywall
   onContinueFree?: () => void;
+  onClose?: () => void; // back button when opened from settings
   trialExpired?: boolean;
   trialStats?: { transactions: number; spaces: number };
   avatarUrl?: string;
@@ -50,7 +51,7 @@ const TRIAL_UNLOCKS = [
 
 type Screen = "main" | "trial-success" | "subscribe" | "downgrade-confirm";
 
-export default function PaywallView({ userId, onSuccess, onPaymentSuccess, onContinueFree, trialExpired, trialStats, avatarUrl, userInitial = "?", userEmail }: PaywallViewProps) {
+export default function PaywallView({ userId, onSuccess, onPaymentSuccess, onContinueFree, onClose, trialExpired, trialStats, avatarUrl, userInitial = "?", userEmail }: PaywallViewProps) {
   const [screen, setScreen] = useState<Screen>("main");
   const [plan, setPlan] = useState<"monthly" | "yearly">("yearly");
   const [loading, setLoading] = useState(false);
@@ -218,6 +219,13 @@ export default function PaywallView({ userId, onSuccess, onPaymentSuccess, onCon
         className="flex flex-col h-full w-full overflow-y-auto no-scrollbar px-6"
         style={{ background: "var(--md-surface)", paddingTop: safeTop, paddingBottom: safeBottom }}
       >
+        {/* Back button when opened from settings */}
+        {onClose && (
+          <button onClick={onClose} className="flex items-center gap-1 mb-2 -ml-1 self-start" style={{ color: "var(--md-on-surface-variant)" }}>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            <span className="text-[13px]">Back</span>
+          </button>
+        )}
         {/* Profile icon */}
         {(avatarUrl || userInitial !== "?") && (
           <div className="flex justify-end mb-4">
