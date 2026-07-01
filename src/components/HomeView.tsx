@@ -129,7 +129,7 @@ export default function HomeView({ transactions, allTransactions, hiddenCount = 
   async function handleSend() {
     const text = input.trim();
     if (!text || isLoading) return;
-    if (logDisabled || !onAddTransactions) { onUpgrade?.(); return; }
+    if (logDisabled || !onAddTransactions) { setInput(""); onUpgrade?.(); return; }
 
     setIsLoading(true);
     setInput("");
@@ -271,7 +271,7 @@ export default function HomeView({ transactions, allTransactions, hiddenCount = 
         <div className="flex items-center justify-between px-4 py-2.5 flex-shrink-0" style={{ background: "rgba(255,107,53,0.08)", borderBottom: "1px solid rgba(255,107,53,0.2)" }}>
           <div className="flex items-center gap-2">
             <span className="text-[13px]">🔒</span>
-            <span className="text-[12px] font-medium" style={{ color: "#FF6B35" }}>Read-only — upgrade to log in this space</span>
+            <span className="text-[12px] font-medium" style={{ color: "#FF6B35" }}>Trial ended · Read-only — upgrade to log here</span>
           </div>
           <button onClick={onUpgrade} className="text-[11px] font-semibold underline" style={{ color: "#FF6B35" }}>Upgrade</button>
         </div>
