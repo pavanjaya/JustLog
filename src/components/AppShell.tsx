@@ -474,7 +474,7 @@ export default function AppShell() {
         </div>
       )}
 
-      {view !== "settings" && subStatus !== "none" && !showTrialPage && (
+      {view !== "settings" && subStatus !== "none" && (
         <TopBar
           onNavigate={setView}
           onAvatarClick={() => setDrawerOpen(true)}
@@ -493,19 +493,17 @@ export default function AppShell() {
             <div className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "var(--md-primary)", borderTopColor: "transparent" }} />
           </div>
         )}
-        {subChecked && (subStatus === "none" || showTrialPage) && user && (
+        {subChecked && subStatus === "none" && !showTrialPage && user && (
           <div className="flex-1 w-full">
             <PaywallView
               userId={user.id}
               onSuccess={handleTrialSuccess}
               onPaymentSuccess={() => { handleSubscribeSuccess(); showToast("Welcome to Pro! 🎉"); }}
               onContinueFree={() => {
-                setShowTrialPage(false);
                 setSubStatus("free");
                 localStorage.setItem("jl_sub", JSON.stringify({ status: "free" }));
                 fetch("/api/subscription/onboard", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ freeChosen: true }) });
               }}
-              onClose={showTrialPage ? () => setShowTrialPage(false) : undefined}
               trialExpired={isTrialExpired}
               trialStats={isTrialExpired ? { transactions: transactions.length, spaces: spaces.length } : undefined}
               avatarUrl={avatarUrl}
@@ -637,6 +635,28 @@ export default function AppShell() {
           onCancelled={() => { setShowSubPage(false); setSubStatus("none"); }}
           onPaymentSuccess={() => { setShowSubPage(false); handleSubscribeSuccess(); showToast("Welcome to Pro! 🎉"); }}
         />
+      )}
+
+      {/* Trial page overlay — shown when user taps "Try Pro free" from Settings */}
+      {showTrialPage && user && (
+        <div className="fixed inset-0 z-[700] flex flex-col max-w-[430px] mx-auto" style={{ background: "var(--md-surface)" }}>
+          <PaywallView
+            userId={user.id}
+            onSuccess={(validUntil) => { setShowTrialPage(false); handleTrialSuccess(validUntil); }}
+            onPaymentSuccess={() => { setShowTrialPage(false); handleSubscribeSuccess(); showToast("Welcome to Pro! 🎉"); }}
+            onContinueFree={() => {
+              setShowTrialPage(false);
+              setSubStatus("free");
+              localStorage.setItem("jl_sub", JSON.stringify({ status: "free" }));
+              fetch("/api/subscription/onboard", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ freeChosen: true }) });
+            }}
+            onClose={() => setShowTrialPage(false)}
+            trialExpired={false}
+            avatarUrl={avatarUrl}
+            userInitial={userInitial}
+            userEmail={user.email}
+          />
+        </div>
       )}
     </div>
   );
