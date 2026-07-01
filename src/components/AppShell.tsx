@@ -447,7 +447,7 @@ export default function AppShell() {
         onSwitch={handleSwitchSpace}
         onCreate={handleCreateSpace}
         onClose={() => setSpaceSwitcherOpen(false)}
-        isPro={true}
+        isPro={isPro}
         onUpgrade={() => setUpgradeSheet({ open: true, feature: "Multiple Spaces" })}
       />
 
