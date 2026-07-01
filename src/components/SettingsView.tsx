@@ -525,7 +525,7 @@ export default function SettingsView({
         validUntil={validUntil}
         subPlan={subPlan}
         onManage={() => onShowSubPage?.()}
-        onStartTrial={() => onUpgrade?.()}
+        onStartTrial={() => onShowSubPage?.()}
       />
 
       {/* Group 1 — data */}
